@@ -47,12 +47,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
-      
+
       if (firebaseUser) {
         // Fetch or create user profile in Firestore
         const profileRef = doc(db, 'users', firebaseUser.uid);
         const profileSnap = await getDoc(profileRef);
-        
+
         if (profileSnap.exists()) {
           setUserProfile(profileSnap.data() as UserProfile);
         } else {
@@ -70,10 +70,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await setDoc(profileRef, newProfile);
           setUserProfile(newProfile);
         }
+
+        // Sync user to Convex (will be enabled once Convex is deployed)
+        // The Convex provider will handle this via useMutation('users/createUser')
+        // after the convex/_generated/api.ts is generated
       } else {
         setUserProfile(null);
       }
-      
+
       setLoading(false);
     });
 

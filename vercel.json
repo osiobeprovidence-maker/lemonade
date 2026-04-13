@@ -1,11 +1,17 @@
 {
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "vite",
   "rewrites": [
     {
       "source": "/(.*)",
       "destination": "/index.html"
     }
   ],
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "framework": "vite"
+  "env": {
+    "VITE_CONVEX_URL": "https://strong-salamander-825.eu-west-1.convex.cloud/",
+    "CONVEX_URL": "https://strong-salamander-825.eu-west-1.convex.cloud/"
+  }
 }
