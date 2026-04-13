@@ -142,7 +142,7 @@ export default function App() {
     if (isLoggedIn) {
       setCurrentView('profile');
     } else {
-      setCurrentView('auth');
+      navigate('/login');
     }
   };
 
@@ -150,7 +150,7 @@ export default function App() {
     if (isLoggedIn) {
       setCurrentView('my');
     } else {
-      setCurrentView('auth');
+      navigate('/login');
     }
   };
 
@@ -162,7 +162,7 @@ export default function App() {
         setCurrentView('publish');
       }
     } else {
-      setCurrentView('publish');
+      navigate('/login');
     }
   };
 
@@ -565,11 +565,11 @@ export default function App() {
         How do you want to share your stories? You can always change your focus or submit self-published work for Originals later.
       </p>
       <div className="grid md:grid-cols-2 gap-8 mb-12">
-        <Card 
+        <Card
           className={`p-8 text-left transition-all cursor-pointer border-2 ${creatorType === 'original' ? 'border-primary bg-primary/5' : 'hover:border-primary/50'}`}
-          onClick={() => { 
+          onClick={() => {
             setCreatorType('original');
-            if(!isLoggedIn) setCurrentView('auth');
+            if(!isLoggedIn) navigate('/login');
             else setCurrentView('publish-dashboard');
           }}
         >
@@ -586,11 +586,11 @@ export default function App() {
           </ul>
         </Card>
 
-        <Card 
+        <Card
           className={`p-8 text-left transition-all cursor-pointer border-2 ${creatorType === 'self' ? 'border-primary bg-primary/5' : 'hover:border-primary/50'}`}
-          onClick={() => { 
+          onClick={() => {
             setCreatorType('self');
-            if(!isLoggedIn) setCurrentView('auth');
+            if(!isLoggedIn) navigate('/login');
             else setCurrentView('publish-dashboard');
           }}
         >
