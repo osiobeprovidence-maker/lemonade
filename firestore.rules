@@ -1,0 +1,162 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {uid}
+    // Fields:
+    //   - uid: string (required) - Firebase Auth UID
+    //   - displayName: string (required) - Public name
+    //   - email: string (required) - Private email
+    //   - role: string (required, enum: ['fan', 'creator', 'admin'])
+    //   - coins: number (required) - Balance
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: series
+    // Document ID: {seriesId}
+    // Fields:
+    //   - title: string (required, size < 100)
+    //   - description: string (required, size < 2000)
+    //   - creatorId: string (required, immutable)
+    //   - creatorName: string (required)
+    //   - status: string (required, enum: ['draft', 'published', 'completed'])
+    //   - coverImage: string (required, url)
+    //   - createdAt: timestamp (required, immutable)
+    //
+    // Collection: chapters
+    // Document ID: {chapterId} (Subcollection of series)
+    // Fields:
+    //   - seriesId: string (required, immutable)
+    //   - chapterNumber: number (required)
+    //   - title: string (required, size < 100)
+    //   - pages: list (required, size < 100) - URLs
+    //   - isPremium: bool (required)
+    //   - coinCost: number (optional)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function hasRole(role) {
+      return isAuthenticated() && getUserData().role == role;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (getUserData().role == 'admin' ||
+          (request.auth.token.email == "osiobeprovidence@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isCreator() {
+      return hasRole('creator') || isAdmin();
+    }
+
+    function isFan() {
+      return hasRole('fan') || isCreator();
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'displayName', 'email', 'role', 'coins', 'createdAt']) &&
+             data.uid == request.auth.uid &&
+             data.displayName is string && data.displayName.size() > 0 && data.displayName.size() < 50 &&
+             data.email is string && data.email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$") &&
+             data.role in ['fan', 'creator', 'admin'] &&
+             data.coins is number && data.coins >= 0 &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidSeries(data) {
+      return data.keys().hasAll(['title', 'description', 'creatorId', 'creatorName', 'status', 'coverImage', 'createdAt']) &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 100 &&
+             data.description is string && data.description.size() < 2000 &&
+             data.creatorId == request.auth.uid &&
+             data.creatorName is string && data.creatorName.size() < 50 &&
+             data.status in ['draft', 'published', 'completed'] &&
+             data.coverImage is string && (data.coverImage.matches("^https://.*") || data.coverImage.matches("^http://.*")) &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidComment(data) {
+      return data.keys().hasAll(['targetId', 'type', 'text', 'userId', 'userName', 'createdAt']) &&
+             data.targetId is string &&
+             data.type in ['series', 'chapter'] &&
+             data.text is string && data.text.size() > 0 && data.text.size() < 1000 &&
+             data.userId == request.auth.uid &&
+             data.userName is string &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidAd(data) {
+      return data.keys().hasAll(['title', 'imageUrl', 'targetUrl', 'type', 'status', 'creatorId', 'budget', 'createdAt']) &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 100 &&
+             data.imageUrl is string && isValidUrl(data.imageUrl) &&
+             data.targetUrl is string && isValidUrl(data.targetUrl) &&
+             data.type in ['native', 'interstitial', 'banner'] &&
+             data.status in ['active', 'paused', 'completed'] &&
+             data.creatorId == request.auth.uid &&
+             data.budget is number && data.budget >= 0 &&
+             data.createdAt is timestamp;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /ads/{adId} {
+      allow read: if true;
+      allow create: if isCreator() && isValidAd(request.resource.data);
+      allow update: if isCreator() && (isOwner(resource.data.creatorId) || isAdmin()) && 
+                    (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['impressions', 'clicks']) || isValidAd(request.resource.data));
+      allow delete: if isCreator() && (isOwner(resource.data.creatorId) || isAdmin());
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAuthenticated() && isValidUser(request.resource.data) && 
+                    (request.resource.data.role == 'fan' || isAdmin());
+      allow update: if isAuthenticated() && isValidUser(request.resource.data) && 
+                    (isOwner(userId) && request.resource.data.role == resource.data.role || isAdmin());
+    }
+
+    match /comments/{commentId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidComment(request.resource.data);
+      allow delete: if isAuthenticated() && (isOwner(resource.data.userId) || isAdmin());
+    }
+
+    match /series/{seriesId} {
+      allow read: if resource.data.status == 'published' || isOwner(resource.data.creatorId) || isAdmin();
+      allow create: if isCreator() && isValidSeries(request.resource.data);
+      allow update: if isCreator() && isValidSeries(request.resource.data) && 
+                    (isOwner(resource.data.creatorId) && request.resource.data.creatorId == resource.data.creatorId || isAdmin());
+      
+      match /chapters/{chapterId} {
+        allow read: if get(/databases/$(database)/documents/series/$(seriesId)).data.status == 'published' || 
+                     isOwner(get(/databases/$(database)/documents/series/$(seriesId)).data.creatorId) || isAdmin();
+        allow write: if isCreator() && 
+                      (isOwner(get(/databases/$(database)/documents/series/$(seriesId)).data.creatorId) || isAdmin());
+      }
+    }
+
+    match /{path=**}/chapters/{chapterId} {
+      allow read: if true; // Allow collection group queries if needed, but scoped by series status usually
+    }
+  }
+}

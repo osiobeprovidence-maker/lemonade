@@ -1,0 +1,111 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "displayName": { "type": "string", "description": "Public name" },
+        "email": { "type": "string", "format": "email" },
+        "photoURL": { "type": "string", "format": "uri" },
+        "role": { "type": "string", "enum": ["fan", "creator", "admin"] },
+        "bio": { "type": "string" },
+        "coins": { "type": "number", "description": "Balance for unlocking chapters" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "displayName", "role"]
+    },
+    "Series": {
+      "title": "Series",
+      "description": "A manga or webtoon series",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "coverImage": { "type": "string", "format": "uri" },
+        "creatorId": { "type": "string", "description": "UID of the creator" },
+        "creatorName": { "type": "string" },
+        "status": { "type": "string", "enum": ["draft", "published", "completed"] },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "viewCount": { "type": "number" },
+        "subscriberCount": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "creatorId", "status"]
+    },
+    "Chapter": {
+      "title": "Chapter",
+      "description": "A single chapter of a series",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "seriesId": { "type": "string" },
+        "chapterNumber": { "type": "number" },
+        "title": { "type": "string" },
+        "pages": { "type": "array", "items": { "type": "string", "format": "uri" }, "description": "List of image URLs" },
+        "isPremium": { "type": "boolean" },
+        "coinCost": { "type": "number" },
+        "publishDate": { "type": "string", "format": "date-time" }
+      },
+      "required": ["seriesId", "chapterNumber", "title"]
+    },
+    "Comment": {
+      "title": "Comment",
+      "description": "User comment on series or chapter",
+      "type": "object",
+      "properties": {
+        "targetId": { "type": "string" },
+        "type": { "type": "string", "enum": ["series", "chapter"] },
+        "text": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userPhoto": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["targetId", "type", "text", "userId"]
+    },
+    "Ad": {
+      "title": "Ad",
+      "description": "Advertisement campaign",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "imageUrl": { "type": "string", "format": "uri" },
+        "targetUrl": { "type": "string", "format": "uri" },
+        "type": { "type": "string", "enum": ["native", "interstitial", "banner"] },
+        "status": { "type": "string", "enum": ["active", "paused", "completed"] },
+        "creatorId": { "type": "string" },
+        "impressions": { "type": "number" },
+        "clicks": { "type": "number" },
+        "budget": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "imageUrl", "type", "creatorId"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/series/{seriesId}": {
+      "schema": "Series",
+      "description": "Manga/Webtoon series"
+    },
+    "/series/{seriesId}/chapters/{chapterId}": {
+      "schema": "Chapter",
+      "description": "Chapters within a series"
+    },
+    "/comments/{commentId}": {
+      "schema": "Comment",
+      "description": "User comments"
+    },
+    "/ads/{adId}": {
+      "schema": "Ad",
+      "description": "Ad campaigns"
+    }
+  }
+}
