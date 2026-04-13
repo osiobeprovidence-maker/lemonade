@@ -88,7 +88,7 @@ export function Studio() {
             onClick={() => navigate('/login')}
             whileTap={{ scale: 0.98 }}
             className="w-full max-w-xs py-3.5 text-white rounded-xl font-black text-sm tracking-widest transition-all hover:opacity-90"
-            style={{ backgroundColor: '#4ade80' }}
+            style={{ backgroundColor: '#1DB954' }}
           >
             SIGN IN
           </motion.button>
@@ -102,7 +102,7 @@ export function Studio() {
       <div className="w-full min-h-screen bg-white flex flex-col">
         <main className="flex-grow px-4 md:px-8 py-12 max-w-2xl mx-auto w-full">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <h1 className="text-4xl md:text-5xl font-black tracking-tighter mb-4" style={{ color: '#4ade80' }}>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tighter mb-4" style={{ color: '#1DB954' }}>
               LEMONADE
             </h1>
             <h2 className="text-3xl md:text-4xl font-black tracking-tight leading-none mb-4">Share your stories with the world.</h2>
@@ -113,7 +113,7 @@ export function Studio() {
             <div className="space-y-6 mb-12">
               <div className="flex gap-4">
                 <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <BookPlus size={20} style={{ color: '#4ade80' }} />
+                  <BookPlus size={20} style={{ color: '#1DB954' }} />
                 </div>
                 <div>
                   <h3 className="text-sm font-bold mb-1">Publish</h3>
@@ -122,7 +122,7 @@ export function Studio() {
               </div>
               <div className="flex gap-4">
                 <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <BarChart3 size={20} style={{ color: '#4ade80' }} />
+                  <BarChart3 size={20} style={{ color: '#1DB954' }} />
                 </div>
                 <div>
                   <h3 className="text-sm font-bold mb-1">Grow</h3>
@@ -131,7 +131,7 @@ export function Studio() {
               </div>
               <div className="flex gap-4">
                 <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Sparkles size={20} style={{ color: '#4ade80' }} />
+                  <Sparkles size={20} style={{ color: '#1DB954' }} />
                 </div>
                 <div>
                   <h3 className="text-sm font-bold mb-1">Earn</h3>
@@ -145,7 +145,7 @@ export function Studio() {
               disabled={isUpgrading}
               whileTap={{ scale: 0.98 }}
               className="w-full py-3.5 text-white rounded-xl font-black text-sm tracking-widest transition-all hover:opacity-90 disabled:opacity-50"
-              style={{ backgroundColor: '#4ade80' }}
+              style={{ backgroundColor: '#1DB954' }}
             >
               {isUpgrading ? 'UPGRADING...' : 'START CREATING NOW'}
             </motion.button>
@@ -167,7 +167,7 @@ export function Studio() {
             onClick={() => setIsCreating(true)}
             whileTap={{ scale: 0.95 }}
             className="w-12 h-12 rounded-xl flex items-center justify-center text-white transition-all hover:opacity-90"
-            style={{ backgroundColor: '#4ade80' }}
+            style={{ backgroundColor: '#1DB954' }}
           >
             <Plus size={22} />
           </motion.button>
@@ -187,7 +187,7 @@ export function Studio() {
             <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-2">Total Earnings</p>
             <div className="flex items-center justify-between">
               <h3 className="text-2xl font-black">₦45,000</h3>
-              <button className="text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full transition-all hover:opacity-80" style={{ backgroundColor: '#4ade8020', color: '#4ade80' }}>
+              <button className="text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full transition-all hover:opacity-80" style={{ backgroundColor: '#1DB95420', color: '#1DB954' }}>
                 Withdraw
               </button>
             </div>
@@ -211,7 +211,7 @@ export function Studio() {
                 onClick={() => setIsCreating(true)}
                 whileTap={{ scale: 0.98 }}
                 className="text-xs font-black uppercase tracking-widest px-6 py-2 rounded-full transition-all hover:opacity-80"
-                style={{ backgroundColor: '#4ade8020', color: '#4ade80' }}
+                style={{ backgroundColor: '#1DB95420', color: '#1DB954' }}
               >
                 Create Series
               </motion.button>
@@ -229,7 +229,7 @@ export function Studio() {
                   </div>
                   <div className="flex-grow min-w-0">
                     <h4 className="text-sm font-bold truncate">{s.title}</h4>
-                    <p className="text-[10px] font-bold uppercase tracking-wider mt-1" style={{ color: '#4ade80' }}>{s.status}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider mt-1" style={{ color: '#1DB954' }}>{s.status}</p>
                   </div>
                   <div className="flex items-center gap-1">
                     <Link
@@ -310,7 +310,7 @@ export function Studio() {
                 type="submit"
                 whileTap={{ scale: 0.98 }}
                 className="w-full py-3.5 text-white rounded-xl font-black text-sm tracking-widest transition-all hover:opacity-90 mt-2"
-                style={{ backgroundColor: '#4ade80' }}
+                style={{ backgroundColor: '#1DB954' }}
               >
                 CREATE SERIES
               </motion.button>

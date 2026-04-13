@@ -38,7 +38,7 @@ export function StudioLayout({ children }: StudioLayoutProps) {
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className="flex items-center gap-2 px-4 py-2 bg-zinc-50 rounded-full border border-zinc-100 hover:bg-zinc-100 transition-all"
           >
-            <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: '#4ade80' }}>
+            <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: '#1DB954' }}>
               {currentItem.label}
             </span>
             <ChevronDown size={14} className={`text-zinc-400 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} />

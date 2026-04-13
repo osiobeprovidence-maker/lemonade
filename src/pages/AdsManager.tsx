@@ -78,7 +78,7 @@ export function AdsManager() {
             onClick={() => setIsCreating(true)}
             whileTap={{ scale: 0.95 }}
             className="w-12 h-12 rounded-xl flex items-center justify-center text-white transition-all hover:opacity-90"
-            style={{ backgroundColor: '#4ade80' }}
+            style={{ backgroundColor: '#1DB954' }}
           >
             <Plus size={22} />
           </motion.button>
@@ -247,7 +247,7 @@ export function AdsManager() {
               </div>
               <motion.button type="submit" whileTap={{ scale: 0.98 }}
                 className="w-full py-3.5 text-white rounded-xl font-black text-sm tracking-widest hover:opacity-90 transition-all mt-2"
-                style={{ backgroundColor: '#4ade80' }}
+                style={{ backgroundColor: '#1DB954' }}
               >
                 LAUNCH CAMPAIGN
               </motion.button>

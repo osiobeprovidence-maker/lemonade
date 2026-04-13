@@ -179,7 +179,14 @@ export default function App() {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
         <div className="absolute bottom-0 left-0 p-8 max-w-2xl">
           <Badge className="mb-4 bg-primary-dark text-primary-foreground hover:bg-primary font-bold uppercase">Now on LEMONADE</Badge>
-          <h1 className="text-5xl font-black italic tracking-tighter mb-4 uppercase">Read the latest hits!</h1>
+          <h1 
+            className="text-5xl font-black italic tracking-tighter mb-4 uppercase text-foreground"
+            style={{
+              textShadow: '0 2px 10px rgba(0,0,0,0.3)',
+            }}
+          >
+            Read the latest hits!
+          </h1>
           <p className="text-lg text-muted-foreground mb-6 font-medium">Tap to read stories on LEMONADE!</p>
           <Button size="lg" className="rounded-full px-8 font-bold gap-2" onClick={() => setCurrentView('originals')}>
             <Play className="w-5 h-5" /> Start Reading
@@ -347,7 +354,14 @@ export default function App() {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
         <div className="absolute bottom-0 left-0 p-8 max-w-2xl">
           <Badge className="mb-4 bg-primary-dark text-primary-foreground hover:bg-primary font-bold uppercase">FEATURED ORIGINAL</Badge>
-          <h1 className="text-5xl font-black italic tracking-tighter mb-4 uppercase">The Price Is Your Everything</h1>
+          <h1 
+            className="text-5xl font-black italic tracking-tighter mb-4 uppercase text-foreground"
+            style={{
+              textShadow: '0 2px 10px rgba(0,0,0,0.3)',
+            }}
+          >
+            The Price Is Your Everything
+          </h1>
           <p className="text-lg text-muted-foreground mb-6 font-medium">A gripping drama about the high stakes of ambition and the secrets that bind us.</p>
           <Button size="lg" className="rounded-full px-8 font-bold gap-2" onClick={() => openSeriesDetails(COMICS[6])}>
             <Play className="w-5 h-5" /> Start Reading

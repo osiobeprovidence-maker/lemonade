@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Menu as MenuIcon, Search, X } from 'lucide-react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../lib/firebase';
+import { Logo } from './Logo';
 
 const SELF_CONTAINED_PAGES = ['/login', '/menu', '/profile', '/notifications', '/rankings', '/help', '/promo', '/categories', '/new-releases', '/wallet'];
 
@@ -36,13 +37,7 @@ export function AppHeader() {
       {/* Desktop Header */}
       <header className="hidden md:flex sticky top-0 z-50 bg-white border-b border-zinc-200 px-6 lg:px-12 h-16 items-center justify-between">
         <div className="flex items-center gap-10">
-          <h1
-            className="text-xl font-black tracking-tight cursor-pointer hover:opacity-80 transition-opacity"
-            style={{ color: '#4ade80' }}
-            onClick={() => navigate('/')}
-          >
-            LEMONADE
-          </h1>
+          <Logo />
           <nav className="flex items-center gap-6">
             <button
               onClick={() => navigate('/browse')}
@@ -95,7 +90,7 @@ export function AppHeader() {
             <button
               onClick={() => navigate('/login')}
               className="text-xs font-bold text-white px-5 py-2 rounded-full hover:opacity-90 transition-all"
-              style={{ backgroundColor: '#4ade80' }}
+              style={{ backgroundColor: '#1DB954' }}
             >
               Log In
             </button>
@@ -116,13 +111,7 @@ export function AppHeader() {
               </svg>
             </button>
           ) : (
-            <h1
-              className="text-lg font-black tracking-tight cursor-pointer"
-              style={{ color: '#4ade80' }}
-              onClick={() => navigate('/')}
-            >
-              LEMONADE
-            </h1>
+            <Logo />
           )}
 
           <div className="flex items-center gap-1">
@@ -155,7 +144,7 @@ export function AppHeader() {
                 className="flex-1 px-4 py-2.5 rounded-xl bg-zinc-50 border border-zinc-200 focus:bg-white focus:border-green-400/30 outline-none text-sm"
                 autoFocus
               />
-              <button type="submit" className="px-4 py-2.5 text-white text-xs font-bold rounded-xl" style={{ backgroundColor: '#4ade80' }}>
+              <button type="submit" className="px-4 py-2.5 text-white text-xs font-bold rounded-xl" style={{ backgroundColor: '#1DB954' }}>
                 Search
               </button>
               <button type="button" onClick={() => { setSearchOpen(false); setSearchQuery(''); }} className="p-2 text-zinc-400">

@@ -52,15 +52,15 @@ export function StudioAnalytics() {
                 <AreaChart data={data}>
                   <defs>
                     <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#4ade80" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#4ade80" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#1DB954" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#1DB954" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#9CA3AF' }} />
                   <YAxis hide />
                   <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} itemStyle={{ fontSize: '12px', fontWeight: 600 }} />
-                  <Area type="monotone" dataKey="views" stroke="#4ade80" strokeWidth={2} fillOpacity={1} fill="url(#colorViews)" />
+                  <Area type="monotone" dataKey="views" stroke="#1DB954" strokeWidth={2} fillOpacity={1} fill="url(#colorViews)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -75,7 +75,7 @@ export function StudioAnalytics() {
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#9CA3AF' }} />
                   <YAxis hide />
                   <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                  <Bar dataKey="subs" fill="#4ade80" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="subs" fill="#1DB954" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

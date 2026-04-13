@@ -98,7 +98,7 @@ export function MenuPage() {
           <h2 className="text-lg font-black tracking-tight leading-none text-zinc-800">
             {user?.displayName || 'Guest User'}
           </h2>
-          <p className="text-xs font-bold mt-1.5 flex items-center gap-1" style={{ color: '#4ade80' }}>
+          <p className="text-xs font-bold mt-1.5 flex items-center gap-1" style={{ color: '#1DB954' }}>
             View Profile <ChevronRight size={12} />
           </p>
         </div>

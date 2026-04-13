@@ -156,7 +156,7 @@ export function Browse() {
         <div className="px-4 md:px-12 pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <h2 className="text-xs font-bold uppercase tracking-wider" style={{ color: '#4ade80' }}>
+              <h2 className="text-xs font-bold uppercase tracking-wider" style={{ color: '#1DB954' }}>
                 {filteredSeries.length} series
               </h2>
               {useDummy && (
@@ -233,7 +233,7 @@ export function Browse() {
                     {s.title}
                   </h3>
                   <p className="text-xs text-zinc-400 mb-1">{s.tags?.[0] || 'Genre'}</p>
-                  <p className="text-xs font-medium" style={{ color: '#4ade80' }}>
+                  <p className="text-xs font-medium" style={{ color: '#1DB954' }}>
                     {formatCount(s.viewCount || 0)} reads
                   </p>
                 </motion.div>

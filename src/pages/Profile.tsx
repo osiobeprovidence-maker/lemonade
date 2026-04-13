@@ -62,7 +62,7 @@ export function Profile() {
             onClick={() => navigate('/login')}
             whileTap={{ scale: 0.98 }}
             className="w-full max-w-xs py-3.5 text-white rounded-xl font-black text-sm tracking-widest transition-all hover:opacity-90"
-            style={{ backgroundColor: '#4ade80' }}
+            style={{ backgroundColor: '#1DB954' }}
           >
             SIGN IN
           </motion.button>
