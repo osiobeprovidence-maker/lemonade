@@ -23,7 +23,7 @@ export function Logo({ className = '', onClick }: LogoProps) {
         }}
       >
         <span
-          className="text-white font-black text-xl tracking-tight uppercase italic block transform skew-x-12"
+          className="text-white font-black text-xl tracking-tight uppercase block transform skew-x-12"
           style={{
             fontFamily: 'Inter Variable, sans-serif',
           }}

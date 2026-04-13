@@ -63,7 +63,7 @@ const SeriesCard = ({ series, type = 'grid-3', showRank = false, rankNum }: { se
         <img src={series.coverImage} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
         {showRank && rankNum && (
           <div 
-            className="absolute -bottom-2 -left-1 text-[60px] md:text-[80px] font-black italic leading-none text-black" 
+            className="absolute -bottom-2 -left-1 text-[60px] md:text-[80px] font-black leading-none text-black" 
             style={{ WebkitTextStroke: '2px white' }}
           >
             {rankNum}

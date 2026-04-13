@@ -109,7 +109,7 @@ export function Comments({ targetId, type }: CommentsProps) {
         ))}
         
         {comments.length === 0 && !loading && (
-          <div className="text-center py-12 text-brand-dark/20 italic">
+          <div className="text-center py-12 text-brand-dark/20"">
             No comments yet. Be the first to say something!
           </div>
         )}

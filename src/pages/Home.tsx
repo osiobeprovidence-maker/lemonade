@@ -98,9 +98,9 @@ export function Home() {
             />
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
               <div className="flex gap-4 mb-3 opacity-80">
-                <span className="text-white font-black text-xs italic tracking-tighter">Disney</span>
-                <span className="text-white font-black text-xs italic tracking-tighter">MARVEL</span>
-                <span className="text-white font-black text-xs italic tracking-tighter">STAR WARS</span>
+                <span className="text-white font-black text-xs tracking-tighter">Disney</span>
+                <span className="text-white font-black text-xs tracking-tighter">MARVEL</span>
+                <span className="text-white font-black text-xs tracking-tighter">STAR WARS</span>
               </div>
               <h2 className="text-white text-lg font-black mb-1 leading-tight">Stories that move you.</h2>
               <p className="text-white/40 text-[8px] font-bold uppercase tracking-widest">Only on Lemonade</p>

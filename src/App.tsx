@@ -180,7 +180,7 @@ export default function App() {
         <div className="absolute bottom-0 left-0 p-8 max-w-2xl">
           <Badge className="mb-4 bg-primary-dark text-primary-foreground hover:bg-primary font-bold uppercase">Now on LEMONADE</Badge>
           <h1 
-            className="text-5xl font-black italic tracking-tighter mb-4 uppercase text-foreground"
+            className="text-5xl font-black tracking-tighter mb-4 uppercase text-foreground"
             style={{
               textShadow: '0 2px 10px rgba(0,0,0,0.3)',
             }}
@@ -197,7 +197,7 @@ export default function App() {
       {/* Trending Section */}
       <div className="px-4 py-2 mb-8 max-w-7xl mx-auto w-full">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-black italic tracking-tighter flex items-center gap-2">
+          <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
             <span className="bg-primary-dark text-primary-foreground px-2 py-0.5 rounded uppercase">Trending</span> & POPULAR SERIES
           </h2>
           <ChevronRight className="w-5 h-5 text-muted-foreground" />
@@ -237,7 +237,7 @@ export default function App() {
       {/* Popular Series by Category */}
       <div className="px-4 py-2 mb-8 max-w-7xl mx-auto w-full">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-black italic tracking-tighter flex items-center gap-2">
+          <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
             <span className="bg-primary-dark text-primary-foreground px-2 py-0.5 rounded uppercase">Popular</span> SERIES BY CATEGORY
           </h2>
           <div className="flex items-center gap-1 text-muted-foreground text-sm cursor-pointer hover:text-foreground">
@@ -278,7 +278,7 @@ export default function App() {
       {/* Newly Released Originals */}
       <div className="px-4 py-2 mb-8 max-w-7xl mx-auto w-full">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-black italic tracking-tighter flex items-center gap-2">
+          <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
             <span className="bg-primary-dark text-primary-foreground px-2 py-0.5 rounded uppercase">Newly</span> RELEASED ORIGINALS
           </h2>
         </div>
@@ -298,7 +298,7 @@ export default function App() {
       {/* Daily Section */}
       <div className="px-4 py-2 mb-8 max-w-7xl mx-auto w-full">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-black italic tracking-tighter flex items-center gap-2">
+          <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
             <span className="bg-primary-dark text-primary-foreground px-2 py-0.5 rounded uppercase">Daily</span> UPDATES
           </h2>
           <div className="flex items-center gap-1 text-muted-foreground text-sm cursor-pointer hover:text-foreground">
@@ -355,7 +355,7 @@ export default function App() {
         <div className="absolute bottom-0 left-0 p-8 max-w-2xl">
           <Badge className="mb-4 bg-primary-dark text-primary-foreground hover:bg-primary font-bold uppercase">FEATURED ORIGINAL</Badge>
           <h1 
-            className="text-5xl font-black italic tracking-tighter mb-4 uppercase text-foreground"
+            className="text-5xl font-black tracking-tighter mb-4 uppercase text-foreground"
             style={{
               textShadow: '0 2px 10px rgba(0,0,0,0.3)',
             }}
@@ -385,7 +385,7 @@ export default function App() {
 
         <div className="mb-12">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-black italic tracking-tighter flex items-center gap-2">
+            <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
               <span className="bg-primary-dark text-primary-foreground px-2 py-0.5 rounded uppercase">Originals</span> {activeDay.toUpperCase()} SCHEDULE
             </h2>
           </div>
@@ -413,7 +413,7 @@ export default function App() {
         </div>
 
         <div className="mb-12">
-          <h2 className="text-2xl font-black italic tracking-tighter flex items-center gap-2 mb-8">
+          <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2 mb-8">
             <span className="bg-primary-dark text-primary-foreground px-2 py-0.5 rounded uppercase">All</span> ORIGINALS
           </h2>
           <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-2 gap-y-8">
@@ -512,7 +512,7 @@ export default function App() {
 
   const renderAuth = () => (
     <div className="px-4 py-16 max-w-md mx-auto w-full min-h-[70vh] flex flex-col items-center">
-      <div className="bg-primary text-primary-foreground font-black text-3xl italic px-4 py-2 tracking-tighter mb-12" style={{ transform: 'skewX(-10deg)' }}>
+      <div className="bg-primary text-primary-foreground font-black text-3xl px-4 py-2 tracking-tighter mb-12" style={{ transform: 'skewX(-10deg)' }}>
         LEMONADE
       </div>
       
@@ -617,7 +617,7 @@ export default function App() {
           </p>
           <div className="bg-muted/50 p-3 rounded-md mb-4">
             <p className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Pro Tip</p>
-            <p className="text-[11px] text-muted-foreground italic">You can submit your self-published series to become an Original at any time!</p>
+            <p className="text-[11px] text-muted-foreground">You can submit your self-published series to become an Original at any time!</p>
           </div>
           <ul className="text-xs space-y-2 text-muted-foreground">
             <li className="flex items-center gap-2"><div className="w-1 h-1 bg-muted-foreground rounded-full" /> Keep All Rights</li>
@@ -904,7 +904,7 @@ export default function App() {
           )}
         </div>
         <div className="flex-1">
-          <h1 className="text-3xl font-black italic tracking-tighter flex items-center gap-2">
+          <h1 className="text-3xl font-black tracking-tighter flex items-center gap-2">
             {userName}
             {isPremium && <BadgeCheck className="w-6 h-6 text-primary" />}
           </h1>
@@ -995,7 +995,7 @@ export default function App() {
     <div className="px-4 py-8 max-w-7xl mx-auto w-full min-h-[60vh]">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-black italic tracking-tighter">Ads Manager</h1>
+          <h1 className="text-3xl font-black tracking-tighter">Ads Manager</h1>
           <p className="text-muted-foreground">Grow your business with Lemonade Ads</p>
         </div>
         <Button className="rounded-full gap-2" onClick={() => setCurrentView('create-campaign')}>
@@ -1393,7 +1393,7 @@ export default function App() {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
         <div className="absolute bottom-0 left-0 p-8 max-w-2xl">
           <Badge className="mb-4 bg-primary-dark text-primary-foreground hover:bg-primary font-bold uppercase">NEW NOVEL SECTION</Badge>
-          <h1 className="text-5xl font-black italic tracking-tighter mb-4 uppercase">LEMON NOVELS</h1>
+          <h1 className="text-5xl font-black tracking-tighter mb-4 uppercase">LEMON NOVELS</h1>
           <p className="text-lg text-muted-foreground mb-6 font-medium">Dive into a world of words. Fresh stories, updated daily. Only on Lemonade.</p>
           <Button size="lg" className="rounded-full px-8 font-bold gap-2" onClick={() => openSeriesDetails(NOVELS[0])}>
             <BookOpen className="w-5 h-5" /> Start Reading
@@ -1416,7 +1416,7 @@ export default function App() {
         </div>
 
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-black italic tracking-tighter flex items-center gap-2">
+          <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
             <span className="bg-primary-dark text-primary-foreground px-2 py-0.5 rounded">LEMON</span> {activeLemonCategory.toUpperCase()} NOVELS
           </h2>
         </div>
@@ -1585,7 +1585,7 @@ export default function App() {
                   </div>
                   <span className="text-xs text-muted-foreground">Reported by User_X • 15m ago</span>
                 </div>
-                <p className="text-sm italic text-muted-foreground bg-white/50 dark:bg-black/20 p-3 rounded-lg mb-4">
+                <p className="text-sm text-muted-foreground bg-white/50 dark:bg-black/20 p-3 rounded-lg mb-4">
                   "This story is terrible and you should stop writing immediately!"
                 </p>
                 <div className="flex justify-end gap-2">
@@ -1648,7 +1648,7 @@ export default function App() {
           <div className="p-6 border-b border-border">
             <div className="flex items-center gap-2 text-primary mb-1">
               <ShieldCheck className="w-6 h-6" />
-              <span className="font-black italic tracking-tighter text-xl">ADMIN</span>
+              <span className="font-black tracking-tighter text-xl">ADMIN</span>
             </div>
             <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Lemonade Platform</p>
           </div>
@@ -1680,7 +1680,7 @@ export default function App() {
         <div className="flex-1 p-8">
           <div className="max-w-6xl mx-auto">
             <div className="flex items-center justify-between mb-8 lg:hidden">
-              <h1 className="text-2xl font-black italic tracking-tighter flex items-center gap-2">
+              <h1 className="text-2xl font-black tracking-tighter flex items-center gap-2">
                 <ShieldCheck className="w-6 h-6 text-primary" /> ADMIN
               </h1>
               <Sheet>
@@ -1692,7 +1692,7 @@ export default function App() {
                   <div className="p-6 border-b border-border">
                     <div className="flex items-center gap-2 text-primary">
                       <ShieldCheck className="w-6 h-6" />
-                      <span className="font-black italic tracking-tighter text-xl">ADMIN</span>
+                      <span className="font-black tracking-tighter text-xl">ADMIN</span>
                     </div>
                   </div>
                   <div className="p-4 space-y-2">
@@ -1707,7 +1707,7 @@ export default function App() {
             </div>
 
             <div className="mb-8">
-              <h2 className="text-3xl font-black italic tracking-tighter uppercase">{adminTab}</h2>
+              <h2 className="text-3xl font-black tracking-tighter uppercase">{adminTab}</h2>
               <p className="text-muted-foreground font-medium">Manage your platform's {adminTab} and settings.</p>
             </div>
 
@@ -1738,7 +1738,7 @@ export default function App() {
 
       <div className="max-w-3xl mx-auto px-6 py-12">
         <div className="prose prose-zinc dark:prose-invert max-w-none">
-          <h1 className="text-4xl font-black italic tracking-tighter mb-8">{selectedComic?.title}</h1>
+          <h1 className="text-4xl font-black tracking-tighter mb-8">{selectedComic?.title}</h1>
           <div className="space-y-6 text-lg leading-relaxed font-serif text-zinc-800 dark:text-zinc-200">
             <p>The sun hung low in the sky, casting long, golden shadows across the sprawling citrus groves of Lemonade Valley. Kaelen wiped the sweat from his brow, his hands stained with the sticky, sweet residue of the day's harvest.</p>
             <p>He had spent his entire life in these fields, but today felt different. The air was thick with a strange, electric energy, and the lemons glowed with an intensity he had never seen before.</p>
@@ -1884,7 +1884,7 @@ export default function App() {
             {selectedComic?.isOriginal && <Badge variant="secondary" className="bg-primary/20 text-primary">Original</Badge>}
             <Badge variant="outline" className="uppercase text-[10px] font-bold">{selectedComic?.type || 'webtoon'}</Badge>
           </div>
-          <h1 className="text-4xl font-black italic tracking-tighter mb-2">{selectedComic?.title}</h1>
+          <h1 className="text-4xl font-black tracking-tighter mb-2">{selectedComic?.title}</h1>
           <p className="text-xl text-muted-foreground mb-4 cursor-pointer hover:text-primary transition-colors inline-block" onClick={() => setCurrentView('creator-profile')}>{selectedComic?.creator}</p>
           <div className="flex items-center gap-6 mb-6 text-sm font-bold">
             <div className="flex items-center gap-2"><Heart className="w-4 h-4" /> {selectedComic?.likes}</div>
@@ -1940,7 +1940,7 @@ export default function App() {
           <div className="w-32 h-32 bg-muted rounded-full overflow-hidden border-4 border-primary/20 mb-6">
             <img src={`https://picsum.photos/seed/${selectedComic?.creator}/200/200`} alt={selectedComic?.creator} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
           </div>
-          <h1 className="text-4xl font-black italic tracking-tighter mb-2 flex items-center gap-2 justify-center">
+          <h1 className="text-4xl font-black tracking-tighter mb-2 flex items-center gap-2 justify-center">
             {selectedComic?.creator}
             <BadgeCheck className="w-6 h-6 text-primary" />
           </h1>
@@ -1979,7 +1979,7 @@ export default function App() {
         <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
           <BadgeCheck className="w-10 h-10 text-primary" />
         </div>
-        <h1 className="text-4xl font-black italic tracking-tighter mb-4 uppercase">Lemonade Premium</h1>
+        <h1 className="text-4xl font-black tracking-tighter mb-4 uppercase">Lemonade Premium</h1>
         <p className="text-muted-foreground text-lg">Get verified, remove ads, and support creators.</p>
       </div>
 
@@ -2227,7 +2227,7 @@ export default function App() {
         </div>
 
         <div className="flex flex-col items-center gap-3">
-          <div className="bg-primary text-primary-foreground font-black text-xl italic px-3 py-1 tracking-tighter cursor-pointer hover:scale-105 transition-transform" style={{ transform: 'skewX(-10deg)' }} onClick={() => setCurrentView('home')}>
+          <div className="bg-primary text-primary-foreground font-black text-xl px-3 py-1 tracking-tighter cursor-pointer hover:scale-105 transition-transform" style={{ transform: 'skewX(-10deg)' }} onClick={() => setCurrentView('home')}>
             LEMONADE
           </div>
           <Button 
