@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db, handleFirestoreError } from '../lib/firebase';
 import { doc, onSnapshot, updateDoc, increment } from 'firebase/firestore';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { ChevronLeft, CreditCard, Zap, ShieldCheck, Gift } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 

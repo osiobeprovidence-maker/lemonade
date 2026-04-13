@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Sparkles, Calendar, Clock, Filter } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { collection, query, where, onSnapshot, orderBy, limit } from 'firebase/firestore';
 import { db, handleFirestoreError } from '../lib/firebase';
 import { SeriesCard } from '../components/SeriesCard';

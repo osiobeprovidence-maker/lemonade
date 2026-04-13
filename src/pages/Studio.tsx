@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db, handleFirestoreError } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp, query, where, onSnapshot, doc, getDoc, updateDoc } from 'firebase/firestore';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Plus, LayoutDashboard, BookPlus, Settings, BarChart3, Sparkles, Megaphone } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 

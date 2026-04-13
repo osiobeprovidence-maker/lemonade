@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Ticket, Gift, CheckCircle2, AlertCircle } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db, handleFirestoreError } from '../lib/firebase';
 import { doc, updateDoc, increment } from 'firebase/firestore';

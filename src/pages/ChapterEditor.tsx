@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db, handleFirestoreError } from '../lib/firebase';
 import { doc, getDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { ChevronLeft, Plus, Trash2, Save, Image as ImageIcon, List } from 'lucide-react';
 
 export function ChapterEditor() {

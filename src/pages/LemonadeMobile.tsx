@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Smartphone, Sparkles, Plus, Home, Compass, Palette, User } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 
 // --- Types ---
 type Tab = 'HOME' | 'ORIGINALS' | 'CANVAS' | 'MY';

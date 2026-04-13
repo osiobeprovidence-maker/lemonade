@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { db } from '../lib/firebase';
 import { collection, query, where, limit, onSnapshot, updateDoc, doc, increment } from 'firebase/firestore';
 import { ExternalLink, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export function ReaderAd() {
   const [ad, setAd] = useState<any>(null);

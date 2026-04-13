@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, LayoutGrid, Zap, Ghost, Sword, Heart, Music, Camera, History, Landmark } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 
 const CATEGORIES = [
   { name: 'Action', icon: Sword, color: 'bg-red-500', count: 124 },

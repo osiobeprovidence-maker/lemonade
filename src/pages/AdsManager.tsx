@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db, handleFirestoreError } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp, query, where, onSnapshot, deleteDoc, doc, updateDoc } from 'firebase/firestore';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Plus, Megaphone, Trash2, ExternalLink, Play, Pause } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 

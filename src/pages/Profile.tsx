@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db, storage, handleFirestoreError } from '../lib/firebase';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { User, Bookmark, History, BookPlus, Camera } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';

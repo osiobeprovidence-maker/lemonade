@@ -7,7 +7,7 @@ import {
   Settings,
   ChevronDown
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface StudioLayoutProps {
   children: React.ReactNode;

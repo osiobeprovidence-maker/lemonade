@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { X, Copy, Twitter, Facebook, MessageCircle, Link as LinkIcon } from 'lucide-react';
 
 interface ShareModalProps {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, HelpCircle, MessageCircle, Mail, FileText, ChevronRight, Search, Shield } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 
 export function HelpSupport() {
   const navigate = useNavigate();

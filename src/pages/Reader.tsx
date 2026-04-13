@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db, handleFirestoreError } from '../lib/firebase';
-import { motion, useScroll, useSpring, useMotionValue, useTransform } from 'motion/react';
+import { motion, useScroll, useSpring, useMotionValue, useTransform } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Menu, MessageSquare, Share2, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import { Comments } from '../components/Comments';
 import { ReaderAd } from '../components/ReaderAd';

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { collection, query, where, limit, onSnapshot, orderBy } from 'firebase/firestore';
 import { db, handleFirestoreError } from '../lib/firebase';
 import { SeriesCard } from '../components/SeriesCard';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { TrendingUp, Sparkles, Clock, ChevronRight, Smartphone } from 'lucide-react';
 
 const MOCK_SERIES = [

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { doc, getDoc, collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db, handleFirestoreError } from '../lib/firebase';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { ChevronLeft, Play, Plus, Share2, Info, List, User, Star, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { Comments } from '../components/Comments';
