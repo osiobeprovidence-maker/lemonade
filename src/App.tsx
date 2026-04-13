@@ -27,11 +27,11 @@ const COMICS = [
 ];
 
 const NOVELS = [
-  { id: 101, title: "The Alchemist of Lemonade", creator: "Lemon Master", genre: "Fantasy", cover: "https://picsum.photos/seed/novel-1/400/533", views: "1.2M", likes: "45K", type: 'novel', summary: "A young alchemist discovers the secret to the ultimate lemonade, which grants magical powers." },
-  { id: 102, title: "Shadow of the Citrus", creator: "Sour King", genre: "Action", cover: "https://picsum.photos/seed/novel-2/400/533", views: "800K", likes: "32K", type: 'novel', summary: "In a world where fruit is power, one warrior fights to protect the last lemon tree." },
+  { id: 101, title: "The Alchemist of Lemonade", creator: "Novel Master", genre: "Fantasy", cover: "https://picsum.photos/seed/novel-1/400/533", views: "1.2M", likes: "45K", type: 'novel', summary: "A young alchemist discovers the secret to the ultimate lemonade, which grants magical powers." },
+  { id: 102, title: "Shadow of the Citrus", creator: "Sour King", genre: "Action", cover: "https://picsum.photos/seed/novel-2/400/533", views: "800K", likes: "32K", type: 'novel', summary: "In a world where fruit is power, one warrior fights to protect the last Novel tree." },
   { id: 103, title: "Sweet Revenge", creator: "Sugar Queen", genre: "Drama", cover: "https://picsum.photos/seed/novel-3/400/533", views: "2.5M", likes: "120K", type: 'novel', summary: "A high society drama about betrayal and the sweetest comeback ever told." },
   { id: 104, title: "Lemonade Stand Hero", creator: "Zest", genre: "Comedy", cover: "https://picsum.photos/seed/novel-4/400/533", views: "1.5M", likes: "88K", type: 'novel', summary: "A hilarious journey of a boy trying to build a lemonade empire in his backyard." },
-  { id: 105, title: "The Last Zest", creator: "Pulp", genre: "Sci-fi", cover: "https://picsum.photos/seed/novel-5/400/533", views: "600K", likes: "15K", type: 'novel', summary: "In a post-apocalyptic future, the last remaining lemon is the key to humanity's survival." },
+  { id: 105, title: "The Last Zest", creator: "Pulp", genre: "Sci-fi", cover: "https://picsum.photos/seed/novel-5/400/533", views: "600K", likes: "15K", type: 'novel', summary: "In a post-apocalyptic future, the last remaining Novel is the key to humanity's survival." },
 ];
 
 const MOCK_USERS = [
@@ -75,7 +75,7 @@ export default function App() {
   const [likedComics, setLikedComics] = useState<Set<number>>(new Set());
   const [isReaderMenuOpen, setIsReaderMenuOpen] = useState(false);
 
-  // Admin & Lemon States
+  // Admin & Novel States
   const [adminTab, setAdminTab] = useState<'dashboard' | 'users' | 'moderation' | 'ads'>('dashboard');
   const [activeLemonCategory, setActiveLemonCategory] = useState('Drama');
   const [previousView, setPreviousView] = useState('home');
@@ -178,7 +178,7 @@ export default function App() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
         <div className="absolute bottom-0 left-0 p-8 max-w-2xl">
-          <Badge className="mb-4 bg-primary-dark text-primary-foreground hover:bg-primary font-bold uppercase">Now on LEMONADE</Badge>
+          <Badge className="mb-4 bg-foreground text-background font-bold uppercase">Now on LEMONADE</Badge>
           <h1 
             className="text-5xl font-black tracking-tighter mb-4 uppercase text-foreground"
             style={{
@@ -198,7 +198,7 @@ export default function App() {
       <div className="px-4 py-2 mb-8 max-w-7xl mx-auto w-full">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
-            <span className="bg-primary-dark text-primary-foreground px-2 py-0.5 rounded uppercase">Trending</span> & POPULAR SERIES
+            <span className="text-foreground font-bold uppercase">Trending</span> & POPULAR SERIES
           </h2>
           <ChevronRight className="w-5 h-5 text-muted-foreground" />
         </div>
@@ -238,7 +238,7 @@ export default function App() {
       <div className="px-4 py-2 mb-8 max-w-7xl mx-auto w-full">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
-            <span className="bg-primary-dark text-primary-foreground px-2 py-0.5 rounded uppercase">Popular</span> SERIES BY CATEGORY
+            <span className="text-foreground font-bold uppercase">Popular</span> SERIES BY CATEGORY
           </h2>
           <div className="flex items-center gap-1 text-muted-foreground text-sm cursor-pointer hover:text-foreground">
             View all <ChevronRight className="w-4 h-4" />
@@ -279,7 +279,7 @@ export default function App() {
       <div className="px-4 py-2 mb-8 max-w-7xl mx-auto w-full">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
-            <span className="bg-primary-dark text-primary-foreground px-2 py-0.5 rounded uppercase">Newly</span> RELEASED ORIGINALS
+            <span className="text-foreground font-bold uppercase">Newly</span> RELEASED ORIGINALS
           </h2>
         </div>
         <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-2 gap-y-6">
@@ -299,7 +299,7 @@ export default function App() {
       <div className="px-4 py-2 mb-8 max-w-7xl mx-auto w-full">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
-            <span className="bg-primary-dark text-primary-foreground px-2 py-0.5 rounded uppercase">Daily</span> UPDATES
+            <span className="text-foreground font-bold uppercase">Daily</span> UPDATES
           </h2>
           <div className="flex items-center gap-1 text-muted-foreground text-sm cursor-pointer hover:text-foreground">
             View all <ChevronRight className="w-4 h-4" />
@@ -353,7 +353,7 @@ export default function App() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
         <div className="absolute bottom-0 left-0 p-8 max-w-2xl">
-          <Badge className="mb-4 bg-primary-dark text-primary-foreground hover:bg-primary font-bold uppercase">FEATURED ORIGINAL</Badge>
+          <Badge className="mb-4 bg-foreground text-background font-bold uppercase">FEATURED ORIGINAL</Badge>
           <h1 
             className="text-5xl font-black tracking-tighter mb-4 uppercase text-foreground"
             style={{
@@ -386,7 +386,7 @@ export default function App() {
         <div className="mb-12">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
-              <span className="bg-primary-dark text-primary-foreground px-2 py-0.5 rounded uppercase">Originals</span> {activeDay.toUpperCase()} SCHEDULE
+              <span className="text-foreground font-bold uppercase">Originals</span>
             </h2>
           </div>
 
@@ -414,7 +414,7 @@ export default function App() {
 
         <div className="mb-12">
           <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2 mb-8">
-            <span className="bg-primary-dark text-primary-foreground px-2 py-0.5 rounded uppercase">All</span> ORIGINALS
+            <span className="text-foreground font-bold uppercase">All</span> ORIGINALS
           </h2>
           <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-2 gap-y-8">
             {COMICS.filter(c => c.isOriginal).map((comic) => (
@@ -1392,8 +1392,8 @@ export default function App() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
         <div className="absolute bottom-0 left-0 p-8 max-w-2xl">
-          <Badge className="mb-4 bg-primary-dark text-primary-foreground hover:bg-primary font-bold uppercase">NEW NOVEL SECTION</Badge>
-          <h1 className="text-5xl font-black tracking-tighter mb-4 uppercase">LEMON NOVELS</h1>
+          <Badge className="mb-4 bg-foreground text-background font-bold uppercase">NEW NOVEL SECTION</Badge>
+          <h1 className="text-5xl font-black tracking-tighter mb-4 uppercase">Novel NOVELS</h1>
           <p className="text-lg text-muted-foreground mb-6 font-medium">Dive into a world of words. Fresh stories, updated daily. Only on Lemonade.</p>
           <Button size="lg" className="rounded-full px-8 font-bold gap-2" onClick={() => openSeriesDetails(NOVELS[0])}>
             <BookOpen className="w-5 h-5" /> Start Reading
@@ -1402,7 +1402,7 @@ export default function App() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4">
-        {/* Lemon Categories */}
+        {/* Novel Categories */}
         <div className="flex items-center gap-2 overflow-x-auto pb-6 no-scrollbar mb-8 border-b border-border">
           {CATEGORIES.map(cat => (
             <button
@@ -1417,7 +1417,7 @@ export default function App() {
 
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
-            <span className="bg-primary-dark text-primary-foreground px-2 py-0.5 rounded">LEMON</span> {activeLemonCategory.toUpperCase()} NOVELS
+            <span className="bg-primary-dark text-primary-foreground px-2 py-0.5 rounded">Novel</span> {activeLemonCategory.toUpperCase()} NOVELS
           </h2>
         </div>
 
@@ -1871,7 +1871,7 @@ export default function App() {
 
   const renderSeriesDetails = () => (
     <div className="px-4 py-8 max-w-4xl mx-auto w-full min-h-[60vh]">
-      <Button variant="ghost" onClick={() => setCurrentView(selectedComic?.type === 'novel' ? 'lemon' : 'home')} className="mb-6 -ml-4 gap-2">
+      <Button variant="ghost" onClick={() => setCurrentView(selectedComic?.type === 'novel' ? 'Novel' : 'home')} className="mb-6 -ml-4 gap-2">
         <ChevronRight className="w-4 h-4 rotate-180" /> Back
       </Button>
       <div className="flex flex-col md:flex-row gap-8 mb-12">
@@ -2093,8 +2093,8 @@ export default function App() {
                   </div>
                   <div className="flex flex-col gap-4 font-semibold">
                     <div onClick={() => setCurrentView('originals')} className="text-foreground hover:text-primary cursor-pointer">Originals</div>
-                    <div onClick={() => setCurrentView('lemon')} className="text-foreground hover:text-primary cursor-pointer flex items-center gap-2">
-                      Lemon <Badge className="bg-primary-dark text-primary-foreground text-[10px] px-1.5 py-0 uppercase">NEW</Badge>
+                    <div onClick={() => setCurrentView('Novel')} className="text-foreground hover:text-primary cursor-pointer flex items-center gap-2">
+                      Novel <Badge className="bg-foreground text-background text-[10px] px-1.5 py-0 uppercase">NEW</Badge>
                     </div>
                     <div onClick={handleMyClick} className="text-foreground hover:text-primary cursor-pointer">My</div>
                   </div>
@@ -2122,10 +2122,10 @@ export default function App() {
                 Originals
               </div>
               <div 
-                onClick={() => setCurrentView('lemon')}
-                className={`${currentView === 'lemon' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'} h-full flex items-center px-1 cursor-pointer gap-2`}
+                onClick={() => setCurrentView('Novel')}
+                className={`${currentView === 'Novel' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'} h-full flex items-center px-1 cursor-pointer gap-2`}
               >
-                Lemon <Badge className="bg-primary-dark text-primary-foreground text-[10px] px-1.5 py-0 uppercase">NEW</Badge>
+                Novel <Badge className="bg-foreground text-background text-[10px] px-1.5 py-0 uppercase">NEW</Badge>
               </div>
               <div 
                 onClick={handleMyClick}
@@ -2167,7 +2167,7 @@ export default function App() {
       <main>
         {currentView === 'home' && renderHome()}
         {currentView === 'originals' && renderOriginals()}
-        {currentView === 'lemon' && renderLemon()}
+        {currentView === 'Novel' && renderLemon()}
         {currentView === 'admin' && renderAdmin()}
         {currentView === 'my' && renderMy()}
         {currentView === 'search' && renderSearch()}
