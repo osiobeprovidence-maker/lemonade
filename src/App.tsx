@@ -10,6 +10,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/co
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Heart, ChevronRight, Menu, Bell, User, Star, Clock, Home, Compass, PenTool, Facebook, Twitter, Instagram, Youtube, Plus, X, Play, SkipForward, DollarSign, BarChart3, Settings, BadgeCheck, Share2, MoreVertical, List, Check, Upload, BookOpen, ShieldCheck, Users, MessageSquare, Flag, Megaphone, Trash2, Eye, EyeOff, Settings2 } from 'lucide-react';
+import { Logo } from './components/Logo';
 
 const COMICS = [
   { id: 1, title: "Surviving the Game as a Barbarian", creator: "K. Ryo", emotion: "Fantasy", genre: "Fantasy", cover: "https://picsum.photos/seed/barbarian/400/533", rankChange: 37, views: "53M", likes: "1.2M", day: "Mon", isNew: true, isOriginal: true, type: 'webtoon' },
@@ -2089,7 +2090,7 @@ export default function App() {
                     className="flex items-center gap-2 text-primary mb-6 cursor-pointer"
                     onClick={() => { setCurrentView('home'); }}
                   >
-                    <span className="font-bold text-xl tracking-tight text-foreground">Lemonade</span>
+                    <Logo />
                   </div>
                   <div className="flex flex-col gap-4 font-semibold">
                     <div onClick={() => setCurrentView('originals')} className="text-foreground hover:text-primary cursor-pointer">Originals</div>
@@ -2111,7 +2112,7 @@ export default function App() {
               className="flex items-center gap-2 text-primary hover:opacity-90 transition-opacity cursor-pointer"
               onClick={() => setCurrentView('home')}
             >
-              <span className="font-bold text-xl tracking-tight text-foreground">Lemonade</span>
+              <Logo />
             </div>
             
             <div className="hidden md:flex items-center gap-6 font-semibold text-sm h-full">
@@ -2227,9 +2228,7 @@ export default function App() {
         </div>
 
         <div className="flex flex-col items-center gap-3">
-          <div className="bg-primary text-primary-foreground font-black text-xl px-3 py-1 tracking-tighter cursor-pointer hover:scale-105 transition-transform" style={{ transform: 'skewX(-10deg)' }} onClick={() => setCurrentView('home')}>
-            LEMONADE
-          </div>
+          <Logo onClick={() => setCurrentView('home')} />
           <Button 
             variant="ghost" 
             size="sm" 
