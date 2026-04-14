@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram, Youtube } from 'lucide-react';
+import { Logo } from './Logo';
 
 export function AppFooter() {
   return (
@@ -8,8 +9,8 @@ export function AppFooter() {
       <div className="flex flex-col items-center gap-10">
         {/* Logo & Tagline */}
         <div className="text-center">
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <h2 className="text-lg font-serif font-black tracking-tighter text-brand-yellow">LEMONADE</h2>
+          <div className="flex items-center justify-center mb-3">
+            <Logo />
           </div>
           <p className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] leading-relaxed">
             Every story has a taste<br />sweet, sour, or both.
