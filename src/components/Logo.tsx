@@ -17,15 +17,16 @@ export function Logo({ className = '', onClick }: LogoProps) {
       onClick={handleClick}
     >
       <div
-        className="px-4 py-1.5 transform -skew-x-12"
+        className="px-5 py-2 transform -skew-x-12"
         style={{
-          backgroundColor: '#1DB954',
+          backgroundColor: '#4CAF50',
         }}
       >
         <span
-          className="text-white font-black text-xl tracking-tight uppercase block transform skew-x-12"
+          className="text-white font-black text-2xl tracking-wide uppercase block transform skew-x-12 italic"
           style={{
             fontFamily: 'Inter Variable, sans-serif',
+            letterSpacing: '0.02em',
           }}
         >
           LEMONADE
