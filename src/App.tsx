@@ -180,7 +180,7 @@ export default function App() {
   };
 
   const renderMovieRail = (title: string, items: typeof MOVIES, accent?: string) => (
-    <section className="px-4 md:px-6 lg:px-8 mb-12">
+    <section className="px-4 md:px-6 lg:px-8 mb-10">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-5">
           <div>
@@ -189,26 +189,27 @@ export default function App() {
           </div>
           <button className="text-sm font-semibold text-white/70 hover:text-white transition-colors">See all</button>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 md:gap-4">
+        <div className="flex gap-3 md:gap-4 overflow-x-auto no-scrollbar pb-2">
           {items.map((movie) => (
-            <article key={movie.id} className="group relative overflow-hidden rounded-md md:rounded-lg">
-              <div className="relative aspect-[3/4] overflow-hidden">
-                <img src={movie.poster} alt={movie.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" referrerPolicy="no-referrer" />
+            <article key={movie.id} className="group relative w-[220px] md:w-[260px] lg:w-[300px] shrink-0 overflow-hidden rounded-md md:rounded-lg">
+              <div className="relative aspect-video overflow-hidden rounded-md md:rounded-lg bg-white/5">
+                <img src={movie.backdrop} alt={movie.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" referrerPolicy="no-referrer" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent" />
                 <div className="absolute top-3 left-3">
                   <Badge className="bg-[#46b653] text-white border-none uppercase text-[10px] tracking-widest">{movie.badge}</Badge>
                 </div>
-                <button className="absolute right-3 bottom-3 w-11 h-11 rounded-full bg-white text-black flex items-center justify-center shadow-lg transition-transform group-hover:scale-105">
+                <div className="absolute inset-x-0 bottom-0 p-3 md:p-4">
+                  <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-white/60 font-bold mb-2">
+                    <span>{movie.type}</span>
+                    <span>{movie.year}</span>
+                    <span>{movie.maturity}</span>
+                  </div>
+                  <h3 className="text-white font-black text-lg leading-tight mb-1">{movie.title}</h3>
+                  <p className="text-white/70 text-sm">{movie.genre} • {movie.runtime}</p>
+                </div>
+                <button className="absolute right-3 bottom-3 w-10 h-10 rounded-full bg-white text-black flex items-center justify-center shadow-lg transition-transform group-hover:scale-105">
                   <Play className="w-4 h-4 fill-current ml-0.5" />
                 </button>
-              </div>
-              <div className="pt-3">
-                <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-white/45 font-bold mb-2">
-                  <span>{movie.type}</span>
-                  <span>{movie.year}</span>
-                </div>
-                <h3 className="text-white font-bold text-base leading-tight mb-1">{movie.title}</h3>
-                <p className="text-white/55 text-sm">{movie.genre} • {movie.runtime}</p>
               </div>
             </article>
           ))}
@@ -286,13 +287,13 @@ export default function App() {
         </div>
       </section>
 
-      <section className="px-4 md:px-6 lg:px-8 -mt-24 relative z-10 mb-12">
+      <section className="px-4 md:px-6 lg:px-8 -mt-20 relative z-10 mb-10">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-[1.25fr_1fr_1fr] gap-4 mb-12">
+          <div className="grid md:grid-cols-[1.1fr_1fr_1fr] gap-3 md:gap-4">
             {[
               { label: 'Now Streaming', value: 'Anime films, prestige series, and weekly drops all on the first screen.' },
-              { label: 'Manga / Manwha', value: 'Keep the current reading experience as a separate destination, not the homepage.' },
-              { label: 'Novel', value: 'Preserve the novel lane with the same platform navigation instead of a disconnected section.' },
+              { label: 'Manga / Manwha', value: 'Move into the reading catalog without losing the same platform navigation.' },
+              { label: 'Novel', value: 'Keep text-first storytelling alongside movies without feeling like a separate product.' },
             ].map((item) => (
               <div key={item.label} className="rounded-2xl border border-white/10 bg-black/45 backdrop-blur-md px-5 py-4">
                 <p className="text-[10px] uppercase tracking-[0.28em] text-white/45 font-bold mb-2">{item.label}</p>
@@ -303,41 +304,9 @@ export default function App() {
         </div>
       </section>
 
-      <section className="px-4 md:px-6 lg:px-8 mb-12">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-4">
-          {[
-            { icon: Sparkles, label: 'Editor\'s Cut', value: 'Handpicked anime movies with stronger art direction and cleaner surfacing.' },
-            { icon: Film, label: 'Binge Rails', value: 'Hero-led rows for films, longform series, and weekend marathons.' },
-            { icon: BookOpen, label: 'Cross-Media', value: 'Jump from the anime adaptation to the manga/manwha or novel in one brand world.' },
-          ].map((item) => (
-            <div key={item.label} className="rounded-[1.75rem] border border-white/10 bg-[#0e1119] p-6 shadow-[0_20px_80px_rgba(0,0,0,0.35)]">
-              <item.icon className="w-6 h-6 text-[#46b653] mb-4" />
-              <h3 className="text-xl font-black mb-2">{item.label}</h3>
-              <p className="text-white/60 leading-relaxed">{item.value}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {renderMovieRail('Trending Anime Tonight', MOVIES, 'Most watched now')}
       {renderMovieRail('Cinematic Worlds', [MOVIES[1], MOVIES[3], MOVIES[0], MOVIES[5], MOVIES[2], MOVIES[4]], 'Movies and prestige series')}
       {renderMovieRail('Pulse-Pounding Action', [MOVIES[4], MOVIES[2], MOVIES[1], MOVIES[5], MOVIES[0], MOVIES[3]], 'Fast, loud, addictive')}
-
-      <section className="px-4 md:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,#10131c_0%,#0b2812_100%)] p-8 md:p-10 grid lg:grid-cols-[1fr_auto] gap-8 items-center">
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.3em] text-white/45 font-bold mb-3">Alternate experiences</p>
-            <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-3">Movies at the front. Manga/manwha and novels on deck.</h2>
-            <p className="text-white/65 max-w-2xl leading-relaxed">
-              The homepage becomes the anime streaming destination, while the reading experiences stay one tap away as dedicated destinations with their own mood and discovery patterns.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Button className="rounded-full px-6 h-12 bg-white text-black hover:bg-white/90" onClick={() => setCurrentView('manga')}>Manga / Manwha</Button>
-            <Button variant="outline" className="rounded-full px-6 h-12 border-white/20 bg-transparent text-white hover:bg-white/10" onClick={() => setCurrentView('Novel')}>Novel</Button>
-          </div>
-        </div>
-      </section>
     </div>
   );
 
