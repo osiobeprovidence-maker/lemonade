@@ -99,6 +99,7 @@ export default function App() {
   const [publishType, setPublishType] = useState<'webtoon' | 'novel'>('webtoon');
   const featuredMovie = MOVIES[0];
   const spotlightMovie = MOVIES[1];
+  const isMovieView = currentView === 'home';
 
   const toggleLike = (comicId: number) => {
     setLikedComics(prev => {
@@ -188,9 +189,9 @@ export default function App() {
           </div>
           <button className="text-sm font-semibold text-white/70 hover:text-white transition-colors">See all</button>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 md:gap-4">
           {items.map((movie) => (
-            <article key={movie.id} className="group relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/5 shadow-[0_20px_60px_rgba(0,0,0,0.25)]">
+            <article key={movie.id} className="group relative overflow-hidden rounded-md md:rounded-lg">
               <div className="relative aspect-[3/4] overflow-hidden">
                 <img src={movie.poster} alt={movie.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" referrerPolicy="no-referrer" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent" />
@@ -201,7 +202,7 @@ export default function App() {
                   <Play className="w-4 h-4 fill-current ml-0.5" />
                 </button>
               </div>
-              <div className="p-4">
+              <div className="pt-3">
                 <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-white/45 font-bold mb-2">
                   <span>{movie.type}</span>
                   <span>{movie.year}</span>
@@ -218,35 +219,41 @@ export default function App() {
 
   const renderMoviesHome = () => (
     <div className="bg-[#06070b] text-white pb-16">
-      <section className="relative min-h-[78vh] overflow-hidden border-b border-white/10">
+      <section className="relative min-h-[82vh] overflow-hidden">
         <img src={featuredMovie.backdrop} alt={featuredMovie.title} className="absolute inset-0 w-full h-full object-cover" referrerPolicy="no-referrer" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(70,182,83,0.25),transparent_28%),linear-gradient(90deg,rgba(3,4,8,0.96)_0%,rgba(3,4,8,0.86)_35%,rgba(3,4,8,0.48)_58%,rgba(3,4,8,0.92)_100%)]" />
-        <div className="relative max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-16 md:py-24 grid lg:grid-cols-[1.1fr_360px] gap-10 items-end min-h-[78vh]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(70,182,83,0.22),transparent_28%),linear-gradient(180deg,rgba(5,6,10,0.18)_0%,rgba(5,6,10,0.46)_18%,rgba(5,6,10,0.78)_55%,rgba(5,6,10,0.98)_100%),linear-gradient(90deg,rgba(3,4,8,0.96)_0%,rgba(3,4,8,0.68)_35%,rgba(3,4,8,0.24)_58%,rgba(3,4,8,0.82)_100%)]" />
+        <div className="relative max-w-7xl mx-auto px-4 md:px-6 lg:px-8 pt-28 md:pt-32 pb-28 md:pb-36 grid lg:grid-cols-[1.05fr_360px] gap-10 items-end min-h-[82vh]">
           <div className="max-w-2xl">
             <div className="flex flex-wrap items-center gap-3 mb-5">
               <Badge className="bg-[#46b653] text-white border-none uppercase tracking-[0.22em] px-4 py-1.5">Anime Premiere</Badge>
-              <span className="text-xs uppercase tracking-[0.28em] text-white/45 font-bold">Built for movies, manga and novels</span>
+              <span className="text-xs uppercase tracking-[0.28em] text-white/55 font-bold">Movies • Manga / Manwha • Novel</span>
             </div>
-            <h1 className="text-5xl md:text-7xl font-black tracking-[-0.04em] leading-[0.9] mb-5">Stream anime like it finally has taste.</h1>
-            <p className="text-lg md:text-xl text-white/72 max-w-xl leading-relaxed mb-7">
-              Lemonade is now your cinematic front page for anime films and series, with manga/manwha and novels living beside it instead of fighting for space.
-            </p>
+            <p className="text-[10px] md:text-xs uppercase tracking-[0.38em] text-white/55 font-bold mb-3">Featured this week</p>
+            <h1 className="text-5xl md:text-7xl font-black tracking-[-0.05em] leading-[0.88] mb-4">{featuredMovie.title}</h1>
+            <div className="flex flex-wrap items-center gap-3 text-sm font-semibold text-white/80 mb-5">
+              <span className="text-[#46b653]">{featuredMovie.badge}</span>
+              <span>{featuredMovie.year}</span>
+              <span>{featuredMovie.maturity}</span>
+              <span>{featuredMovie.runtime}</span>
+              <span>{featuredMovie.genre}</span>
+            </div>
+            <p className="text-lg md:text-xl text-white/72 max-w-xl leading-relaxed mb-7">{featuredMovie.summary}</p>
             <div className="flex flex-wrap items-center gap-3 md:gap-4 mb-8">
               <Button size="lg" className="rounded-full px-8 h-12 bg-white text-black hover:bg-white/90 font-bold gap-2">
                 <Play className="w-4 h-4 fill-current" /> Watch Now
               </Button>
-              <Button size="lg" variant="outline" className="rounded-full px-8 h-12 border-white/20 bg-white/5 text-white hover:bg-white/10 gap-2" onClick={() => setCurrentView('manga')}>
-                <BookOpen className="w-4 h-4" /> Browse Manga / Manwha
+              <Button size="lg" variant="outline" className="rounded-full px-8 h-12 border-white/20 bg-white/15 text-white hover:bg-white/20 gap-2">
+                <Film className="w-4 h-4" /> More Info
               </Button>
             </div>
-            <div className="flex flex-wrap gap-6 text-sm text-white/70">
-              <div className="flex items-center gap-2"><Tv className="w-4 h-4 text-[#46b653]" /> 4K anime premieres</div>
-              <div className="flex items-center gap-2"><Film className="w-4 h-4 text-[#46b653]" /> Movie-first curation</div>
-              <div className="flex items-center gap-2"><Zap className="w-4 h-4 text-[#46b653]" /> Better discovery rails</div>
+            <div className="flex flex-wrap gap-6 text-sm text-white/72">
+              <div className="flex items-center gap-2"><Tv className="w-4 h-4 text-[#46b653]" /> Stream anime movies and series</div>
+              <div className="flex items-center gap-2"><BookOpen className="w-4 h-4 text-[#46b653]" /> Continue into manga / manwha</div>
+              <div className="flex items-center gap-2"><Zap className="w-4 h-4 text-[#46b653]" /> Cleaner browse navigation</div>
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-5 shadow-[0_25px_120px_rgba(0,0,0,0.45)]">
+          <div className="rounded-[1.5rem] border border-white/10 bg-black/30 backdrop-blur-md p-5 shadow-[0_25px_120px_rgba(0,0,0,0.45)]">
             <div className="aspect-video rounded-[1.25rem] overflow-hidden mb-5 relative">
               <img src={spotlightMovie.backdrop} alt={spotlightMovie.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent" />
@@ -279,7 +286,24 @@ export default function App() {
         </div>
       </section>
 
-      <section className="px-4 md:px-6 lg:px-8 -mt-10 relative z-10 mb-12">
+      <section className="px-4 md:px-6 lg:px-8 -mt-24 relative z-10 mb-12">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-[1.25fr_1fr_1fr] gap-4 mb-12">
+            {[
+              { label: 'Now Streaming', value: 'Anime films, prestige series, and weekly drops all on the first screen.' },
+              { label: 'Manga / Manwha', value: 'Keep the current reading experience as a separate destination, not the homepage.' },
+              { label: 'Novel', value: 'Preserve the novel lane with the same platform navigation instead of a disconnected section.' },
+            ].map((item) => (
+              <div key={item.label} className="rounded-2xl border border-white/10 bg-black/45 backdrop-blur-md px-5 py-4">
+                <p className="text-[10px] uppercase tracking-[0.28em] text-white/45 font-bold mb-2">{item.label}</p>
+                <p className="text-sm text-white/72 leading-relaxed">{item.value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="px-4 md:px-6 lg:px-8 mb-12">
         <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-4">
           {[
             { icon: Sparkles, label: 'Editor\'s Cut', value: 'Handpicked anime movies with stronger art direction and cleaner surfacing.' },
@@ -2223,12 +2247,12 @@ export default function App() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Top Navigation */}
-      <nav className="sticky top-0 w-full z-50 bg-background border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
+      <nav className={`${isMovieView ? 'absolute top-0 left-0 right-0 bg-gradient-to-b from-black/80 via-black/35 to-transparent' : 'sticky top-0 bg-background border-b border-border'} w-full z-50`}>
+        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4 md:gap-6">
             {/* Mobile Hamburger Menu */}
             <Sheet>
-              <SheetTrigger className="md:hidden text-muted-foreground -ml-2 flex items-center justify-center w-10 h-10 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer">
+              <SheetTrigger className={`md:hidden -ml-2 flex items-center justify-center w-10 h-10 rounded-md transition-colors cursor-pointer ${isMovieView ? 'text-white hover:bg-white/10' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'}`}>
                 <Menu className="w-6 h-6" />
               </SheetTrigger>
               <SheetContent side="left" className="w-[280px] p-0">
@@ -2260,34 +2284,38 @@ export default function App() {
             </Sheet>
 
             <div 
-              className="flex items-center gap-2 text-primary hover:opacity-90 transition-opacity cursor-pointer"
+              className="flex items-center gap-2 hover:opacity-90 transition-opacity cursor-pointer"
               onClick={() => setCurrentView('home')}
             >
-              <Logo />
+              {isMovieView ? (
+                <span className="text-[#46b653] font-black text-2xl tracking-tight italic">LEMONADE</span>
+              ) : (
+                <Logo />
+              )}
             </div>
             
-            <div className="hidden md:flex items-center gap-6 font-semibold text-sm h-full">
+            <div className={`hidden md:flex items-center gap-6 font-semibold text-sm h-full ${isMovieView ? 'text-white' : ''}`}>
               <div 
                 onClick={() => setCurrentView('home')}
-                className={`${currentView === 'home' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'} h-full flex items-center px-1 cursor-pointer`}
+                className={`${currentView === 'home' ? (isMovieView ? 'text-white' : 'text-primary border-b-2 border-primary') : (isMovieView ? 'text-white/78 hover:text-white' : 'text-muted-foreground hover:text-foreground')} h-full flex items-center px-1 cursor-pointer`}
               >
                 Movies
               </div>
               <div 
                 onClick={() => setCurrentView('manga')}
-                className={`${currentView === 'manga' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'} h-full flex items-center px-1 cursor-pointer`}
+                className={`${currentView === 'manga' ? (isMovieView ? 'text-white' : 'text-primary border-b-2 border-primary') : (isMovieView ? 'text-white/78 hover:text-white' : 'text-muted-foreground hover:text-foreground')} h-full flex items-center px-1 cursor-pointer`}
               >
                 Manga / Manwha
               </div>
               <div 
                 onClick={() => setCurrentView('Novel')}
-                className={`${currentView === 'Novel' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'} h-full flex items-center px-1 cursor-pointer gap-2`}
+                className={`${currentView === 'Novel' ? (isMovieView ? 'text-white' : 'text-primary border-b-2 border-primary') : (isMovieView ? 'text-white/78 hover:text-white' : 'text-muted-foreground hover:text-foreground')} h-full flex items-center px-1 cursor-pointer gap-2`}
               >
-                Novel <Badge className="bg-foreground text-background text-[10px] px-1.5 py-0 uppercase">LIVE</Badge>
+                Novel <Badge className={`${isMovieView ? 'bg-[#46b653] text-white' : 'bg-foreground text-background'} text-[10px] px-1.5 py-0 uppercase`}>LIVE</Badge>
               </div>
               <div 
                 onClick={handleMyClick}
-                className={`${currentView === 'my' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'} h-full flex items-center px-1 cursor-pointer`}
+                className={`${currentView === 'my' ? (isMovieView ? 'text-white' : 'text-primary border-b-2 border-primary') : (isMovieView ? 'text-white/78 hover:text-white' : 'text-muted-foreground hover:text-foreground')} h-full flex items-center px-1 cursor-pointer`}
               >
                 My
               </div>
@@ -2298,22 +2326,28 @@ export default function App() {
             <Button 
               variant="ghost" 
               size="icon" 
-              className={`${currentView === 'search' ? 'text-primary' : 'text-muted-foreground'}`}
+              className={`${currentView === 'search' ? (isMovieView ? 'text-white' : 'text-primary') : (isMovieView ? 'text-white/80 hover:text-white hover:bg-white/10' : 'text-muted-foreground')}`}
               onClick={() => setCurrentView('search')}
             >
               <Search className="w-5 h-5" />
             </Button>
-            <Button 
-              variant="default" 
-              className="hidden md:flex rounded-full font-semibold px-6"
-              onClick={handlePublishClick}
-            >
-              Publish
-            </Button>
+            {isMovieView ? (
+              <Button variant="ghost" size="icon" className="hidden md:flex text-white/80 hover:text-white hover:bg-white/10">
+                <Bell className="w-5 h-5" />
+              </Button>
+            ) : (
+              <Button 
+                variant="default" 
+                className="hidden md:flex rounded-full font-semibold px-6"
+                onClick={handlePublishClick}
+              >
+                Publish
+              </Button>
+            )}
             <Button 
               variant="ghost" 
               size="icon" 
-              className={`${currentView === 'profile' || currentView === 'auth' ? 'text-primary' : 'text-muted-foreground'}`}
+              className={`${currentView === 'profile' || currentView === 'auth' ? (isMovieView ? 'text-white' : 'text-primary') : (isMovieView ? 'text-white/80 hover:text-white hover:bg-white/10' : 'text-muted-foreground')}`}
               onClick={handleProfileClick}
             >
               <User className="w-5 h-5" />
