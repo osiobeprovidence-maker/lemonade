@@ -241,10 +241,13 @@ export default function App() {
     }
   };
 
-  const renderHome = () => (
+  const renderHome = () => {
+    const homeContainerClass = "mx-auto w-full max-w-7xl px-6 sm:px-8 lg:px-10";
+
+    return (
     <>
       {/* Hero Banner */}
-      <div className="relative h-[400px] w-full overflow-hidden mb-12">
+      <div className="relative mb-12 h-[400px] w-full overflow-hidden">
         <img 
           src="https://picsum.photos/seed/lemonade-hero/1920/1080" 
           alt="Home Banner" 
@@ -252,25 +255,29 @@ export default function App() {
           referrerPolicy="no-referrer"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
-        <div className="absolute bottom-0 left-0 p-8 max-w-2xl">
-          <Badge className="mb-4 bg-foreground text-background font-bold uppercase">Now on LEMONADE</Badge>
-          <h1 
-            className="text-3xl md:text-5xl font-black tracking-tighter mb-4 uppercase text-foreground"
-            style={{
-              textShadow: '0 2px 10px rgba(0,0,0,0.3)',
-            }}
-          >
-            Read the latest hits!
-          </h1>
-          <p className="text-base md:text-lg text-muted-foreground mb-6 font-medium">Tap to read stories on LEMONADE!</p>
-          <Button size="lg" className="rounded-full px-8 font-bold gap-2" onClick={() => setCurrentView('manga')}>
-            <Play className="w-5 h-5" /> Start Reading
-          </Button>
+        <div className="absolute inset-0 flex items-end">
+          <div className={homeContainerClass}>
+            <div className="max-w-2xl pb-8 md:pb-10">
+              <Badge className="mb-4 bg-foreground text-background font-bold uppercase">Now on LEMONADE</Badge>
+              <h1 
+                className="mb-4 text-3xl font-black uppercase tracking-tighter text-foreground md:text-5xl"
+                style={{
+                  textShadow: '0 2px 10px rgba(0,0,0,0.3)',
+                }}
+              >
+                Read the latest hits!
+              </h1>
+              <p className="mb-6 text-base font-medium text-muted-foreground md:text-lg">Tap to read stories on LEMONADE!</p>
+              <Button size="lg" className="gap-2 rounded-full px-8 font-bold" onClick={() => setCurrentView('manga')}>
+                <Play className="w-5 h-5" /> Start Reading
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Trending Section */}
-      <div className="px-4 py-2 mb-8 max-w-7xl mx-auto w-full">
+      <div className={`${homeContainerClass} mb-8 py-2`}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
             <span className="text-foreground font-bold uppercase">Trending</span> & POPULAR SERIES
@@ -310,7 +317,7 @@ export default function App() {
       </div>
 
       {/* Popular Series by Category */}
-      <div className="px-4 py-2 mb-8 max-w-7xl mx-auto w-full">
+      <div className={`${homeContainerClass} mb-8 py-2`}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
             <span className="text-foreground font-bold uppercase">Popular</span> SERIES BY CATEGORY
@@ -351,7 +358,7 @@ export default function App() {
       </div>
 
       {/* Newly Released Originals */}
-      <div className="px-4 py-2 mb-8 max-w-7xl mx-auto w-full">
+      <div className={`${homeContainerClass} mb-8 py-2`}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
             <span className="text-foreground font-bold uppercase">Newly</span> RELEASED ORIGINALS
@@ -371,7 +378,7 @@ export default function App() {
       </div>
 
       {/* Daily Section */}
-      <div className="px-4 py-2 mb-8 max-w-7xl mx-auto w-full">
+      <div className={`${homeContainerClass} mb-8 py-2`}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
             <span className="text-foreground font-bold uppercase">Daily</span> UPDATES
@@ -415,7 +422,8 @@ export default function App() {
         </div>
       </div>
     </>
-  );
+    );
+  };
 
   const renderOriginals = () => (
     <div className="pb-20">
