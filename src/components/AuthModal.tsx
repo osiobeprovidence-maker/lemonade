@@ -6,6 +6,7 @@ import { updatePassword } from 'firebase/auth';
 import { api } from '../../convex/_generated/api';
 import { auth } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
+import { uploadProfilePhoto } from '../lib/profilePhoto';
 import { SignupOptions } from './SignupOptions';
 import { EmailSignupForm } from './EmailSignupForm';
 import { ProfileCompletionForm } from './ProfileCompletionForm';
@@ -30,11 +31,13 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
   const [birthDay, setBirthDay] = useState('');
   const [birthYear, setBirthYear] = useState('');
   const [pronouns, setPronouns] = useState('');
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -47,11 +50,13 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
       setBirthDay('');
       setBirthYear('');
       setPronouns('');
+      setProfilePhotoUrl('');
       setPassword('');
       setConfirmPassword('');
       setShowPassword(false);
       setShowConfirmPassword(false);
       setLoading(false);
+      setIsUploadingPhoto(false);
       setError('');
     }
   }, [open]);
@@ -61,7 +66,25 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
 
     setEmail(user?.email || email);
     setUsername((current) => current || userProfile?.displayName || user?.displayName || '');
-  }, [email, open, step, user?.displayName, user?.email, userProfile?.displayName]);
+    setProfilePhotoUrl((current) => current || userProfile?.photoURL || user?.photoURL || '');
+  }, [email, open, step, user?.displayName, user?.email, user?.photoURL, userProfile?.displayName, userProfile?.photoURL]);
+
+  const handleProfilePhotoChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !auth.currentUser) return;
+
+    try {
+      setError('');
+      setIsUploadingPhoto(true);
+      const photoURL = await uploadProfilePhoto(auth.currentUser, file);
+      setProfilePhotoUrl(photoURL);
+    } catch (photoError: any) {
+      setError(photoError?.message || 'Could not upload your profile photo.');
+    } finally {
+      setIsUploadingPhoto(false);
+      event.target.value = '';
+    }
+  };
 
   const birthdayIso = useMemo(() => {
     if (!birthMonth || !birthDay || !birthYear) return '';
@@ -167,6 +190,11 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
       return;
     }
 
+    if (isUploadingPhoto) {
+      setError('Please wait for your profile photo to finish uploading.');
+      return;
+    }
+
     if (authMethod === 'email') {
       if (password.length < 6) {
         setError('Password must be at least 6 characters.');
@@ -192,6 +220,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
         username: username.trim(),
         birthday: birthdayIso,
         pronouns: pronouns || undefined,
+        photoURL: profilePhotoUrl || undefined,
       });
 
       onSuccess();
@@ -276,6 +305,8 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                       birthDay={birthDay}
                       birthYear={birthYear}
                       pronouns={pronouns}
+                      profilePhotoUrl={profilePhotoUrl}
+                      isUploadingPhoto={isUploadingPhoto}
                       password={password}
                       confirmPassword={confirmPassword}
                       isEmailSignup={authMethod === 'email'}
@@ -288,6 +319,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                       onBirthDayChange={setBirthDay}
                       onBirthYearChange={setBirthYear}
                       onPronounsChange={setPronouns}
+                      onProfilePhotoChange={handleProfilePhotoChange}
                       onPasswordChange={setPassword}
                       onConfirmPasswordChange={setConfirmPassword}
                       onTogglePassword={() => setShowPassword((current) => !current)}

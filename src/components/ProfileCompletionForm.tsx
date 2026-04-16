@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, ChevronDown, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, ChevronDown, Eye, EyeOff, ImagePlus } from 'lucide-react';
 
 const MONTHS = [
   'January',
@@ -27,6 +27,8 @@ interface ProfileCompletionFormProps {
   birthDay: string;
   birthYear: string;
   pronouns: string;
+  profilePhotoUrl: string;
+  isUploadingPhoto: boolean;
   password: string;
   confirmPassword: string;
   isEmailSignup: boolean;
@@ -39,6 +41,7 @@ interface ProfileCompletionFormProps {
   onBirthDayChange: (value: string) => void;
   onBirthYearChange: (value: string) => void;
   onPronounsChange: (value: string) => void;
+  onProfilePhotoChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onPasswordChange: (value: string) => void;
   onConfirmPasswordChange: (value: string) => void;
   onTogglePassword: () => void;
@@ -54,6 +57,8 @@ export function ProfileCompletionForm({
   birthDay,
   birthYear,
   pronouns,
+  profilePhotoUrl,
+  isUploadingPhoto,
   password,
   confirmPassword,
   isEmailSignup,
@@ -66,6 +71,7 @@ export function ProfileCompletionForm({
   onBirthDayChange,
   onBirthYearChange,
   onPronounsChange,
+  onProfilePhotoChange,
   onPasswordChange,
   onConfirmPasswordChange,
   onTogglePassword,
@@ -83,6 +89,26 @@ export function ProfileCompletionForm({
       {error && <p className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
 
       <div className="space-y-4">
+        <label className="block space-y-2">
+          <span className="text-sm font-semibold text-zinc-900">Profile Photo (optional)</span>
+          <label className="flex cursor-pointer items-center gap-4 rounded-xl border border-dashed border-gray-300 p-4 transition hover:border-emerald-500">
+            <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-zinc-100">
+              {profilePhotoUrl ? (
+                <img src={profilePhotoUrl} alt="Profile preview" className="h-full w-full object-cover" />
+              ) : (
+                <ImagePlus className="h-5 w-5 text-zinc-400" />
+              )}
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-zinc-900">
+                {isUploadingPhoto ? 'Uploading photo...' : 'Upload a profile photo'}
+              </p>
+              <p className="text-xs text-zinc-500">JPG, PNG, or WebP up to 5MB.</p>
+            </div>
+            <input type="file" accept="image/*" onChange={onProfilePhotoChange} className="hidden" />
+          </label>
+        </label>
+
         <label className="block space-y-2">
           <span className="text-sm font-semibold text-zinc-900">Email</span>
           <input
@@ -171,7 +197,7 @@ export function ProfileCompletionForm({
       <div className="space-y-3">
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || isUploadingPhoto}
           className="w-full rounded-xl bg-emerald-600 px-4 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? 'Saving profile...' : 'Finish signup'}

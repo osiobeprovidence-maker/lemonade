@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from './contexts/AuthContext';
+import { useQuery } from 'convex/react';
+import { api } from '../convex/_generated/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -37,13 +39,6 @@ const NOVELS = [
   { id: 103, title: "Sweet Revenge", creator: "Sugar Queen", genre: "Drama", cover: "https://picsum.photos/seed/novel-3/400/533", views: "2.5M", likes: "120K", type: 'novel', summary: "A high society drama about betrayal and the sweetest comeback ever told." },
   { id: 104, title: "Lemonade Stand Hero", creator: "Zest", genre: "Comedy", cover: "https://picsum.photos/seed/novel-4/400/533", views: "1.5M", likes: "88K", type: 'novel', summary: "A hilarious journey of a boy trying to build a lemonade empire in his backyard." },
   { id: 105, title: "The Last Zest", creator: "Pulp", genre: "Sci-fi", cover: "https://picsum.photos/seed/novel-5/400/533", views: "600K", likes: "15K", type: 'novel', summary: "In a post-apocalyptic future, the last remaining Novel is the key to humanity's survival." },
-];
-
-const MOCK_USERS = [
-  { id: 1, name: "riderezzy@gmail.com", role: "Admin", status: "Active", joined: "2024-01-15" },
-  { id: 2, name: "lemon_fan_99", role: "User", status: "Active", joined: "2024-02-10" },
-  { id: 3, name: "toxic_reader", role: "User", status: "Banned", joined: "2024-03-01" },
-  { id: 4, name: "creative_soul", role: "Creator", status: "Active", joined: "2024-01-20" },
 ];
 
 const ADMIN_ADS = [
@@ -97,6 +92,8 @@ export default function App() {
   });
   const [newComment, setNewComment] = useState('');
   const [publishType, setPublishType] = useState<'webtoon' | 'novel'>('webtoon');
+  const [adminUserSearch, setAdminUserSearch] = useState('');
+  const convexAdminUsers = useQuery(api.users.getAllUsers, { limit: 100 });
   useEffect(() => {
     if (!user && !userProfile) return;
 
@@ -157,6 +154,16 @@ export default function App() {
     comic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     comic.genre.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  const filteredAdminUsers = (convexAdminUsers || []).filter((adminUser) => {
+    const query = adminUserSearch.trim().toLowerCase();
+    if (!query) return true;
+
+    return (
+      adminUser.displayName?.toLowerCase().includes(query) ||
+      adminUser.email?.toLowerCase().includes(query) ||
+      adminUser.firebaseUid.toLowerCase().includes(query)
+    );
+  });
 
   const pageContainerClass = "mx-auto w-full max-w-7xl px-6 sm:px-8 lg:px-10";
 
@@ -1613,10 +1620,20 @@ export default function App() {
     const renderAdminUsers = () => (
       <Card className="p-6">
         <div className="flex items-center justify-between mb-8">
-          <h3 className="text-xl font-bold">User Management</h3>
+          <div>
+            <h3 className="text-xl font-bold">User Management</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              {convexAdminUsers ? `${convexAdminUsers.length} users loaded from Convex` : 'Loading Convex users...'}
+            </p>
+          </div>
           <div className="flex gap-2">
-            <input type="text" placeholder="Search users..." className="bg-muted border-none rounded-full px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary" />
-            <Button size="sm" className="rounded-full font-bold">Add User</Button>
+            <input
+              type="text"
+              value={adminUserSearch}
+              onChange={(e) => setAdminUserSearch(e.target.value)}
+              placeholder="Search users..."
+              className="bg-muted border-none rounded-full px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+            />
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -1627,33 +1644,38 @@ export default function App() {
                 <th className="pb-4 font-bold">Role</th>
                 <th className="pb-4 font-bold">Status</th>
                 <th className="pb-4 font-bold">Joined</th>
-                <th className="pb-4 font-bold text-right">Actions</th>
+                <th className="pb-4 font-bold">UID</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {MOCK_USERS.map(user => (
-                <tr key={user.id} className="hover:bg-muted/30 transition-colors">
-                  <td className="py-4 font-medium">{user.name}</td>
+              {filteredAdminUsers.map((adminUser) => (
+                <tr key={adminUser._id} className="hover:bg-muted/30 transition-colors">
                   <td className="py-4">
-                    <Badge variant="outline" className="font-bold">{user.role}</Badge>
+                    <div className="font-medium">{adminUser.displayName || adminUser.email || 'Unnamed user'}</div>
+                    <div className="text-xs text-muted-foreground mt-1">{adminUser.email || 'No email saved'}</div>
+                  </td>
+                  <td className="py-4">
+                    <Badge variant="outline" className="font-bold capitalize">{adminUser.role}</Badge>
                   </td>
                   <td className="py-4">
                     <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${user.status === 'Active' ? 'bg-primary' : 'bg-red-500'}`} />
-                      <span className="text-sm">{user.status}</span>
+                      <div className={`w-2 h-2 rounded-full ${adminUser.onboardingCompleted ? 'bg-primary' : 'bg-primary-light'}`} />
+                      <span className="text-sm">{adminUser.onboardingCompleted ? 'Profile Complete' : 'Basic Auth Only'}</span>
                     </div>
                   </td>
-                  <td className="py-4 text-sm text-muted-foreground">{user.joined}</td>
-                  <td className="py-4 text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary"><Settings2 className="w-4 h-4" /></Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-500"><Trash2 className="w-4 h-4" /></Button>
-                    </div>
+                  <td className="py-4 text-sm text-muted-foreground">
+                    {'_creationTime' in adminUser ? new Date(adminUser._creationTime).toLocaleDateString() : 'Unknown'}
                   </td>
+                  <td className="py-4 text-xs text-muted-foreground">{adminUser.firebaseUid}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+          {convexAdminUsers && filteredAdminUsers.length === 0 && (
+            <div className="py-8 text-center text-sm text-muted-foreground">
+              No Convex users matched your search.
+            </div>
+          )}
         </div>
       </Card>
     );

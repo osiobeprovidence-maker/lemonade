@@ -81,6 +81,7 @@ export const createUserProfile = mutation({
         username: v.string(),
         birthday: v.string(),
         pronouns: v.optional(v.string()),
+        photoURL: v.optional(v.string()),
     },
     handler: async (ctx, args) => {
         let user = await ctx.db
@@ -92,6 +93,7 @@ export const createUserProfile = mutation({
                 firebaseUid: args.userId,
                 email: args.email,
                 displayName: args.username,
+                photoURL: args.photoURL,
                 role: "reader",
                 isPremium: false,
                 genres: [],
@@ -113,6 +115,7 @@ export const createUserProfile = mutation({
         await ctx.db.patch(user._id, {
             email: args.email,
             displayName: args.username,
+            photoURL: args.photoURL,
             birthYear: birthYear ? Number(birthYear) : undefined,
             birthMonth,
             birthDay: birthDay ? Number(birthDay) : undefined,
