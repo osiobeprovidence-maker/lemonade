@@ -1832,51 +1832,180 @@ export default function App() {
     );
   };
 
-  const renderNovelReader = () => (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
-      <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-        <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Button variant="ghost" size="icon" onClick={() => setCurrentView('series-details')} className="rounded-full">
-            <ChevronRight className="w-6 h-6 rotate-180" />
-          </Button>
-          <div className="text-center">
-            <h2 className="font-bold text-sm line-clamp-1">{selectedComic?.title}</h2>
-            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Chapter 1: The Beginning</p>
-          </div>
-          <Button variant="ghost" size="icon" className="rounded-full"><Settings2 className="w-5 h-5" /></Button>
-        </div>
-      </div>
+  const renderNovelReader = () => {
+    const isLiked = selectedComic ? likedComics.has(selectedComic.id) : false;
+    const authorInitial = selectedComic?.creator?.charAt(0)?.toUpperCase() || 'L';
+    const chapterParagraphs = [
+      `${selectedComic?.summary || 'This story begins with a quiet unease, the kind that settles into a room before anyone says a word.'} The city outside was still awake, but inside, everything felt suspended between confession and consequence.`,
+      `I used to think stories announced themselves with thunder. Turns out they arrive softer than that, in the scrape of a chair, in a glance held one second too long, in the feeling that something familiar has shifted half an inch out of place.`,
+      `${selectedComic?.creator || 'The narrator'} writes with the patience of someone circling the truth. Each sentence drifts forward, calm on the surface, carrying the weight of choices nobody wants to name out loud.`,
+      `By midnight, the air had gone thin and metallic. The kind of night that makes old promises sound dangerous. I looked at the message again, then at the door, and knew that if I opened it, nothing in my life would fit back together the same way.`,
+      `So I stayed still for one last borrowed moment, letting the silence lengthen. Outside, the world kept moving. Inside, the story finally began.`
+    ];
 
-      <div className="max-w-3xl mx-auto px-6 py-12">
-        <div className="prose prose-zinc dark:prose-invert max-w-none">
-          <h1 className="text-4xl font-black tracking-tighter mb-8">{selectedComic?.title}</h1>
-          <div className="space-y-6 text-lg leading-relaxed font-serif text-zinc-800 dark:text-zinc-200">
-            <p>The sun hung low in the sky, casting long, golden shadows across the sprawling citrus groves of Lemonade Valley. Kaelen wiped the sweat from his brow, his hands stained with the sticky, sweet residue of the day's harvest.</p>
-            <p>He had spent his entire life in these fields, but today felt different. The air was thick with a strange, electric energy, and the lemons glowed with an intensity he had never seen before.</p>
-            <p>"Kaelen!" a voice called out from the edge of the grove. It was Master Zest, the oldest alchemist in the village. He looked frantic, his white robes fluttering in the breeze.</p>
-            <p>"You must come quickly," Zest panted, leaning on his staff. "The Great Squeeze is beginning. The prophecy of the Golden Lemonade is finally coming to pass."</p>
-            <p>Kaelen's heart raced. He had heard the stories since he was a child, but he never truly believed them. The Golden Lemonade was said to grant the drinker the power to reshape reality itself.</p>
-            <p>As they hurried toward the village square, the sky began to turn a deep, vibrant yellow. The ground beneath their feet trembled, and the scent of citrus became almost overwhelming.</p>
-            <p>In the center of the square stood the Ancient Press, a massive stone structure that had remained silent for centuries. Now, it was humming with power, its gears turning with a rhythmic, grinding sound.</p>
-            <p>"The first drop," Zest whispered, his eyes wide with awe. "It's happening."</p>
-          </div>
-        </div>
-
-        <div className="mt-16 flex justify-between items-center border-t border-border pt-8">
-          <Button variant="outline" className="rounded-full px-8 font-bold">Previous Chapter</Button>
-          <div className="flex gap-4">
-            <Button variant="outline" size="icon" className="rounded-full" onClick={() => selectedComic && toggleLike(selectedComic.id)}>
-              <Heart className={`w-5 h-5 ${likedComics.has(selectedComic?.id) ? 'fill-primary text-primary' : ''}`} />
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="sticky top-0 z-50 border-b border-zinc-200 bg-white/85 backdrop-blur-md">
+          <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-6 sm:px-8 lg:px-10">
+            <Button variant="ghost" size="icon" onClick={() => setCurrentView('series-details')} className="rounded-full">
+              <ChevronRight className="w-6 h-6 rotate-180" />
             </Button>
-            <Button variant="outline" size="icon" className="rounded-full"><Share2 className="w-5 h-5" /></Button>
+            <div className="text-center">
+              <h2 className="line-clamp-1 text-sm font-semibold text-zinc-700">{selectedComic?.title}</h2>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-zinc-400">Chapter One</p>
+            </div>
+            <Button variant="ghost" size="icon" className="rounded-full text-zinc-500">
+              <Settings2 className="w-5 h-5" />
+            </Button>
           </div>
-          <Button className="rounded-full px-8 font-bold">Next Chapter</Button>
         </div>
 
-        {selectedComic && renderCommentSection(selectedComic.id)}
+        <div className="mx-auto w-full max-w-7xl px-6 py-10 sm:px-8 lg:px-10 lg:py-12">
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-[180px_minmax(0,680px)_220px] lg:items-start lg:justify-center">
+            <aside className="hidden lg:block">
+              <div className="sticky top-24 space-y-6">
+                <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700">
+                      {authorInitial}
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-zinc-400">Author</p>
+                      <p className="text-sm font-semibold text-zinc-900">{selectedComic?.creator}</p>
+                    </div>
+                  </div>
+                  <Button variant="outline" className="mt-4 w-full rounded-full font-semibold">
+                    Follow
+                  </Button>
+                </div>
+
+                <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-zinc-400">Share</p>
+                  <div className="flex flex-col gap-2">
+                    <Button variant="ghost" size="icon" className="justify-start rounded-xl text-zinc-500 hover:text-zinc-900">
+                      <Share2 className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="justify-start rounded-xl text-zinc-500 hover:text-zinc-900">
+                      <Heart className={`h-4 w-4 ${isLiked ? 'fill-primary text-primary' : ''}`} />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="justify-start rounded-xl text-zinc-500 hover:text-zinc-900">
+                      <MessageSquare className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </aside>
+
+            <article className="max-w-3xl mx-auto w-full">
+              <div className="rounded-[28px] border border-zinc-200 bg-white px-6 py-8 shadow-sm sm:px-8 md:px-10 md:py-10">
+                <header className="border-b border-zinc-100 pb-8 text-center">
+                  <p className="text-sm text-gray-500">{selectedComic?.title}</p>
+                  <h1 className="mt-3 text-3xl font-semibold text-zinc-950">Chapter One</h1>
+                  <div className="mt-4 flex items-center justify-center gap-5 text-xs text-gray-400">
+                    <span className="flex items-center gap-1.5">
+                      <Eye className="h-3.5 w-3.5" />
+                      {selectedComic?.views || '0'}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Heart className="h-3.5 w-3.5" />
+                      {selectedComic?.likes || '0'}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <MessageSquare className="h-3.5 w-3.5" />
+                      {(comments[selectedComic?.id] || []).length}
+                    </span>
+                  </div>
+                </header>
+
+                <div className="py-8">
+                  <div className="mb-8 flex items-center justify-center">
+                    <div className="h-px w-full bg-zinc-100" />
+                    <span className="px-5 text-sm font-medium uppercase tracking-[0.35em] text-zinc-400">Harper</span>
+                    <div className="h-px w-full bg-zinc-100" />
+                  </div>
+
+                  <div className="mx-auto max-w-[680px] text-left text-base leading-relaxed text-gray-800 md:text-lg md:leading-[1.85]">
+                    {chapterParagraphs.map((paragraph, index) => (
+                      <p key={index} className="mb-5">
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="border-t border-zinc-100 pt-8">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-3">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="rounded-full"
+                        onClick={() => selectedComic && toggleLike(selectedComic.id)}
+                      >
+                        <Heart className={`h-4 w-4 ${isLiked ? 'fill-primary text-primary' : ''}`} />
+                      </Button>
+                      <Button variant="outline" size="icon" className="rounded-full">
+                        <MessageSquare className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    <div className="flex flex-col gap-3 sm:flex-row">
+                      <Button variant="outline" className="rounded-full px-6 font-semibold">
+                        Previous Chapter
+                      </Button>
+                      <Button className="rounded-full px-6 font-semibold">
+                        Next Chapter
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-10">{selectedComic && renderCommentSection(selectedComic.id)}</div>
+            </article>
+
+            <aside className="hidden lg:block">
+              <div className="sticky top-24 space-y-5">
+                <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-zinc-400">Lemonade Premium</p>
+                  <h3 className="mt-3 text-lg font-semibold text-zinc-950">Read without interruptions</h3>
+                  <p className="mt-2 text-sm leading-6 text-zinc-500">
+                    Unlock premium chapters, save your place everywhere, and get early access to featured novels.
+                  </p>
+                  <Button className="mt-4 w-full rounded-full font-semibold">Try Premium</Button>
+                </div>
+
+                <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-zinc-400">More Like This</p>
+                  <div className="mt-4 space-y-4">
+                    {NOVELS.filter((novel) => novel.id !== selectedComic?.id).slice(0, 3).map((novel) => (
+                      <button
+                        key={novel.id}
+                        type="button"
+                        onClick={() => openSeriesDetails(novel)}
+                        className="flex w-full items-start gap-3 text-left transition hover:opacity-80"
+                      >
+                        <img
+                          src={novel.cover}
+                          alt={novel.title}
+                          className="h-16 w-12 rounded-lg object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="min-w-0">
+                          <p className="line-clamp-2 text-sm font-semibold text-zinc-900">{novel.title}</p>
+                          <p className="mt-1 text-xs text-zinc-500">{novel.creator}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderReader = () => {
     const isLiked = selectedComic ? likedComics.has(selectedComic.id) : false;
