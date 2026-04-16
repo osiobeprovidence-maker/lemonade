@@ -202,12 +202,8 @@ export function Login() {
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid w-full max-w-5xl overflow-hidden rounded-[2rem] border border-stone-200 bg-white shadow-[0_30px_80px_rgba(0,0,0,0.08)] md:grid-cols-[1.05fr_0.95fr]"
+          className="w-full max-w-2xl overflow-hidden rounded-[2rem] border border-stone-200 bg-white shadow-[0_30px_80px_rgba(0,0,0,0.08)]"
         >
-          <section className="relative hidden overflow-hidden bg-[linear-gradient(160deg,#fef3c7_0%,#fde68a_38%,#f59e0b_100%)] md:flex">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.75),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(120,53,15,0.18),transparent_30%)]" />
-          </section>
-
           <section className="flex items-center justify-center p-6 sm:p-8 md:p-10">
             <div className="w-full max-w-md">
               <div className="mb-8 text-center">
