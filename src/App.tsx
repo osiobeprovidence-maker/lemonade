@@ -2180,10 +2180,9 @@ export default function App() {
                     <Logo />
                   </div>
                   <div className="flex flex-col gap-4 font-semibold">
-                    <div onClick={() => setCurrentView('home')} className="text-foreground hover:text-primary cursor-pointer">Home</div>
-                    <div onClick={() => setCurrentView('manga')} className="text-foreground hover:text-primary cursor-pointer">Webtoons</div>
-                    <div onClick={() => setCurrentView('Novel')} className="text-foreground hover:text-primary cursor-pointer flex items-center gap-2">
-                      Novels <Badge className="bg-foreground text-background text-[10px] px-1.5 py-0 uppercase">LIVE</Badge>
+                    <div onClick={() => setCurrentView('manga')} className="text-foreground hover:text-primary cursor-pointer">Original</div>
+                    <div onClick={() => setCurrentView('Novel')} className="text-foreground hover:text-primary cursor-pointer">
+                      Novels
                     </div>
                     <div onClick={handleMyClick} className="text-foreground hover:text-primary cursor-pointer">My</div>
                   </div>
@@ -2205,22 +2204,16 @@ export default function App() {
             
             <div className="hidden md:flex items-center gap-6 font-semibold text-sm h-full">
               <div 
-                onClick={() => setCurrentView('home')}
-                className={`${currentView === 'home' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'} h-full flex items-center px-1 cursor-pointer`}
-              >
-                Home
-              </div>
-              <div 
                 onClick={() => setCurrentView('manga')}
                 className={`${currentView === 'manga' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'} h-full flex items-center px-1 cursor-pointer`}
               >
-                Webtoons
+                Original
               </div>
               <div 
                 onClick={() => setCurrentView('Novel')}
-                className={`${currentView === 'Novel' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'} h-full flex items-center px-1 cursor-pointer gap-2`}
+                className={`${currentView === 'Novel' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'} h-full flex items-center px-1 cursor-pointer`}
               >
-                Novels <Badge className="bg-foreground text-background text-[10px] px-1.5 py-0 uppercase">LIVE</Badge>
+                Novels
               </div>
               <div 
                 onClick={handleMyClick}

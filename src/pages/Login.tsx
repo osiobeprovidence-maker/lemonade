@@ -204,24 +204,8 @@ export function Login() {
           animate={{ opacity: 1, y: 0 }}
           className="grid w-full max-w-5xl overflow-hidden rounded-[2rem] border border-stone-200 bg-white shadow-[0_30px_80px_rgba(0,0,0,0.08)] md:grid-cols-[1.05fr_0.95fr]"
         >
-          <section className="relative hidden overflow-hidden bg-[linear-gradient(160deg,#fef3c7_0%,#fde68a_38%,#f59e0b_100%)] p-10 text-zinc-900 md:flex md:flex-col md:justify-between">
+          <section className="relative hidden overflow-hidden bg-[linear-gradient(160deg,#fef3c7_0%,#fde68a_38%,#f59e0b_100%)] md:flex">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.75),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(120,53,15,0.18),transparent_30%)]" />
-            <div className="relative">
-              <p className="mb-4 text-sm font-semibold uppercase tracking-[0.35em] text-zinc-800/70">Lemonade</p>
-              <h1 className="max-w-sm text-5xl font-black leading-[0.95] tracking-tight">
-                Stories worth
-                <br />
-                staying for.
-              </h1>
-              <p className="mt-6 max-w-md text-base leading-7 text-zinc-800/80">
-                Create your account, set up your reader identity, and jump straight into the next chapter.
-              </p>
-            </div>
-            <div className="relative rounded-[1.75rem] bg-white/70 p-6 backdrop-blur-sm">
-              <p className="text-sm font-medium leading-7 text-zinc-700">
-                Your signup now finishes with a quick profile step so every new Lemonade account starts with the same onboarding flow, whether you use Google, Apple, or email.
-              </p>
-            </div>
           </section>
 
           <section className="flex items-center justify-center p-6 sm:p-8 md:p-10">
@@ -235,8 +219,6 @@ export function Login() {
                   {view === 'signup-profile' && 'Finish your profile'}
                 </h2>
                 <p className="mt-3 text-sm leading-6 text-zinc-500">
-                  {view === 'login' && 'Log in with email, Google, or Apple.'}
-                  {view === 'signup-choice' && 'Start with Google, Apple, or email. Then we will collect your profile details next.'}
                   {view === 'signup-email' && 'Step 1 of 2. Set your email and password first.'}
                   {view === 'signup-profile' && 'Step 2 of 2. This follows for every signup method.'}
                 </p>
@@ -291,6 +273,15 @@ export function Login() {
                         </button>
                       </div>
                     </label>
+
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        className="text-sm font-medium text-zinc-500 transition hover:text-zinc-900"
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
 
                     <motion.button
                       type="submit"
