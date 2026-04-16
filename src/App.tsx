@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Heart, ChevronRight, Menu, Bell, User, Star, Clock, Home, Compass, PenTool, Facebook, Twitter, Instagram, Youtube, Plus, X, Play, SkipForward, DollarSign, BarChart3, Settings, BadgeCheck, Share2, MoreVertical, List, Check, Upload, BookOpen, ShieldCheck, Users, MessageSquare, Flag, Megaphone, Trash2, Eye, EyeOff, Settings2, Film, Sparkles, Tv, Zap } from 'lucide-react';
+import { Search, Heart, ChevronRight, Menu, Bell, User, Star, Clock, Home, Compass, PenTool, Facebook, Twitter, Instagram, Youtube, Plus, X, Play, SkipForward, DollarSign, BarChart3, Settings, BadgeCheck, Share2, MoreVertical, List, Check, Upload, BookOpen, ShieldCheck, Users, MessageSquare, Flag, Megaphone, Trash2, Eye, EyeOff, Settings2, Sparkles, Zap } from 'lucide-react';
 import { Logo } from './components/Logo';
 import { auth } from './lib/firebase';
 import { updateProfile as updateFirebaseProfile } from 'firebase/auth';
@@ -36,15 +36,6 @@ const NOVELS = [
   { id: 103, title: "Sweet Revenge", creator: "Sugar Queen", genre: "Drama", cover: "https://picsum.photos/seed/novel-3/400/533", views: "2.5M", likes: "120K", type: 'novel', summary: "A high society drama about betrayal and the sweetest comeback ever told." },
   { id: 104, title: "Lemonade Stand Hero", creator: "Zest", genre: "Comedy", cover: "https://picsum.photos/seed/novel-4/400/533", views: "1.5M", likes: "88K", type: 'novel', summary: "A hilarious journey of a boy trying to build a lemonade empire in his backyard." },
   { id: 105, title: "The Last Zest", creator: "Pulp", genre: "Sci-fi", cover: "https://picsum.photos/seed/novel-5/400/533", views: "600K", likes: "15K", type: 'novel', summary: "In a post-apocalyptic future, the last remaining Novel is the key to humanity's survival." },
-];
-
-const MOVIES = [
-  { id: 201, title: "Crimson Orbit", type: "Series", genre: "Sci-Fi", maturity: "16+", runtime: "2 Seasons", badge: "Top 10", year: "2026", backdrop: "https://picsum.photos/seed/crimson-orbit/1600/900", poster: "https://picsum.photos/seed/crimson-orbit-poster/400/600", summary: "A washed-up mech pilot and a runaway princess cross a war-torn galaxy to stop an empire built on memory theft." },
-  { id: 202, title: "Ashes of Kyoto", type: "Movie", genre: "Action", maturity: "13+", runtime: "1h 58m", badge: "New", year: "2026", backdrop: "https://picsum.photos/seed/ashes-kyoto/1600/900", poster: "https://picsum.photos/seed/ashes-kyoto-poster/400/600", summary: "When ancient spirits rise beneath neon streets, one exorcist must choose between revenge and saving the city." },
-  { id: 203, title: "Blue Locker Room", type: "Series", genre: "Sports", maturity: "13+", runtime: "24 Episodes", badge: "Trending", year: "2025", backdrop: "https://picsum.photos/seed/blue-locker/1600/900", poster: "https://picsum.photos/seed/blue-locker-poster/400/600", summary: "A ruthless football academy turns gifted teenagers into stars by making every match feel like survival." },
-  { id: 204, title: "Moon Thread", type: "Movie", genre: "Fantasy", maturity: "PG-13", runtime: "2h 11m", badge: "Exclusive", year: "2026", backdrop: "https://picsum.photos/seed/moon-thread/1600/900", poster: "https://picsum.photos/seed/moon-thread-poster/400/600", summary: "A seamstress who can stitch fate itself is hunted by a kingdom afraid of the future she can rewrite." },
-  { id: 205, title: "Zero Signal", type: "Series", genre: "Thriller", maturity: "18+", runtime: "10 Episodes", badge: "Hot", year: "2025", backdrop: "https://picsum.photos/seed/zero-signal/1600/900", poster: "https://picsum.photos/seed/zero-signal-poster/400/600", summary: "A pirate broadcast reveals the truth behind a global blackout, turning every viewer into a target." },
-  { id: 206, title: "Lotus Rebellion", type: "Series", genre: "Adventure", maturity: "16+", runtime: "3 Seasons", badge: "Fan Pick", year: "2024", backdrop: "https://picsum.photos/seed/lotus-rebellion/1600/900", poster: "https://picsum.photos/seed/lotus-rebellion-poster/400/600", summary: "Across floating kingdoms, a rebel crew steals sacred relics before the royal court can weaponize them." },
 ];
 
 const MOCK_USERS = [
@@ -104,10 +95,6 @@ export default function App() {
   });
   const [newComment, setNewComment] = useState('');
   const [publishType, setPublishType] = useState<'webtoon' | 'novel'>('webtoon');
-  const featuredMovie = MOVIES[0];
-  const spotlightMovie = MOVIES[1];
-  const isMovieView = currentView === 'home';
-
   useEffect(() => {
     if (!user && !userProfile) return;
 
@@ -254,137 +241,6 @@ export default function App() {
     }
   };
 
-  const renderMovieRail = (title: string, items: typeof MOVIES, accent?: string) => (
-    <section className="px-4 md:px-6 lg:px-8 mb-10">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.3em] text-white/40 font-bold mb-2">{accent || 'Stream now'}</p>
-            <h2 className="text-2xl md:text-3xl font-black tracking-tight text-white">{title}</h2>
-          </div>
-          <button className="text-sm font-semibold text-white/70 hover:text-white transition-colors">See all</button>
-        </div>
-        <div className="flex gap-3 md:gap-4 overflow-x-auto no-scrollbar pb-2">
-          {items.map((movie) => (
-            <article key={movie.id} className="group relative w-[220px] md:w-[260px] lg:w-[300px] shrink-0 overflow-hidden rounded-md md:rounded-lg">
-              <div className="relative aspect-video overflow-hidden rounded-md md:rounded-lg bg-white/5">
-                <img src={movie.backdrop} alt={movie.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" referrerPolicy="no-referrer" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent" />
-                <div className="absolute top-3 left-3">
-                  <Badge className="bg-[#46b653] text-white border-none uppercase text-[10px] tracking-widest">{movie.badge}</Badge>
-                </div>
-                <div className="absolute inset-x-0 bottom-0 p-3 md:p-4">
-                  <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-white/60 font-bold mb-2">
-                    <span>{movie.type}</span>
-                    <span>{movie.year}</span>
-                    <span>{movie.maturity}</span>
-                  </div>
-                  <h3 className="text-white font-black text-lg leading-tight mb-1">{movie.title}</h3>
-                  <p className="text-white/70 text-sm">{movie.genre} • {movie.runtime}</p>
-                </div>
-                <button className="absolute right-3 bottom-3 w-10 h-10 rounded-full bg-white text-black flex items-center justify-center shadow-lg transition-transform group-hover:scale-105">
-                  <Play className="w-4 h-4 fill-current ml-0.5" />
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-
-  const renderMoviesHome = () => (
-    <div className="bg-[#06070b] text-white pb-16">
-      <section className="relative min-h-[82vh] overflow-hidden">
-        <img src={featuredMovie.backdrop} alt={featuredMovie.title} className="absolute inset-0 w-full h-full object-cover" referrerPolicy="no-referrer" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(70,182,83,0.22),transparent_28%),linear-gradient(180deg,rgba(5,6,10,0.18)_0%,rgba(5,6,10,0.46)_18%,rgba(5,6,10,0.78)_55%,rgba(5,6,10,0.98)_100%),linear-gradient(90deg,rgba(3,4,8,0.96)_0%,rgba(3,4,8,0.68)_35%,rgba(3,4,8,0.24)_58%,rgba(3,4,8,0.82)_100%)]" />
-        <div className="relative max-w-7xl mx-auto px-4 md:px-6 lg:px-8 pt-28 md:pt-32 pb-28 md:pb-36 grid lg:grid-cols-[1.05fr_360px] gap-10 items-end min-h-[82vh]">
-          <div className="max-w-2xl">
-            <div className="flex flex-wrap items-center gap-3 mb-5">
-              <Badge className="bg-[#46b653] text-white border-none uppercase tracking-[0.22em] px-4 py-1.5">Anime Premiere</Badge>
-              <span className="text-xs uppercase tracking-[0.28em] text-white/55 font-bold">Movies • Manga / Manwha • Novel</span>
-            </div>
-            <p className="text-[10px] md:text-xs uppercase tracking-[0.38em] text-white/55 font-bold mb-3">Featured this week</p>
-            <h1 className="text-3xl sm:text-4xl md:text-7xl font-black tracking-[-0.05em] leading-[0.92] md:leading-[0.88] mb-4">{featuredMovie.title}</h1>
-            <div className="flex flex-wrap items-center gap-3 text-sm font-semibold text-white/80 mb-5">
-              <span className="text-[#46b653]">{featuredMovie.badge}</span>
-              <span>{featuredMovie.year}</span>
-              <span>{featuredMovie.maturity}</span>
-              <span>{featuredMovie.runtime}</span>
-              <span>{featuredMovie.genre}</span>
-            </div>
-            <p className="text-lg md:text-xl text-white/72 max-w-xl leading-relaxed mb-7">{featuredMovie.summary}</p>
-            <div className="flex flex-wrap items-center gap-3 md:gap-4 mb-8">
-              <Button size="lg" className="rounded-full px-8 h-12 bg-white text-black hover:bg-white/90 font-bold gap-2">
-                <Play className="w-4 h-4 fill-current" /> Watch Now
-              </Button>
-              <Button size="lg" variant="outline" className="rounded-full px-8 h-12 border-white/20 bg-white/15 text-white hover:bg-white/20 gap-2">
-                <Film className="w-4 h-4" /> More Info
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-6 text-sm text-white/72">
-              <div className="flex items-center gap-2"><Tv className="w-4 h-4 text-[#46b653]" /> Stream anime movies and series</div>
-              <div className="flex items-center gap-2"><BookOpen className="w-4 h-4 text-[#46b653]" /> Continue into manga / manwha</div>
-              <div className="flex items-center gap-2"><Zap className="w-4 h-4 text-[#46b653]" /> Cleaner browse navigation</div>
-            </div>
-          </div>
-
-          <div className="rounded-[1.5rem] border border-white/10 bg-black/30 backdrop-blur-md p-5 shadow-[0_25px_120px_rgba(0,0,0,0.45)]">
-            <div className="aspect-video rounded-[1.25rem] overflow-hidden mb-5 relative">
-              <img src={spotlightMovie.backdrop} alt={spotlightMovie.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.25em] text-white/55 font-bold mb-1">Tonight's spotlight</p>
-                  <h3 className="text-2xl font-black">{spotlightMovie.title}</h3>
-                </div>
-                <div className="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center">
-                  <Play className="w-4 h-4 fill-current ml-0.5" />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="rounded-2xl bg-white/5 p-3 border border-white/10">
-                <p className="text-2xl font-black">320+</p>
-                <p className="text-[10px] uppercase tracking-[0.25em] text-white/45 font-bold mt-1">Anime titles</p>
-              </div>
-              <div className="rounded-2xl bg-white/5 p-3 border border-white/10">
-                <p className="text-2xl font-black">48</p>
-                <p className="text-[10px] uppercase tracking-[0.25em] text-white/45 font-bold mt-1">Premieres</p>
-              </div>
-              <div className="rounded-2xl bg-white/5 p-3 border border-white/10">
-                <p className="text-2xl font-black">12</p>
-                <p className="text-[10px] uppercase tracking-[0.25em] text-white/45 font-bold mt-1">Genres</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="px-4 md:px-6 lg:px-8 -mt-20 relative z-10 mb-10">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-[1.1fr_1fr_1fr] gap-3 md:gap-4">
-            {[
-              { label: 'Now Streaming', value: 'Anime films, prestige series, and weekly drops all on the first screen.' },
-              { label: 'Manga / Manwha', value: 'Move into the reading catalog without losing the same platform navigation.' },
-              { label: 'Novel', value: 'Keep text-first storytelling alongside movies without feeling like a separate product.' },
-            ].map((item) => (
-              <div key={item.label} className="rounded-2xl border border-white/10 bg-black/45 backdrop-blur-md px-5 py-4">
-                <p className="text-[10px] uppercase tracking-[0.28em] text-white/45 font-bold mb-2">{item.label}</p>
-                <p className="text-sm text-white/72 leading-relaxed">{item.value}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {renderMovieRail('Trending Anime Tonight', MOVIES, 'Most watched now')}
-      {renderMovieRail('Cinematic Worlds', [MOVIES[1], MOVIES[3], MOVIES[0], MOVIES[5], MOVIES[2], MOVIES[4]], 'Movies and prestige series')}
-      {renderMovieRail('Pulse-Pounding Action', [MOVIES[4], MOVIES[2], MOVIES[1], MOVIES[5], MOVIES[0], MOVIES[3]], 'Fast, loud, addictive')}
-    </div>
-  );
-
   const renderHome = () => (
     <>
       {/* Hero Banner */}
@@ -407,7 +263,7 @@ export default function App() {
             Read the latest hits!
           </h1>
           <p className="text-base md:text-lg text-muted-foreground mb-6 font-medium">Tap to read stories on LEMONADE!</p>
-          <Button size="lg" className="rounded-full px-8 font-bold gap-2" onClick={() => setCurrentView('originals')}>
+          <Button size="lg" className="rounded-full px-8 font-bold gap-2" onClick={() => setCurrentView('manga')}>
             <Play className="w-5 h-5" /> Start Reading
           </Button>
         </div>
@@ -2304,12 +2160,12 @@ export default function App() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Top Navigation */}
-      <nav className={`${isMovieView ? 'absolute top-0 left-0 right-0 bg-gradient-to-b from-black/80 via-black/35 to-transparent' : 'sticky top-0 bg-background border-b border-border'} w-full z-50`}>
+      <nav className="sticky top-0 bg-background border-b border-border w-full z-50">
         <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4 md:gap-6">
             {/* Mobile Hamburger Menu */}
             <Sheet>
-              <SheetTrigger className={`md:hidden -ml-2 flex items-center justify-center w-10 h-10 rounded-md transition-colors cursor-pointer ${isMovieView ? 'text-white hover:bg-white/10' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'}`}>
+              <SheetTrigger className="md:hidden -ml-2 flex items-center justify-center w-10 h-10 rounded-md transition-colors cursor-pointer text-muted-foreground hover:bg-accent hover:text-accent-foreground">
                 <Menu className="w-6 h-6" />
               </SheetTrigger>
               <SheetContent side="left" className="w-[280px] p-0">
@@ -2324,10 +2180,10 @@ export default function App() {
                     <Logo />
                   </div>
                   <div className="flex flex-col gap-4 font-semibold">
-                    <div onClick={() => setCurrentView('home')} className="text-foreground hover:text-primary cursor-pointer">Movies</div>
-                    <div onClick={() => setCurrentView('manga')} className="text-foreground hover:text-primary cursor-pointer">Manga / Manwha</div>
+                    <div onClick={() => setCurrentView('home')} className="text-foreground hover:text-primary cursor-pointer">Home</div>
+                    <div onClick={() => setCurrentView('manga')} className="text-foreground hover:text-primary cursor-pointer">Webtoons</div>
                     <div onClick={() => setCurrentView('Novel')} className="text-foreground hover:text-primary cursor-pointer flex items-center gap-2">
-                      Novel <Badge className="bg-foreground text-background text-[10px] px-1.5 py-0 uppercase">LIVE</Badge>
+                      Novels <Badge className="bg-foreground text-background text-[10px] px-1.5 py-0 uppercase">LIVE</Badge>
                     </div>
                     <div onClick={handleMyClick} className="text-foreground hover:text-primary cursor-pointer">My</div>
                   </div>
@@ -2347,28 +2203,28 @@ export default function App() {
               <Logo />
             </div>
             
-            <div className={`hidden md:flex items-center gap-6 font-semibold text-sm h-full ${isMovieView ? 'text-white' : ''}`}>
+            <div className="hidden md:flex items-center gap-6 font-semibold text-sm h-full">
               <div 
                 onClick={() => setCurrentView('home')}
-                className={`${currentView === 'home' ? (isMovieView ? 'text-white' : 'text-primary border-b-2 border-primary') : (isMovieView ? 'text-white/78 hover:text-white' : 'text-muted-foreground hover:text-foreground')} h-full flex items-center px-1 cursor-pointer`}
+                className={`${currentView === 'home' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'} h-full flex items-center px-1 cursor-pointer`}
               >
-                Movies
+                Home
               </div>
               <div 
                 onClick={() => setCurrentView('manga')}
-                className={`${currentView === 'manga' ? (isMovieView ? 'text-white' : 'text-primary border-b-2 border-primary') : (isMovieView ? 'text-white/78 hover:text-white' : 'text-muted-foreground hover:text-foreground')} h-full flex items-center px-1 cursor-pointer`}
+                className={`${currentView === 'manga' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'} h-full flex items-center px-1 cursor-pointer`}
               >
-                Manga / Manwha
+                Webtoons
               </div>
               <div 
                 onClick={() => setCurrentView('Novel')}
-                className={`${currentView === 'Novel' ? (isMovieView ? 'text-white' : 'text-primary border-b-2 border-primary') : (isMovieView ? 'text-white/78 hover:text-white' : 'text-muted-foreground hover:text-foreground')} h-full flex items-center px-1 cursor-pointer gap-2`}
+                className={`${currentView === 'Novel' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'} h-full flex items-center px-1 cursor-pointer gap-2`}
               >
-                Novel <Badge className={`${isMovieView ? 'bg-[#46b653] text-white' : 'bg-foreground text-background'} text-[10px] px-1.5 py-0 uppercase`}>LIVE</Badge>
+                Novels <Badge className="bg-foreground text-background text-[10px] px-1.5 py-0 uppercase">LIVE</Badge>
               </div>
               <div 
                 onClick={handleMyClick}
-                className={`${currentView === 'my' ? (isMovieView ? 'text-white' : 'text-primary border-b-2 border-primary') : (isMovieView ? 'text-white/78 hover:text-white' : 'text-muted-foreground hover:text-foreground')} h-full flex items-center px-1 cursor-pointer`}
+                className={`${currentView === 'my' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'} h-full flex items-center px-1 cursor-pointer`}
               >
                 My
               </div>
@@ -2379,28 +2235,22 @@ export default function App() {
             <Button 
               variant="ghost" 
               size="icon" 
-              className={`${currentView === 'search' ? (isMovieView ? 'text-white' : 'text-primary') : (isMovieView ? 'text-white/80 hover:text-white hover:bg-white/10' : 'text-muted-foreground')}`}
+              className={`${currentView === 'search' ? 'text-primary' : 'text-muted-foreground'}`}
               onClick={() => setCurrentView('search')}
             >
               <Search className="w-5 h-5" />
             </Button>
-            {isMovieView ? (
-              <Button variant="ghost" size="icon" className="hidden md:flex text-white/80 hover:text-white hover:bg-white/10">
-                <Bell className="w-5 h-5" />
-              </Button>
-            ) : (
-              <Button 
-                variant="default" 
-                className="hidden md:flex rounded-full font-semibold px-6"
-                onClick={handlePublishClick}
-              >
-                Publish
-              </Button>
-            )}
+            <Button 
+              variant="default" 
+              className="hidden md:flex rounded-full font-semibold px-6"
+              onClick={handlePublishClick}
+            >
+              Publish
+            </Button>
             <Button 
               variant="ghost" 
               size="icon" 
-              className={`${currentView === 'profile' || currentView === 'auth' ? (isMovieView ? 'text-white' : 'text-primary') : (isMovieView ? 'text-white/80 hover:text-white hover:bg-white/10' : 'text-muted-foreground')}`}
+              className={`${currentView === 'profile' || currentView === 'auth' ? 'text-primary' : 'text-muted-foreground'}`}
               onClick={handleProfileClick}
             >
               <User className="w-5 h-5" />
@@ -2410,7 +2260,7 @@ export default function App() {
       </nav>
 
       <main>
-        {currentView === 'home' && renderMoviesHome()}
+        {currentView === 'home' && renderHome()}
         {currentView === 'manga' && renderOriginals()}
         {currentView === 'Novel' && renderLemon()}
         {currentView === 'admin' && renderAdmin()}
@@ -2489,3 +2339,4 @@ export default function App() {
     </div>
   );
 }
+
