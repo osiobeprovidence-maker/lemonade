@@ -11,6 +11,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Heart, ChevronRight, Menu, Bell, User, Star, Clock, Home, Compass, PenTool, Facebook, Twitter, Instagram, Youtube, Plus, X, Play, SkipForward, DollarSign, BarChart3, Settings, BadgeCheck, Share2, MoreVertical, List, Check, Upload, BookOpen, ShieldCheck, Users, MessageSquare, Flag, Megaphone, Trash2, Eye, EyeOff, Settings2, Film, Sparkles, Tv, Zap } from 'lucide-react';
 import { Logo } from './components/Logo';
+import { auth } from './lib/firebase';
+import { updateProfile as updateFirebaseProfile } from 'firebase/auth';
+import { uploadProfilePhoto } from './lib/profilePhoto';
 
 const COMICS = [
   { id: 1, title: "Surviving the Game as a Barbarian", creator: "K. Ryo", emotion: "Fantasy", genre: "Fantasy", cover: "https://picsum.photos/seed/barbarian/400/533", rankChange: 37, views: "53M", likes: "1.2M", day: "Mon", isNew: true, isOriginal: true, type: 'webtoon' },
@@ -61,7 +64,7 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun', 'Completed'];
 const EMOTIONS = ['Sweet', 'Bitter', 'Raw', 'Explosive'];
 
 export default function App() {
-  const { user, logout, userProfile } = useAuth();
+  const { user, logout, userProfile, updateUserProfile } = useAuth();
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState('home');
   const [activeCategory, setActiveCategory] = useState('Drama');
@@ -84,6 +87,10 @@ export default function App() {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [likedComics, setLikedComics] = useState<Set<number>>(new Set());
   const [isReaderMenuOpen, setIsReaderMenuOpen] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [profileSaveError, setProfileSaveError] = useState('');
+  const [isUploadingProfilePic, setIsUploadingProfilePic] = useState(false);
+  const profileImageInputRef = React.useRef<HTMLInputElement>(null);
 
   // Admin & Novel States
   const [adminTab, setAdminTab] = useState<'dashboard' | 'users' | 'moderation' | 'ads'>('dashboard');
@@ -100,6 +107,17 @@ export default function App() {
   const featuredMovie = MOVIES[0];
   const spotlightMovie = MOVIES[1];
   const isMovieView = currentView === 'home';
+
+  useEffect(() => {
+    if (!user && !userProfile) return;
+
+    setUserName(userProfile?.displayName || user?.displayName || 'Lemonade Reader');
+    setUserBio(userProfile?.bio || '');
+    setUserProfilePic(userProfile?.photoURL || user?.photoURL || null);
+    setDropSomethingLink(userProfile?.dropSomethingLink || '');
+    setSelectedGenres(userProfile?.genres || []);
+    setIsPremium(Boolean(userProfile?.isPremium));
+  }, [user, userProfile]);
 
   const toggleLike = (comicId: number) => {
     setLikedComics(prev => {
@@ -179,6 +197,63 @@ export default function App() {
     }
   };
 
+  const handleProfileImageSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    setProfileSaveError('');
+    setIsUploadingProfilePic(true);
+
+    try {
+      const photoURL = await uploadProfilePhoto(user, file);
+      await updateUserProfile({ photoURL });
+      setUserProfilePic(photoURL);
+    } catch (error) {
+      console.error('Profile photo upload failed:', error);
+      setProfileSaveError(error instanceof Error ? error.message : 'Profile photo upload failed. Please try again.');
+    } finally {
+      setIsUploadingProfilePic(false);
+      event.target.value = '';
+    }
+  };
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    setProfileSaveError('');
+    setIsSavingProfile(true);
+
+    try {
+      const cleanName = userName.trim() || 'Lemonade Reader';
+      const cleanBio = userBio.trim();
+      const cleanDropSomethingLink = dropSomethingLink.trim();
+
+      await updateFirebaseProfile(auth.currentUser ?? user, {
+        displayName: cleanName,
+        photoURL: userProfilePic || undefined,
+      });
+
+      await updateUserProfile({
+        displayName: cleanName,
+        bio: cleanBio || undefined,
+        photoURL: userProfilePic || undefined,
+        genres: selectedGenres,
+        dropSomethingLink: cleanDropSomethingLink || undefined,
+      });
+
+      setCurrentView('profile');
+    } catch (error) {
+      console.error('Failed to save profile:', error);
+      setProfileSaveError('Could not save your profile right now. Please try again.');
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
   const renderMovieRail = (title: string, items: typeof MOVIES, accent?: string) => (
     <section className="px-4 md:px-6 lg:px-8 mb-10">
       <div className="max-w-7xl mx-auto">
@@ -230,7 +305,7 @@ export default function App() {
               <span className="text-xs uppercase tracking-[0.28em] text-white/55 font-bold">Movies • Manga / Manwha • Novel</span>
             </div>
             <p className="text-[10px] md:text-xs uppercase tracking-[0.38em] text-white/55 font-bold mb-3">Featured this week</p>
-            <h1 className="text-5xl md:text-7xl font-black tracking-[-0.05em] leading-[0.88] mb-4">{featuredMovie.title}</h1>
+            <h1 className="text-3xl sm:text-4xl md:text-7xl font-black tracking-[-0.05em] leading-[0.92] md:leading-[0.88] mb-4">{featuredMovie.title}</h1>
             <div className="flex flex-wrap items-center gap-3 text-sm font-semibold text-white/80 mb-5">
               <span className="text-[#46b653]">{featuredMovie.badge}</span>
               <span>{featuredMovie.year}</span>
@@ -324,14 +399,14 @@ export default function App() {
         <div className="absolute bottom-0 left-0 p-8 max-w-2xl">
           <Badge className="mb-4 bg-foreground text-background font-bold uppercase">Now on LEMONADE</Badge>
           <h1 
-            className="text-5xl font-black tracking-tighter mb-4 uppercase text-foreground"
+            className="text-3xl md:text-5xl font-black tracking-tighter mb-4 uppercase text-foreground"
             style={{
               textShadow: '0 2px 10px rgba(0,0,0,0.3)',
             }}
           >
             Read the latest hits!
           </h1>
-          <p className="text-lg text-muted-foreground mb-6 font-medium">Tap to read stories on LEMONADE!</p>
+          <p className="text-base md:text-lg text-muted-foreground mb-6 font-medium">Tap to read stories on LEMONADE!</p>
           <Button size="lg" className="rounded-full px-8 font-bold gap-2" onClick={() => setCurrentView('originals')}>
             <Play className="w-5 h-5" /> Start Reading
           </Button>
@@ -499,14 +574,14 @@ export default function App() {
         <div className="absolute bottom-0 left-0 p-8 max-w-2xl">
           <Badge className="mb-4 bg-foreground text-background font-bold uppercase">Featured Manga / Manwha</Badge>
           <h1 
-            className="text-5xl font-black tracking-tighter mb-4 uppercase text-foreground"
+            className="text-3xl md:text-5xl font-black tracking-tighter mb-4 uppercase text-foreground"
             style={{
               textShadow: '0 2px 10px rgba(0,0,0,0.3)',
             }}
           >
             The Price Is Your Everything
           </h1>
-          <p className="text-lg text-muted-foreground mb-6 font-medium">A reading-first destination for manga and manwha with weekly drops, high-performing romance, action, and drama titles.</p>
+          <p className="text-base md:text-lg text-muted-foreground mb-6 font-medium">A reading-first destination for manga and manwha with weekly drops, high-performing romance, action, and drama titles.</p>
           <Button size="lg" className="rounded-full px-8 font-bold gap-2" onClick={() => openSeriesDetails(COMICS[6])}>
             <Play className="w-5 h-5" /> Start Reading
           </Button>
@@ -1034,7 +1109,7 @@ export default function App() {
 
   const renderProfile = () => (
     <div className="px-4 py-12 max-w-2xl mx-auto w-full min-h-[60vh]">
-      <div className="flex items-center gap-6 mb-8">
+      <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:gap-6 mb-8">
         <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center overflow-hidden border-4 border-primary/20 relative">
           {userProfilePic ? (
             <img src={userProfilePic} alt={userName} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
@@ -1048,11 +1123,11 @@ export default function App() {
           )}
         </div>
         <div className="flex-1">
-          <h1 className="text-3xl font-black tracking-tighter flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tighter flex items-center gap-2">
             {userName}
             {isPremium && <BadgeCheck className="w-6 h-6 text-primary" />}
           </h1>
-          <p className="text-muted-foreground font-medium">riderezzy@gmail.com</p>
+          <p className="text-sm sm:text-base text-muted-foreground font-medium break-all">{user?.email || 'No email available'}</p>
           <div className="flex flex-wrap gap-2 mt-3">
             <Button variant="outline" size="sm" className="rounded-full font-bold" onClick={() => setCurrentView('edit-profile')}>Edit Profile</Button>
             <Button variant="default" size="sm" className="rounded-full font-bold bg-primary/10 text-primary hover:bg-primary/20 border-none" onClick={() => setCurrentView('wallet')}>
@@ -1178,12 +1253,12 @@ export default function App() {
       <Button variant="ghost" onClick={() => setCurrentView('profile')} className="mb-6 -ml-4 gap-2">
         <ChevronRight className="w-4 h-4 rotate-180" /> Back to Profile
       </Button>
-      <h1 className="text-3xl font-bold mb-8">Edit Profile</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold mb-8">Edit Profile</h1>
       
-      <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); setCurrentView('profile'); }}>
+      <form className="space-y-6" onSubmit={handleSaveProfile}>
         <div className="space-y-4">
           <label className="text-sm font-bold">Profile Picture</label>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">
             <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center overflow-hidden border-4 border-primary/20 relative">
               {userProfilePic ? (
                 <img src={userProfilePic} alt="Preview" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
@@ -1193,18 +1268,23 @@ export default function App() {
             </div>
             <div className="flex-1 space-y-2">
               <p className="text-xs text-muted-foreground mb-2">Upload a profile picture to personalize your account.</p>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
+                <input
+                  ref={profileImageInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleProfileImageSelected}
+                />
                 <Button 
                   type="button" 
                   variant="outline" 
                   size="sm" 
                   className="rounded-full font-bold"
-                  onClick={() => {
-                    const url = prompt("Enter image URL for profile picture:");
-                    if (url) setUserProfilePic(url);
-                  }}
+                  disabled={isUploadingProfilePic}
+                  onClick={() => profileImageInputRef.current?.click()}
                 >
-                  <Upload className="w-3 h-3 mr-1" /> Upload Image
+                  <Upload className="w-3 h-3 mr-1" /> {isUploadingProfilePic ? 'Uploading...' : 'Upload Image'}
                 </Button>
                 {userProfilePic && (
                   <Button 
@@ -1222,6 +1302,12 @@ export default function App() {
           </div>
         </div>
 
+        {profileSaveError && (
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+            {profileSaveError}
+          </div>
+        )}
+
         <div className="space-y-2">
           <label className="text-sm font-bold">Display Name</label>
           <input type="text" value={userName} onChange={(e) => setUserName(e.target.value)} className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none" required />
@@ -1235,7 +1321,9 @@ export default function App() {
           <p className="text-xs text-muted-foreground mb-2">Add your DropSomething link so fans can support you directly.</p>
           <input type="url" value={dropSomethingLink} onChange={(e) => setDropSomethingLink(e.target.value)} placeholder="https://dropsomething.com/yourusername" className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none" />
         </div>
-        <Button type="submit" className="w-full rounded-full py-6 font-bold">Save Changes</Button>
+        <Button type="submit" className="w-full rounded-full py-6 font-bold" disabled={isSavingProfile || isUploadingProfilePic}>
+          {isSavingProfile ? 'Saving...' : 'Save Changes'}
+        </Button>
       </form>
     </div>
   );
@@ -1249,7 +1337,7 @@ export default function App() {
       
       <Card className="p-8 text-center mb-8 bg-primary/5 border-primary/20">
         <p className="text-sm font-bold text-muted-foreground uppercase mb-2">Available Coins</p>
-        <p className="text-5xl font-black text-primary mb-6">150</p>
+        <p className="text-4xl sm:text-5xl font-black text-primary mb-6">150</p>
         <Button className="rounded-full px-8 font-bold">Buy More Coins</Button>
       </Card>
 

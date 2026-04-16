@@ -20,6 +20,7 @@ interface ConvexUserProfile {
   email?: string;
   displayName?: string;
   photoURL?: string;
+  coins?: number;
   role: 'reader' | 'creator' | 'admin';
   isPremium: boolean;
   bio?: string;

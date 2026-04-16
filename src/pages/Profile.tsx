@@ -1,51 +1,41 @@
 import React from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth, db, storage, handleFirestoreError } from '../lib/firebase';
+import { auth } from '../lib/firebase';
 import { motion } from 'framer-motion';
 import { User, Bookmark, History, BookPlus, Camera } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { useAuth } from '../contexts/AuthContext';
+import { uploadProfilePhoto } from '../lib/profilePhoto';
 
 export function Profile() {
   const [user] = useAuthState(auth);
+  const { userProfile, updateUserProfile } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = React.useState<'library' | 'history' | 'series'>('library');
   const [userSeries, setUserSeries] = React.useState<any[]>([]);
-  const [userProfile, setUserProfile] = React.useState<any>(null);
   const [uploading, setUploading] = React.useState(false);
+  const [uploadError, setUploadError] = React.useState('');
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
-    if (!user) return;
-
-    const profileRef = doc(db, 'users', user.uid);
-    const unsubscribeProfile = onSnapshot(profileRef, (docSnap) => {
-      if (docSnap.exists()) setUserProfile(docSnap.data());
-    }, (error) => handleFirestoreError(error, 'GET', `users/${user.uid}`));
-
-    const q = query(collection(db, 'series'), where('creatorId', '==', user.uid));
-    const unsubscribeSeries = onSnapshot(q, (snapshot) => {
-      setUserSeries(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    }, (error) => handleFirestoreError(error, 'LIST', 'series'));
-
-    return () => { unsubscribeProfile(); unsubscribeSeries(); };
+    setUserSeries([]);
   }, [user]);
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
+    setUploadError('');
     setUploading(true);
     try {
-      const storageRef = ref(storage, `avatars/${user.uid}`);
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
-      await updateDoc(doc(db, 'users', user.uid), { photoURL: url });
+      const photoURL = await uploadProfilePhoto(user, file);
+      await updateUserProfile({ photoURL });
     } catch (error) {
       console.error('Upload failed:', error);
+      setUploadError(error instanceof Error ? error.message : 'Upload failed. Please try again.');
     } finally {
       setUploading(false);
+      e.target.value = '';
     }
   };
 
@@ -79,8 +69,9 @@ export function Profile() {
           <div className="relative inline-block mb-6">
             <div className="w-24 h-24 rounded-full overflow-hidden mx-auto border-2 border-zinc-100">
               <img
-                src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName}`}
+                src={userProfile?.photoURL || user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName}`}
                 className="w-full h-full object-cover"
+                alt={user.displayName || 'Profile'}
               />
             </div>
             <button
@@ -104,6 +95,9 @@ export function Profile() {
           <span className="inline-block text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-green-50 text-green-600">
             {userProfile?.role || 'fan'}
           </span>
+          {uploadError && (
+            <p className="mt-3 text-xs font-medium text-red-500">{uploadError}</p>
+          )}
 
           {/* Stats */}
           <div className="grid grid-cols-2 gap-3 mt-8 max-w-sm mx-auto">
