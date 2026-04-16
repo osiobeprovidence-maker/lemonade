@@ -11,6 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Heart, ChevronRight, Menu, Bell, User, Star, Clock, Home, Compass, PenTool, Facebook, Twitter, Instagram, Youtube, Plus, X, Play, SkipForward, DollarSign, BarChart3, Settings, BadgeCheck, Share2, MoreVertical, List, Check, Upload, BookOpen, ShieldCheck, Users, MessageSquare, Flag, Megaphone, Trash2, Eye, EyeOff, Settings2, Sparkles, Zap } from 'lucide-react';
 import { Logo } from './components/Logo';
+import { AuthModal } from './components/AuthModal';
 import { auth } from './lib/firebase';
 import { updateProfile as updateFirebaseProfile } from 'firebase/auth';
 import { uploadProfilePhoto } from './lib/profilePhoto';
@@ -63,6 +64,7 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const isLoggedIn = !!user;
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [creatorType, setCreatorType] = useState<'original' | 'self' | null>(null);
   const [dashboardTab, setDashboardTab] = useState<'series' | 'monetization' | 'stats'>('series');
   const [selectedComic, setSelectedComic] = useState<any>(null);
@@ -156,11 +158,18 @@ export default function App() {
     comic.genre.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const pageContainerClass = "mx-auto w-full max-w-7xl px-6 sm:px-8 lg:px-10";
+
+  const openSignupModal = () => {
+    setAuthMode('signup');
+    setIsAuthModalOpen(true);
+  };
+
   const handleProfileClick = () => {
     if (isLoggedIn) {
       setCurrentView('profile');
     } else {
-      navigate('/login');
+      openSignupModal();
     }
   };
 
@@ -168,7 +177,7 @@ export default function App() {
     if (isLoggedIn) {
       setCurrentView('my');
     } else {
-      navigate('/login');
+      openSignupModal();
     }
   };
 
@@ -180,7 +189,7 @@ export default function App() {
         setCurrentView('publish');
       }
     } else {
-      navigate('/login');
+      openSignupModal();
     }
   };
 
@@ -207,7 +216,7 @@ export default function App() {
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
-      navigate('/login');
+      openSignupModal();
       return;
     }
 
@@ -242,8 +251,6 @@ export default function App() {
   };
 
   const renderHome = () => {
-    const homeContainerClass = "mx-auto w-full max-w-7xl px-6 sm:px-8 lg:px-10";
-
     return (
     <>
       {/* Hero Banner */}
@@ -256,7 +263,7 @@ export default function App() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
         <div className="absolute inset-0 flex items-end">
-          <div className={homeContainerClass}>
+          <div className={pageContainerClass}>
             <div className="max-w-2xl pb-8 md:pb-10">
               <Badge className="mb-4 bg-foreground text-background font-bold uppercase">Now on LEMONADE</Badge>
               <h1 
@@ -277,7 +284,7 @@ export default function App() {
       </div>
 
       {/* Trending Section */}
-      <div className={`${homeContainerClass} mb-8 py-2`}>
+      <div className={`${pageContainerClass} mb-8 py-2`}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
             <span className="text-foreground font-bold uppercase">Trending</span> & POPULAR SERIES
@@ -317,7 +324,7 @@ export default function App() {
       </div>
 
       {/* Popular Series by Category */}
-      <div className={`${homeContainerClass} mb-8 py-2`}>
+      <div className={`${pageContainerClass} mb-8 py-2`}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
             <span className="text-foreground font-bold uppercase">Popular</span> SERIES BY CATEGORY
@@ -358,7 +365,7 @@ export default function App() {
       </div>
 
       {/* Newly Released Originals */}
-      <div className={`${homeContainerClass} mb-8 py-2`}>
+      <div className={`${pageContainerClass} mb-8 py-2`}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
             <span className="text-foreground font-bold uppercase">Newly</span> RELEASED ORIGINALS
@@ -378,7 +385,7 @@ export default function App() {
       </div>
 
       {/* Daily Section */}
-      <div className={`${homeContainerClass} mb-8 py-2`}>
+      <div className={`${pageContainerClass} mb-8 py-2`}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
             <span className="text-foreground font-bold uppercase">Daily</span> UPDATES
@@ -435,24 +442,28 @@ export default function App() {
           referrerPolicy="no-referrer" 
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
-        <div className="absolute bottom-0 left-0 p-8 max-w-2xl">
-          <Badge className="mb-4 bg-foreground text-background font-bold uppercase">Featured Manga / Manwha</Badge>
-          <h1 
-            className="text-3xl md:text-5xl font-black tracking-tighter mb-4 uppercase text-foreground"
-            style={{
-              textShadow: '0 2px 10px rgba(0,0,0,0.3)',
-            }}
-          >
-            The Price Is Your Everything
-          </h1>
-          <p className="text-base md:text-lg text-muted-foreground mb-6 font-medium">A reading-first destination for manga and manwha with weekly drops, high-performing romance, action, and drama titles.</p>
-          <Button size="lg" className="rounded-full px-8 font-bold gap-2" onClick={() => openSeriesDetails(COMICS[6])}>
-            <Play className="w-5 h-5" /> Start Reading
-          </Button>
+        <div className="absolute inset-0 flex items-end">
+          <div className={pageContainerClass}>
+            <div className="max-w-2xl pb-8 md:pb-10">
+              <Badge className="mb-4 bg-foreground text-background font-bold uppercase">Featured Manga / Manwha</Badge>
+              <h1 
+                className="mb-4 text-3xl font-black uppercase tracking-tighter text-foreground md:text-5xl"
+                style={{
+                  textShadow: '0 2px 10px rgba(0,0,0,0.3)',
+                }}
+              >
+                The Price Is Your Everything
+              </h1>
+              <p className="mb-6 text-base font-medium text-muted-foreground md:text-lg">A reading-first destination for manga and manwha with weekly drops, high-performing romance, action, and drama titles.</p>
+              <Button size="lg" className="rounded-full px-8 font-bold gap-2" onClick={() => openSeriesDetails(COMICS[6])}>
+                <Play className="w-5 h-5" /> Start Reading
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4">
+      <div className={pageContainerClass}>
         {/* Weekly Schedule Tabs */}
         <div className="flex items-center gap-2 overflow-x-auto pb-6 no-scrollbar mb-8 border-b border-border">
           {DAYS.map(day => (
@@ -666,7 +677,7 @@ export default function App() {
           className={`p-8 text-left transition-all cursor-pointer border-2 ${creatorType === 'original' ? 'border-primary bg-primary/5' : 'hover:border-primary/50'}`}
           onClick={() => {
             setCreatorType('original');
-            if(!isLoggedIn) navigate('/login');
+            if(!isLoggedIn) openSignupModal();
             else setCurrentView('publish-dashboard');
           }}
         >
@@ -687,7 +698,7 @@ export default function App() {
           className={`p-8 text-left transition-all cursor-pointer border-2 ${creatorType === 'self' ? 'border-primary bg-primary/5' : 'hover:border-primary/50'}`}
           onClick={() => {
             setCreatorType('self');
-            if(!isLoggedIn) navigate('/login');
+            if(!isLoggedIn) openSignupModal();
             else setCurrentView('publish-dashboard');
           }}
         >
@@ -1487,17 +1498,21 @@ export default function App() {
           referrerPolicy="no-referrer"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
-        <div className="absolute bottom-0 left-0 p-8 max-w-2xl">
-          <Badge className="mb-4 bg-foreground text-background font-bold uppercase">NEW NOVEL SECTION</Badge>
-          <h1 className="text-5xl font-black tracking-tighter mb-4 uppercase">Novel NOVELS</h1>
-          <p className="text-lg text-muted-foreground mb-6 font-medium">Dive into a world of words. Fresh stories, updated daily. Only on Lemonade.</p>
-          <Button size="lg" className="rounded-full px-8 font-bold gap-2" onClick={() => openSeriesDetails(NOVELS[0])}>
-            <BookOpen className="w-5 h-5" /> Start Reading
-          </Button>
+        <div className="absolute inset-0 flex items-end">
+          <div className={pageContainerClass}>
+            <div className="max-w-2xl pb-8 md:pb-10">
+              <Badge className="mb-4 bg-foreground text-background font-bold uppercase">NEW NOVEL SECTION</Badge>
+              <h1 className="mb-4 text-3xl font-black uppercase tracking-tighter md:text-5xl">Novel NOVELS</h1>
+              <p className="mb-6 text-base font-medium text-muted-foreground md:text-lg">Dive into a world of words. Fresh stories, updated daily. Only on Lemonade.</p>
+              <Button size="lg" className="rounded-full px-8 font-bold gap-2" onClick={() => openSeriesDetails(NOVELS[0])}>
+                <BookOpen className="w-5 h-5" /> Start Reading
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4">
+      <div className={pageContainerClass}>
         {/* Novel Categories */}
         <div className="flex items-center gap-2 overflow-x-auto pb-6 no-scrollbar mb-8 border-b border-border">
           {CATEGORIES.map(cat => (
@@ -2196,6 +2211,9 @@ export default function App() {
                   </div>
                 </div>
                 <div className="p-6 flex flex-col gap-4 font-medium text-muted-foreground">
+                  {!isLoggedIn && (
+                    <div onClick={openSignupModal} className="flex items-center gap-3 hover:text-foreground cursor-pointer"><User className="w-5 h-5" /> Sign Up</div>
+                  )}
                   <div onClick={handlePublishClick} className="flex items-center gap-3 hover:text-foreground cursor-pointer"><PenTool className="w-5 h-5" /> Publish</div>
                   <div onClick={() => setCurrentView('ads-manager')} className="flex items-center gap-3 hover:text-foreground cursor-pointer"><BarChart3 className="w-5 h-5" /> Ads Manager</div>
                   <div onClick={handleMyClick} className="flex items-center gap-3 hover:text-foreground cursor-pointer"><Star className="w-5 h-5" /> Subscriptions</div>
@@ -2241,6 +2259,15 @@ export default function App() {
             >
               <Search className="w-5 h-5" />
             </Button>
+            {!isLoggedIn && (
+              <Button
+                variant="outline"
+                className="hidden md:flex rounded-full font-semibold px-6"
+                onClick={openSignupModal}
+              >
+                Sign Up
+              </Button>
+            )}
             <Button 
               variant="default" 
               className="hidden md:flex rounded-full font-semibold px-6"
@@ -2286,6 +2313,12 @@ export default function App() {
         {currentView === 'reader' && renderReader()}
         {currentView === 'novel-reader' && renderNovelReader()}
       </main>
+
+      <AuthModal
+        open={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={() => setCurrentView('my')}
+      />
 
       {showAd && renderAdOverlay()}
 

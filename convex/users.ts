@@ -82,6 +82,63 @@ export const updateUserProfile = mutation({
   },
 });
 
+export const createUserProfile = mutation({
+  args: {
+    userId: v.string(),
+    email: v.optional(v.string()),
+    username: v.string(),
+    birthday: v.string(),
+    pronouns: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    let user = await ctx.db
+      .query("users")
+      .withIndex("by_firebase_uid", (q) => q.eq("firebaseUid", args.userId))
+      .first();
+
+    if (!user) {
+      const userId = await ctx.db.insert("users", {
+        firebaseUid: args.userId,
+        email: args.email,
+        displayName: args.username,
+        role: "reader",
+        isPremium: false,
+        genres: [],
+        marketingEmails: false,
+        acceptedTerms: true,
+        onboardingCompleted: true,
+      });
+
+      await ctx.db.insert("wallet", {
+        userId,
+        balance: 0,
+        transactions: [],
+      });
+
+      user = await ctx.db.get(userId);
+    }
+
+    if (!user) {
+      throw new Error("Could not create user profile");
+    }
+
+    const [birthYear, birthMonth, birthDay] = args.birthday.split("-");
+
+    await ctx.db.patch(user._id, {
+      email: args.email,
+      displayName: args.username,
+      birthYear: birthYear ? Number(birthYear) : undefined,
+      birthMonth,
+      birthDay: birthDay ? Number(birthDay) : undefined,
+      pronouns: args.pronouns,
+      acceptedTerms: true,
+      onboardingCompleted: true,
+    });
+
+    return user._id;
+  },
+});
+
 // Get all users (admin only)
 export const getAllUsers = query({
   args: { limit: v.optional(v.number()) },
