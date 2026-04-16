@@ -2252,15 +2252,11 @@ export default function App() {
               </SheetContent>
             </Sheet>
 
-            <div 
+            <div
               className="flex items-center gap-2 hover:opacity-90 transition-opacity cursor-pointer"
               onClick={() => setCurrentView('home')}
             >
-              {isMovieView ? (
-                <span className="text-[#46b653] font-black text-2xl tracking-tight italic">LEMONADE</span>
-              ) : (
-                <Logo />
-              )}
+              <Logo />
             </div>
             
             <div className={`hidden md:flex items-center gap-6 font-semibold text-sm h-full ${isMovieView ? 'text-white' : ''}`}>
