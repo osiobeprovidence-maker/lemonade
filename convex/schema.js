@@ -35,9 +35,19 @@ export default defineSchema({
         isNew: v.boolean(),
         releaseDay: v.optional(v.string()),
         status: v.union(v.literal("ongoing"), v.literal("completed"), v.literal("hiatus")),
-    }).index("by_creator", ["creatorId"])
-        .index("by_genre", ["genre"])
-        .index("by_type", ["type"]),
+  }).index("by_creator", ["creatorId"])
+    .index("by_genre", ["genre"])
+    .index("by_type", ["type"]),
+    storyStyles: defineTable({
+        storyKey: v.string(),
+        coverImage: v.optional(v.string()),
+        backgroundImage: v.optional(v.string()),
+        backgroundOverlayColor: v.optional(v.string()),
+        backgroundOverlayOpacity: v.optional(v.number()),
+        textColor: v.union(v.literal("light"), v.literal("dark")),
+        layoutStyle: v.union(v.literal("classic"), v.literal("immersive")),
+        fontStyle: v.union(v.literal("serif"), v.literal("sans")),
+    }).index("by_story_key", ["storyKey"]),
     chapters: defineTable({
         seriesId: v.id("series"),
         chapterNumber: v.number(),

@@ -49,6 +49,15 @@ export const getSeries = query({
         return await ctx.db.get(args.id);
     },
 });
+export const getStoryStyleByKey = query({
+    args: { storyKey: v.string() },
+    handler: async (ctx, args) => {
+        return await ctx.db
+            .query("storyStyles")
+            .withIndex("by_story_key", (q) => q.eq("storyKey", args.storyKey))
+            .first();
+    },
+});
 // Create series
 export const createSeries = mutation({
     args: {
@@ -70,6 +79,29 @@ export const createSeries = mutation({
             isNew: true,
             status: "ongoing",
         });
+    },
+});
+export const upsertStoryStyle = mutation({
+    args: {
+        storyKey: v.string(),
+        coverImage: v.optional(v.string()),
+        backgroundImage: v.optional(v.string()),
+        backgroundOverlayColor: v.optional(v.string()),
+        backgroundOverlayOpacity: v.optional(v.number()),
+        textColor: v.union(v.literal("light"), v.literal("dark")),
+        layoutStyle: v.union(v.literal("classic"), v.literal("immersive")),
+        fontStyle: v.union(v.literal("serif"), v.literal("sans")),
+    },
+    handler: async (ctx, args) => {
+        const existing = await ctx.db
+            .query("storyStyles")
+            .withIndex("by_story_key", (q) => q.eq("storyKey", args.storyKey))
+            .first();
+        if (existing) {
+            await ctx.db.patch(existing._id, args);
+            return existing._id;
+        }
+        return await ctx.db.insert("storyStyles", args);
     },
 });
 // Increment views

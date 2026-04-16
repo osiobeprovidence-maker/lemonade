@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from './contexts/AuthContext';
-import { useQuery } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { api } from '../convex/_generated/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -49,6 +49,15 @@ const ADMIN_ADS = [
 const CATEGORIES = ['Drama', 'Fantasy', 'Comedy', 'Action', 'Slice of life', 'Romance', 'Superhero', 'Sci-fi'];
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun', 'Completed'];
 const EMOTIONS = ['Sweet', 'Bitter', 'Raw', 'Explosive'];
+const STORY_STYLE_DEFAULTS = {
+  coverImage: '',
+  backgroundImage: '',
+  backgroundOverlayColor: '#000000',
+  backgroundOverlayOpacity: 40,
+  textColor: 'dark' as 'light' | 'dark',
+  layoutStyle: 'classic' as 'classic' | 'immersive',
+  fontStyle: 'serif' as 'serif' | 'sans',
+};
 
 export default function App() {
   const { user, logout, userProfile, updateUserProfile } = useAuth();
@@ -93,7 +102,20 @@ export default function App() {
   const [newComment, setNewComment] = useState('');
   const [publishType, setPublishType] = useState<'webtoon' | 'novel'>('webtoon');
   const [adminUserSearch, setAdminUserSearch] = useState('');
+  const [editableStoryKey, setEditableStoryKey] = useState(String(NOVELS[0].id));
+  const [storyCoverImage, setStoryCoverImage] = useState('');
+  const [storyBackgroundImage, setStoryBackgroundImage] = useState('');
+  const [storyOverlayColor, setStoryOverlayColor] = useState('#000000');
+  const [storyOverlayOpacity, setStoryOverlayOpacity] = useState(40);
+  const [storyTextColor, setStoryTextColor] = useState<'light' | 'dark'>('dark');
+  const [storyLayoutStyle, setStoryLayoutStyle] = useState<'classic' | 'immersive'>('classic');
+  const [storyFontStyle, setStoryFontStyle] = useState<'serif' | 'sans'>('serif');
+  const [isSavingStoryStyle, setIsSavingStoryStyle] = useState(false);
+  const [storyStyleMessage, setStoryStyleMessage] = useState('');
   const convexAdminUsers = useQuery(api.users.getAllUsers, { limit: 100 });
+  const selectedStoryStyle = useQuery(api.series.getStoryStyleByKey, selectedComic ? { storyKey: String(selectedComic.id) } : "skip");
+  const editableStoryStyle = useQuery(api.series.getStoryStyleByKey, editableStoryKey ? { storyKey: editableStoryKey } : "skip");
+  const upsertStoryStyle = useMutation(api.series.upsertStoryStyle);
   useEffect(() => {
     if (!user && !userProfile) return;
 
@@ -154,6 +176,8 @@ export default function App() {
     comic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     comic.genre.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  const editableStories = [...NOVELS, ...COMICS];
+  const editableStory = editableStories.find((story) => String(story.id) === editableStoryKey) || NOVELS[0];
   const filteredAdminUsers = (convexAdminUsers || []).filter((adminUser) => {
     const query = adminUserSearch.trim().toLowerCase();
     if (!query) return true;
@@ -166,6 +190,46 @@ export default function App() {
   });
 
   const pageContainerClass = "mx-auto w-full max-w-7xl px-6 sm:px-8 lg:px-10";
+  const readerStoryStyle = {
+    ...STORY_STYLE_DEFAULTS,
+    ...(selectedStoryStyle || {}),
+  };
+  const readerTextClasses = readerStoryStyle.textColor === 'light'
+    ? 'text-white'
+    : 'text-zinc-950';
+  const readerMutedTextClasses = readerStoryStyle.textColor === 'light'
+    ? 'text-white/75'
+    : 'text-zinc-500';
+  const readerCardClasses = readerStoryStyle.layoutStyle === 'immersive'
+    ? 'border border-white/15 bg-white/10 backdrop-blur-sm'
+    : 'border border-zinc-200 bg-white shadow-sm';
+  const readerFontClass = readerStoryStyle.fontStyle === 'serif' ? 'font-serif' : 'font-sans';
+
+  useEffect(() => {
+    if (!selectedComic) return;
+    setEditableStoryKey(String(selectedComic.id));
+  }, [selectedComic]);
+
+  useEffect(() => {
+    const style = editableStoryStyle
+      ? {
+          ...STORY_STYLE_DEFAULTS,
+          ...editableStoryStyle,
+        }
+      : {
+          ...STORY_STYLE_DEFAULTS,
+          coverImage: editableStory?.cover || '',
+        };
+
+    setStoryCoverImage(style.coverImage || editableStory?.cover || '');
+    setStoryBackgroundImage(style.backgroundImage || '');
+    setStoryOverlayColor(style.backgroundOverlayColor || '#000000');
+    setStoryOverlayOpacity(style.backgroundOverlayOpacity ?? 40);
+    setStoryTextColor(style.textColor || 'dark');
+    setStoryLayoutStyle(style.layoutStyle || 'classic');
+    setStoryFontStyle(style.fontStyle || 'serif');
+    setStoryStyleMessage('');
+  }, [editableStory?.cover, editableStoryStyle, editableStoryKey]);
 
   const openSignupModal = () => {
     setAuthMode('signup');
@@ -254,6 +318,30 @@ export default function App() {
       setProfileSaveError('Could not save your profile right now. Please try again.');
     } finally {
       setIsSavingProfile(false);
+    }
+  };
+
+  const handleSaveStoryStyle = async (event: React.FormEvent) => {
+    event.preventDefault();
+    try {
+      setIsSavingStoryStyle(true);
+      setStoryStyleMessage('');
+      await upsertStoryStyle({
+        storyKey: editableStoryKey,
+        coverImage: storyCoverImage.trim() || undefined,
+        backgroundImage: storyBackgroundImage.trim() || undefined,
+        backgroundOverlayColor: storyOverlayColor,
+        backgroundOverlayOpacity: storyOverlayOpacity,
+        textColor: storyTextColor,
+        layoutStyle: storyLayoutStyle,
+        fontStyle: storyFontStyle,
+      });
+      setStoryStyleMessage('Story style saved. Reader updates should appear immediately.');
+    } catch (error) {
+      console.error('Failed to save story style:', error);
+      setStoryStyleMessage('Could not save story style right now.');
+    } finally {
+      setIsSavingStoryStyle(false);
     }
   };
 
@@ -793,7 +881,18 @@ export default function App() {
               </div>
               <p className="text-sm text-muted-foreground mb-4">Draft • Updated 2 hours ago</p>
               <div className="flex flex-wrap justify-center md:justify-start gap-3">
-                <Button variant="outline" size="sm" className="rounded-full" onClick={() => setCurrentView('edit-series')}>Edit Series</Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full"
+                  onClick={() => {
+                    setSelectedComic(NOVELS[0]);
+                    setEditableStoryKey(String(NOVELS[0].id));
+                    setCurrentView('edit-series');
+                  }}
+                >
+                  Edit Series
+                </Button>
                 <Button variant="outline" size="sm" className="rounded-full" onClick={() => setCurrentView('publish-episode')}>Add Episode</Button>
                 {creatorType === 'self' && (
                   <Button variant="default" size="sm" className="rounded-full bg-primary/10 text-primary hover:bg-primary/20 border-none">
@@ -1387,34 +1486,130 @@ export default function App() {
   );
 
   const renderEditSeries = () => (
-    <div className="px-4 py-12 max-w-2xl mx-auto w-full min-h-[60vh]">
+    <div className="px-4 py-12 max-w-3xl mx-auto w-full min-h-[60vh]">
       <Button variant="ghost" onClick={() => setCurrentView('publish-dashboard')} className="mb-6 -ml-4 gap-2">
         <ChevronRight className="w-4 h-4 rotate-180" /> Back to Dashboard
       </Button>
       <h1 className="text-3xl font-bold mb-8">Edit Series</h1>
       
-      <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); setCurrentView('publish-dashboard'); }}>
+      <form className="space-y-8" onSubmit={handleSaveStoryStyle}>
+        <div className="space-y-2">
+          <label className="text-sm font-bold">Story</label>
+          <select
+            value={editableStoryKey}
+            onChange={(event) => setEditableStoryKey(event.target.value)}
+            className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none"
+          >
+            {editableStories.map((story) => (
+              <option key={story.id} value={String(story.id)}>
+                {story.title} ({story.type})
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className="space-y-2">
           <label className="text-sm font-bold">Series Title</label>
-          <input type="text" defaultValue="My First Comic" className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none" required />
+          <input type="text" value={editableStory?.title || ''} className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none" readOnly />
         </div>
         
         <div className="space-y-2">
           <label className="text-sm font-bold">Summary</label>
-          <textarea defaultValue="This is the summary of my first comic." className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none min-h-[120px]" required />
+          <textarea value={('summary' in editableStory ? editableStory.summary : '') || 'No summary available.'} className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none min-h-[120px]" readOnly />
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-bold">Update Thumbnail</label>
-          <div className="flex items-center gap-4">
-            <div className="w-24 h-32 bg-muted rounded-md overflow-hidden shrink-0">
-              <img src="https://picsum.photos/seed/mycomic/200/300" alt="Current Thumbnail" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+          <label className="text-sm font-bold">Cover Image (URL)</label>
+          <input
+            type="url"
+            value={storyCoverImage}
+            onChange={(event) => setStoryCoverImage(event.target.value)}
+            placeholder="https://example.com/cover.jpg"
+            className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-bold">Background Image (URL)</label>
+          <input
+            type="url"
+            value={storyBackgroundImage}
+            onChange={(event) => setStoryBackgroundImage(event.target.value)}
+            placeholder="https://example.com/background.jpg"
+            className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none"
+          />
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm font-bold">Background Overlay Color</label>
+            <div className="flex items-center gap-3">
+              <input type="color" value={storyOverlayColor} onChange={(event) => setStoryOverlayColor(event.target.value)} className="h-12 w-16 rounded-md border border-border bg-background p-1" />
+              <input
+                type="text"
+                value={storyOverlayColor}
+                onChange={(event) => setStoryOverlayColor(event.target.value)}
+                className="flex-1 bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none"
+              />
             </div>
-            <Button variant="outline" type="button">Upload New Image</Button>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-bold">Overlay Opacity ({storyOverlayOpacity}%)</label>
+            <input
+              type="range"
+              min="0"
+              max="90"
+              step="5"
+              value={storyOverlayOpacity}
+              onChange={(event) => setStoryOverlayOpacity(Number(event.target.value))}
+              className="w-full"
+            />
           </div>
         </div>
 
-        <Button type="submit" className="w-full rounded-full py-6 font-bold">Save Changes</Button>
+        <div className="grid md:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm font-bold">Layout Style</label>
+            <select value={storyLayoutStyle} onChange={(event) => setStoryLayoutStyle(event.target.value as 'classic' | 'immersive')} className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none">
+              <option value="classic">classic</option>
+              <option value="immersive">immersive</option>
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-bold">Text Color</label>
+            <select value={storyTextColor} onChange={(event) => setStoryTextColor(event.target.value as 'light' | 'dark')} className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none">
+              <option value="dark">dark</option>
+              <option value="light">light</option>
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-bold">Font Style</label>
+            <select value={storyFontStyle} onChange={(event) => setStoryFontStyle(event.target.value as 'serif' | 'sans')} className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none">
+              <option value="serif">serif</option>
+              <option value="sans">sans</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-bold">Live Cover Preview</label>
+          <div className="flex items-center gap-4">
+            <div className="w-24 h-32 bg-muted rounded-md overflow-hidden shrink-0">
+              <img src={storyCoverImage || editableStory?.cover} alt="Current Thumbnail" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+            </div>
+            <p className="text-sm text-muted-foreground">Save changes to update the reader live for this story.</p>
+          </div>
+        </div>
+
+        {storyStyleMessage && (
+          <div className="rounded-xl border border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+            {storyStyleMessage}
+          </div>
+        )}
+
+        <Button type="submit" disabled={isSavingStoryStyle} className="w-full rounded-full py-6 font-bold">
+          {isSavingStoryStyle ? 'Saving Story Style...' : 'Save Changes'}
+        </Button>
       </form>
     </div>
   );
@@ -1857,6 +2052,8 @@ export default function App() {
   const renderNovelReader = () => {
     const isLiked = selectedComic ? likedComics.has(selectedComic.id) : false;
     const authorInitial = selectedComic?.creator?.charAt(0)?.toUpperCase() || 'L';
+    const readerCoverImage = readerStoryStyle.coverImage || selectedComic?.cover;
+    const overlayAlpha = Math.max(0, Math.min(100, readerStoryStyle.backgroundOverlayOpacity ?? 40)) / 100;
     const chapterParagraphs = [
       `${selectedComic?.summary || 'This story begins with a quiet unease, the kind that settles into a room before anyone says a word.'} The city outside was still awake, but inside, everything felt suspended between confession and consequence.`,
       `I used to think stories announced themselves with thunder. Turns out they arrive softer than that, in the scrape of a chair, in a glance held one second too long, in the feeling that something familiar has shifted half an inch out of place.`,
@@ -1866,34 +2063,47 @@ export default function App() {
     ];
 
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="sticky top-0 z-50 border-b border-zinc-200 bg-white/85 backdrop-blur-md">
+      <div className={`relative min-h-screen ${readerStoryStyle.layoutStyle === 'immersive' && readerStoryStyle.backgroundImage ? 'overflow-hidden' : ''} ${readerStoryStyle.layoutStyle === 'classic' ? 'bg-gray-50' : 'bg-zinc-950'}`}>
+        {readerStoryStyle.layoutStyle === 'immersive' && readerStoryStyle.backgroundImage && (
+          <>
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: `url(${readerStoryStyle.backgroundImage})` }}
+            />
+            <div
+              className="absolute inset-0"
+              style={{ backgroundColor: readerStoryStyle.backgroundOverlayColor || '#000000', opacity: overlayAlpha }}
+            />
+          </>
+        )}
+
+        <div className={`sticky top-0 z-50 border-b ${readerStoryStyle.layoutStyle === 'immersive' ? 'border-white/10 bg-black/30 text-white backdrop-blur-md' : 'border-zinc-200 bg-white/85 backdrop-blur-md'}`}>
           <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-6 sm:px-8 lg:px-10">
             <Button variant="ghost" size="icon" onClick={() => setCurrentView('series-details')} className="rounded-full">
               <ChevronRight className="w-6 h-6 rotate-180" />
             </Button>
             <div className="text-center">
-              <h2 className="line-clamp-1 text-sm font-semibold text-zinc-700">{selectedComic?.title}</h2>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-zinc-400">Chapter One</p>
+              <h2 className={`line-clamp-1 text-sm font-semibold ${readerStoryStyle.layoutStyle === 'immersive' ? 'text-white' : 'text-zinc-700'}`}>{selectedComic?.title}</h2>
+              <p className={`text-[10px] font-semibold uppercase tracking-[0.3em] ${readerStoryStyle.layoutStyle === 'immersive' ? 'text-white/65' : 'text-zinc-400'}`}>Chapter One</p>
             </div>
-            <Button variant="ghost" size="icon" className="rounded-full text-zinc-500">
+            <Button variant="ghost" size="icon" className={`rounded-full ${readerStoryStyle.layoutStyle === 'immersive' ? 'text-white/75' : 'text-zinc-500'}`}>
               <Settings2 className="w-5 h-5" />
             </Button>
           </div>
         </div>
 
-        <div className="mx-auto w-full max-w-7xl px-6 py-10 sm:px-8 lg:px-10 lg:py-12">
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-10 sm:px-8 lg:px-10 lg:py-12">
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-[180px_minmax(0,680px)_220px] lg:items-start lg:justify-center">
             <aside className="hidden lg:block">
               <div className="sticky top-24 space-y-6">
-                <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+                <div className={`rounded-2xl p-5 ${readerCardClasses}`}>
                   <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700">
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-full text-sm font-bold ${readerStoryStyle.layoutStyle === 'immersive' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-700'}`}>
                       {authorInitial}
                     </div>
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-zinc-400">Author</p>
-                      <p className="text-sm font-semibold text-zinc-900">{selectedComic?.creator}</p>
+                      <p className={`text-xs font-semibold uppercase tracking-[0.25em] ${readerMutedTextClasses}`}>Author</p>
+                      <p className={`text-sm font-semibold ${readerTextClasses}`}>{selectedComic?.creator}</p>
                     </div>
                   </div>
                   <Button variant="outline" className="mt-4 w-full rounded-full font-semibold">
@@ -1901,16 +2111,16 @@ export default function App() {
                   </Button>
                 </div>
 
-                <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-                  <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-zinc-400">Share</p>
+                <div className={`rounded-2xl p-4 ${readerCardClasses}`}>
+                  <p className={`mb-3 text-xs font-semibold uppercase tracking-[0.25em] ${readerMutedTextClasses}`}>Share</p>
                   <div className="flex flex-col gap-2">
-                    <Button variant="ghost" size="icon" className="justify-start rounded-xl text-zinc-500 hover:text-zinc-900">
+                    <Button variant="ghost" size="icon" className={`justify-start rounded-xl ${readerStoryStyle.layoutStyle === 'immersive' ? 'text-white/75 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'}`}>
                       <Share2 className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="justify-start rounded-xl text-zinc-500 hover:text-zinc-900">
+                    <Button variant="ghost" size="icon" className={`justify-start rounded-xl ${readerStoryStyle.layoutStyle === 'immersive' ? 'text-white/75 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'}`}>
                       <Heart className={`h-4 w-4 ${isLiked ? 'fill-primary text-primary' : ''}`} />
                     </Button>
-                    <Button variant="ghost" size="icon" className="justify-start rounded-xl text-zinc-500 hover:text-zinc-900">
+                    <Button variant="ghost" size="icon" className={`justify-start rounded-xl ${readerStoryStyle.layoutStyle === 'immersive' ? 'text-white/75 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'}`}>
                       <MessageSquare className="h-4 w-4" />
                     </Button>
                   </div>
@@ -1919,11 +2129,16 @@ export default function App() {
             </aside>
 
             <article className="max-w-3xl mx-auto w-full">
-              <div className="rounded-[28px] border border-zinc-200 bg-white px-6 py-8 shadow-sm sm:px-8 md:px-10 md:py-10">
-                <header className="border-b border-zinc-100 pb-8 text-center">
-                  <p className="text-sm text-gray-500">{selectedComic?.title}</p>
-                  <h1 className="mt-3 text-3xl font-semibold text-zinc-950">Chapter One</h1>
-                  <div className="mt-4 flex items-center justify-center gap-5 text-xs text-gray-400">
+              <div className={`rounded-[28px] px-6 py-8 sm:px-8 md:px-10 md:py-10 ${readerCardClasses}`}>
+                {readerCoverImage && (
+                  <div className="mb-8">
+                    <img src={readerCoverImage} alt={selectedComic?.title} className="max-h-64 w-full rounded-lg object-cover" referrerPolicy="no-referrer" />
+                  </div>
+                )}
+                <header className={`border-b pb-8 text-center ${readerStoryStyle.layoutStyle === 'immersive' ? 'border-white/10' : 'border-zinc-100'}`}>
+                  <p className={`text-sm ${readerMutedTextClasses}`}>{selectedComic?.title}</p>
+                  <h1 className={`mt-3 text-3xl font-semibold ${readerTextClasses}`}>Chapter One</h1>
+                  <div className={`mt-4 flex items-center justify-center gap-5 text-xs ${readerMutedTextClasses}`}>
                     <span className="flex items-center gap-1.5">
                       <Eye className="h-3.5 w-3.5" />
                       {selectedComic?.views || '0'}
@@ -1941,12 +2156,12 @@ export default function App() {
 
                 <div className="py-8">
                   <div className="mb-8 flex items-center justify-center">
-                    <div className="h-px w-full bg-zinc-100" />
-                    <span className="px-5 text-sm font-medium uppercase tracking-[0.35em] text-zinc-400">Harper</span>
-                    <div className="h-px w-full bg-zinc-100" />
+                    <div className={`h-px w-full ${readerStoryStyle.layoutStyle === 'immersive' ? 'bg-white/10' : 'bg-zinc-100'}`} />
+                    <span className={`px-5 text-sm font-medium uppercase tracking-[0.35em] ${readerMutedTextClasses}`}>Harper</span>
+                    <div className={`h-px w-full ${readerStoryStyle.layoutStyle === 'immersive' ? 'bg-white/10' : 'bg-zinc-100'}`} />
                   </div>
 
-                  <div className="mx-auto max-w-[680px] text-left text-base leading-relaxed text-gray-800 md:text-lg md:leading-[1.85]">
+                  <div className={`max-w-3xl mx-auto px-6 py-10 rounded-2xl ${readerStoryStyle.layoutStyle === 'immersive' ? 'backdrop-blur-sm' : ''} text-left text-base leading-relaxed md:text-lg md:leading-[1.85] ${readerTextClasses} ${readerFontClass}`}>
                     {chapterParagraphs.map((paragraph, index) => (
                       <p key={index} className="mb-5">
                         {paragraph}
@@ -1955,7 +2170,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="border-t border-zinc-100 pt-8">
+                <div className={`border-t pt-8 ${readerStoryStyle.layoutStyle === 'immersive' ? 'border-white/10' : 'border-zinc-100'}`}>
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-3">
                       <Button
@@ -1988,17 +2203,17 @@ export default function App() {
 
             <aside className="hidden lg:block">
               <div className="sticky top-24 space-y-5">
-                <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-zinc-400">Lemonade Premium</p>
-                  <h3 className="mt-3 text-lg font-semibold text-zinc-950">Read without interruptions</h3>
-                  <p className="mt-2 text-sm leading-6 text-zinc-500">
+                <div className={`rounded-2xl p-5 ${readerCardClasses}`}>
+                  <p className={`text-xs font-semibold uppercase tracking-[0.25em] ${readerMutedTextClasses}`}>Lemonade Premium</p>
+                  <h3 className={`mt-3 text-lg font-semibold ${readerTextClasses}`}>Read without interruptions</h3>
+                  <p className={`mt-2 text-sm leading-6 ${readerMutedTextClasses}`}>
                     Unlock premium chapters, save your place everywhere, and get early access to featured novels.
                   </p>
                   <Button className="mt-4 w-full rounded-full font-semibold">Try Premium</Button>
                 </div>
 
-                <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-zinc-400">More Like This</p>
+                <div className={`rounded-2xl p-5 ${readerCardClasses}`}>
+                  <p className={`text-xs font-semibold uppercase tracking-[0.25em] ${readerMutedTextClasses}`}>More Like This</p>
                   <div className="mt-4 space-y-4">
                     {NOVELS.filter((novel) => novel.id !== selectedComic?.id).slice(0, 3).map((novel) => (
                       <button
@@ -2014,8 +2229,8 @@ export default function App() {
                           referrerPolicy="no-referrer"
                         />
                         <div className="min-w-0">
-                          <p className="line-clamp-2 text-sm font-semibold text-zinc-900">{novel.title}</p>
-                          <p className="mt-1 text-xs text-zinc-500">{novel.creator}</p>
+                          <p className={`line-clamp-2 text-sm font-semibold ${readerTextClasses}`}>{novel.title}</p>
+                          <p className={`mt-1 text-xs ${readerMutedTextClasses}`}>{novel.creator}</p>
                         </div>
                       </button>
                     ))}
@@ -2031,9 +2246,17 @@ export default function App() {
 
   const renderReader = () => {
     const isLiked = selectedComic ? likedComics.has(selectedComic.id) : false;
+    const readerCoverImage = readerStoryStyle.coverImage || selectedComic?.cover;
+    const overlayAlpha = Math.max(0, Math.min(100, readerStoryStyle.backgroundOverlayOpacity ?? 40)) / 100;
 
     return (
-      <div className="min-h-screen bg-black text-white">
+      <div className={`relative min-h-screen ${readerStoryStyle.layoutStyle === 'immersive' && readerStoryStyle.backgroundImage ? 'overflow-hidden' : ''} ${readerStoryStyle.layoutStyle === 'immersive' ? 'bg-black' : 'bg-zinc-950'} text-white`}>
+        {readerStoryStyle.layoutStyle === 'immersive' && readerStoryStyle.backgroundImage && (
+          <>
+            <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${readerStoryStyle.backgroundImage})` }} />
+            <div className="absolute inset-0" style={{ backgroundColor: readerStoryStyle.backgroundOverlayColor || '#000000', opacity: overlayAlpha }} />
+          </>
+        )}
         <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-md px-4 h-14 flex items-center justify-between border-b border-white/10">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" onClick={() => setCurrentView('home')} className="text-white hover:bg-white/10">
@@ -2102,7 +2325,12 @@ export default function App() {
           </div>
         </div>
 
-        <div className="max-w-2xl mx-auto py-4 space-y-0">
+        <div className="relative z-10 max-w-2xl mx-auto py-4 space-y-0">
+          {readerCoverImage && (
+            <div className="px-4 pb-4">
+              <img src={readerCoverImage} alt={selectedComic?.title} className="max-h-64 w-full rounded-lg object-cover" referrerPolicy="no-referrer" />
+            </div>
+          )}
           {[1, 2, 3, 4, 5].map(i => (
             <img 
               key={i} 
