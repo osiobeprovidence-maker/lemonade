@@ -13,6 +13,13 @@ export default defineSchema({
     genres: v.optional(v.array(v.string())),
     profilePic: v.optional(v.id("_storage")),
     dropSomethingLink: v.optional(v.string()),
+    birthMonth: v.optional(v.string()),
+    birthDay: v.optional(v.number()),
+    birthYear: v.optional(v.number()),
+    pronouns: v.optional(v.string()),
+    marketingEmails: v.optional(v.boolean()),
+    acceptedTerms: v.optional(v.boolean()),
+    onboardingCompleted: v.optional(v.boolean()),
   }).index("by_firebase_uid", ["firebaseUid"]),
 
   series: defineTable({

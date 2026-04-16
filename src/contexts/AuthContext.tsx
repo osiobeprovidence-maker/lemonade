@@ -11,7 +11,8 @@ import {
   GoogleAuthProvider,
   OAuthProvider,
   signOut,
-  updateProfile
+  updateProfile,
+  getAdditionalUserInfo
 } from 'firebase/auth';
 
 interface ConvexUserProfile {
@@ -26,6 +27,17 @@ interface ConvexUserProfile {
   bio?: string;
   genres?: string[];
   dropSomethingLink?: string;
+  birthMonth?: string;
+  birthDay?: number;
+  birthYear?: number;
+  pronouns?: string;
+  marketingEmails?: boolean;
+  acceptedTerms?: boolean;
+  onboardingCompleted?: boolean;
+}
+
+interface AuthActionResult {
+  requiresProfileCompletion: boolean;
 }
 
 interface AuthContextType {
@@ -33,9 +45,9 @@ interface AuthContextType {
   userProfile: ConvexUserProfile | null;
   loading: boolean;
   signInWithEmail: (email: string, password: string) => Promise<void>;
-  signUpWithEmail: (email: string, password: string, displayName: string) => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
-  signInWithApple: () => Promise<void>;
+  signUpWithEmail: (email: string, password: string) => Promise<AuthActionResult>;
+  signInWithGoogle: () => Promise<AuthActionResult>;
+  signInWithApple: () => Promise<AuthActionResult>;
   logout: () => Promise<void>;
   updateUserProfile: (data: Partial<ConvexUserProfile>) => Promise<void>;
 }
@@ -82,19 +94,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await signInWithEmailAndPassword(auth, email, password);
   };
 
-  const signUpWithEmail = async (email: string, password: string, displayName: string) => {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(cred.user, { displayName });
+  const signUpWithEmail = async (email: string, password: string) => {
+    await createUserWithEmailAndPassword(auth, email, password);
+    return { requiresProfileCompletion: true };
   };
 
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
+    const credential = await signInWithPopup(auth, provider);
+    return {
+      requiresProfileCompletion: Boolean(getAdditionalUserInfo(credential)?.isNewUser),
+    };
   };
 
   const signInWithApple = async () => {
     const provider = new OAuthProvider('apple.com');
-    await signInWithPopup(auth, provider);
+    const credential = await signInWithPopup(auth, provider);
+    return {
+      requiresProfileCompletion: Boolean(getAdditionalUserInfo(credential)?.isNewUser),
+    };
   };
 
   const logout = async () => {
@@ -104,6 +122,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateUserProfile = async (data: Partial<ConvexUserProfile>) => {
     if (!user) return;
+
+    if (data.displayName || data.photoURL) {
+      await updateProfile(user, {
+        displayName: data.displayName ?? user.displayName,
+        photoURL: data.photoURL ?? user.photoURL,
+      });
+    }
+
     await updateUserProfileMutation({
       firebaseUid: user.uid,
       displayName: data.displayName,
@@ -111,6 +137,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       photoURL: data.photoURL,
       genres: data.genres,
       dropSomethingLink: data.dropSomethingLink,
+      birthMonth: data.birthMonth,
+      birthDay: data.birthDay,
+      birthYear: data.birthYear,
+      pronouns: data.pronouns,
+      marketingEmails: data.marketingEmails,
+      acceptedTerms: data.acceptedTerms,
+      onboardingCompleted: data.onboardingCompleted,
     });
     // Refresh profile by triggering a re-render (Convex will update automatically)
   };

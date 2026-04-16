@@ -33,6 +33,9 @@ export const createUser = mutation({
             role: "reader",
             isPremium: false,
             genres: [],
+            marketingEmails: false,
+            acceptedTerms: false,
+            onboardingCompleted: false,
         });
         // Create wallet for new user
         await ctx.db.insert("wallet", {
@@ -51,6 +54,13 @@ export const updateUserProfile = mutation({
         photoURL: v.optional(v.string()),
         genres: v.optional(v.array(v.string())),
         dropSomethingLink: v.optional(v.string()),
+        birthMonth: v.optional(v.string()),
+        birthDay: v.optional(v.number()),
+        birthYear: v.optional(v.number()),
+        pronouns: v.optional(v.string()),
+        marketingEmails: v.optional(v.boolean()),
+        acceptedTerms: v.optional(v.boolean()),
+        onboardingCompleted: v.optional(v.boolean()),
     },
     handler: async (ctx, args) => {
         const { firebaseUid, ...updates } = args;
