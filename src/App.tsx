@@ -508,21 +508,21 @@ export default function App() {
           <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
           <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-10 pb-12 md:pb-24 flex flex-col items-start pt-32">
             <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4 flex-wrap">
-              <Badge className="bg-primary text-primary-foreground uppercase tracking-widest text-[10px] md:text-xs font-black px-2 md:px-3 py-1 shadow-lg shadow-primary/20">Featured</Badge>
-              <Badge variant="outline" className="text-white border-white/20 uppercase tracking-widest text-[10px] md:text-xs font-black px-2 md:px-3 py-1 backdrop-blur-sm">Action &amp; Fantasy</Badge>
+              <Badge className="bg-primary text-primary-foreground uppercase tracking-widest text-[10px] md:text-xs font-black px-3 md:px-3 py-1 shadow-lg shadow-primary/20 rounded-md">Featured</Badge>
+              <Badge variant="outline" className="text-white border-white/20 uppercase tracking-widest text-[10px] md:text-xs font-black px-3 md:px-3 py-1 backdrop-blur-sm rounded-md">Action &amp; Fantasy</Badge>
             </div>
-            <h1 className="text-white text-4xl md:text-7xl font-black mb-3 md:mb-4 leading-[1.1] tracking-tighter drop-shadow-lg max-w-3xl">
-              Surviving the Game<br className="hidden md:block" /> as a Barbarian
+            <h1 className="text-white text-[2.8rem] md:text-7xl font-black mb-4 md:mb-4 leading-[1] tracking-tighter drop-shadow-lg max-w-3xl">
+              Surviving the<br />Game<br />as a Barbarian
             </h1>
-            <p className="text-white/80 text-sm md:text-xl max-w-2xl mb-6 md:mb-8 leading-relaxed font-medium drop-shadow">
+            <p className="text-white/84 text-base md:text-xl max-w-2xl mb-8 md:mb-8 leading-relaxed font-medium drop-shadow-md">
               When a hardcore gamer is sucked into his favorite punishing RPG, he must rely on his encyclopedic knowledge of the game to survive in a brutal world.
             </p>
-            <div className="flex flex-row items-center gap-3 w-full sm:w-auto">
-              <Button className="flex-1 sm:flex-none h-auto bg-primary hover:bg-primary/90 text-primary-foreground rounded-[16px] px-3 md:px-8 py-4 md:py-6 text-sm md:text-lg font-black shadow-[0_0_40px_rgba(30,215,96,0.3)] transition-all hover:-translate-y-1" onClick={() => setCurrentView('manga')}>
-                <Play className="w-4 h-4 md:w-5 md:h-5 mr-1.5 md:mr-2" fill="currentColor" /> Read Now
+            <div className="flex flex-row items-center gap-3 w-full sm:w-auto mt-2">
+              <Button className="flex-1 sm:flex-none h-auto bg-primary hover:bg-primary/90 text-primary-foreground rounded-[16px] px-3 md:px-8 py-5 md:py-6 text-sm md:text-lg font-black shadow-[0_4px_20px_rgba(30,215,96,0.3)] transition-all hover:-translate-y-1" onClick={() => setCurrentView('reader')}>
+                <Play className="w-5 h-5 md:w-5 md:h-5 mr-1.5 md:mr-2" fill="currentColor" /> Read Now
               </Button>
-              <Button variant="outline" className="flex-1 sm:flex-none h-auto border-white/20 bg-black/40 text-white hover:bg-white hover:text-black rounded-[16px] px-3 md:px-8 py-4 md:py-6 text-sm md:text-lg font-black backdrop-blur-md transition-all hover:-translate-y-1">
-                <Plus className="w-4 h-4 md:w-5 md:h-5 mr-1.5 md:mr-2" /> Add to Library
+              <Button variant="outline" className="flex-1 sm:flex-none h-auto border-white/20 bg-black/40 text-white hover:bg-white hover:text-black rounded-[16px] px-3 md:px-8 py-5 md:py-6 text-sm md:text-lg font-black backdrop-blur-md transition-all hover:-translate-y-1">
+                <Plus className="w-5 h-5 md:w-5 md:h-5 mr-1.5 md:mr-2" /> Add to Library
               </Button>
             </div>
           </div>
@@ -2830,14 +2830,37 @@ export default function App() {
               </SheetContent>
             </Sheet>
 
-            <div
-              className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer text-primary transform hover:scale-105 duration-300"
-              onClick={() => setCurrentView('home')}
-            >
-              <Logo />
-            </div>
+      {/* Header / Navigation */}
+      <nav className="sticky top-0 z-[60] w-full border-b border-white/5 bg-zinc-950/90 backdrop-blur-xl h-[5rem]">
+        <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 md:px-6 lg:px-10">
+          {/* Mobile Header Structure (Matching Screenshot) */}
+          <div className="flex md:hidden items-center justify-between w-full">
+            <Button variant="ghost" size="icon" className="text-white hover:bg-white/10" onClick={() => setIsReaderMenuOpen(!isReaderMenuOpen)}>
+              <Menu className="w-6 h-6" />
+            </Button>
             
-            <div className="hidden md:flex items-center gap-8 font-black text-[13px] uppercase tracking-widest h-full">
+            <div className="relative group cursor-pointer" onClick={() => setCurrentView('home')}>
+              <div className="absolute inset-0 bg-primary -skew-x-[15deg] transform -translate-y-0.5" />
+              <div className="relative px-6 py-1 flex items-center justify-center">
+                <span className="text-white font-black italic tracking-tighter text-xl">LEMONADE</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="icon" className="text-white" onClick={() => setCurrentView('search')}>
+                <Search className="w-6 h-6" />
+              </Button>
+              <Button variant="ghost" size="icon" className="text-white" onClick={handleProfileClick}>
+                <User className="w-6 h-6" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Desktop Header Structure */}
+          <div className="hidden md:flex items-center gap-12 h-full">
+            <Logo onClick={() => setCurrentView('home')} className="hover:opacity-80 transition-opacity" />
+            
+            <div className="flex items-center gap-8 font-black text-[13px] uppercase tracking-widest h-full">
               <div 
                 onClick={() => setCurrentView('home')}
                 className={`relative h-full flex items-center cursor-pointer transition-colors pt-0.5 ${currentView === 'home' ? 'text-primary' : 'text-zinc-400 hover:text-white'}`}
@@ -2869,7 +2892,7 @@ export default function App() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-4">
+          <div className="hidden md:flex items-center gap-2 md:gap-4">
             <Button 
                variant="ghost" 
                size="icon" 
@@ -2881,14 +2904,14 @@ export default function App() {
             {!isLoggedIn && (
                <Button
                  variant="outline"
-                 className="hidden md:flex rounded-full font-bold px-6 border-white/10 text-white hover:bg-white/10 transition-colors"
+                 className="rounded-full font-bold px-6 border-white/10 text-white hover:bg-white/10 transition-colors"
                  onClick={openSignupModal}
                >
                  Sign Up
                </Button>
             )}
             <Button 
-               className="hidden md:flex rounded-full font-black tracking-wide px-8 bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_4px_14px_rgba(30,215,96,0.3)] transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(30,215,96,0.4)]"
+               className="rounded-full font-black tracking-wide px-8 bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_4px_14px_rgba(30,215,96,0.3)] transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(30,215,96,0.4)]"
                onClick={handlePublishClick}
             >
                Publish
