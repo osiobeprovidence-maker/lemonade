@@ -59,26 +59,27 @@ const SeriesCard = ({ series, type = 'grid-3', showRank = false, rankNum }: { se
       onClick={() => navigate(`/series/${series.id}`)}
       className={`flex flex-col gap-2 cursor-pointer group ${type === 'grid-3' ? 'w-full' : ''}`}
     >
-      <div className="relative aspect-[3/4] bg-zinc-100 rounded-lg overflow-hidden shadow-sm border border-zinc-200 group-hover:shadow-md transition-all">
-        <img src={series.coverImage} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
+      <div className="relative aspect-[3/4] bg-zinc-900 rounded-2xl overflow-hidden shadow-sm border border-white/5 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_12px_30px_rgba(30,215,96,0.15)] group-hover:border-primary/30">
+        <img src={series.coverImage} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90 group-hover:opacity-100" referrerPolicy="no-referrer" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         {showRank && rankNum && (
           <div 
-            className="absolute -bottom-2 -left-1 text-[60px] md:text-[80px] font-black leading-none text-black" 
-            style={{ WebkitTextStroke: '2px white' }}
+            className="absolute -bottom-2 -left-2 text-[70px] md:text-[80px] font-black leading-none text-transparent drop-shadow-xl" 
+            style={{ WebkitTextStroke: '2px rgba(255,255,255,0.8)' }}
           >
             {rankNum}
           </div>
         )}
         {series.status === 'New chapter' && (
-          <div className="absolute top-2 right-2 bg-brand-yellow text-white text-[8px] font-black px-1.5 py-0.5 rounded uppercase shadow-lg shadow-brand-yellow/20">
+          <div className="absolute top-2 left-2 bg-primary text-black text-[9px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-wide">
             New
           </div>
         )}
       </div>
       <div className="flex flex-col px-1 mt-2">
-        <h3 className="text-sm font-bold line-clamp-1 leading-tight">{series.title}</h3>
-        <div className="flex items-center justify-between mt-0.5">
-          <span className="text-xs text-zinc-500">{series.genre}</span>
+        <h3 className="text-sm font-black line-clamp-1 leading-tight text-white group-hover:text-primary transition-colors">{series.title}</h3>
+        <div className="flex items-center justify-between mt-1">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">{series.genre}</span>
           {series.trend !== undefined && (
             <span className={`text-[10px] font-bold ${series.trend >= 0 ? 'text-green-500' : 'text-red-500'}`}>
               {series.trend >= 0 ? '▲' : '▼'}{Math.abs(series.trend)}
@@ -99,60 +100,94 @@ export function LemonadeMobile() {
   const genres = ['All', 'Action', 'Romance', 'Fantasy', 'Sci-Fi', 'Mythology', 'Comedy'];
 
   const renderHome = () => (
-    <div className="animate-in fade-in duration-500 w-full max-w-[1200px] mx-auto">
+    <div className="animate-in fade-in duration-500 w-full max-w-[1200px] mx-auto pb-12">
       {/* Featured Banner */}
-      <section className="px-4 md:px-0 py-4 md:py-8">
-        <div className="relative h-48 md:h-[400px] rounded-xl overflow-hidden bg-zinc-900 group cursor-pointer">
-          <img 
-            src="https://picsum.photos/seed/lemonade-hero/1200/600" 
-            className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
-            referrerPolicy="no-referrer"
-          />
-          <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-12 bg-gradient-to-t from-black/90 via-black/40 to-transparent">
-            <span className="text-brand-yellow text-[10px] md:text-xs font-black tracking-widest uppercase mb-2">Featured Original</span>
-            <h2 className="text-white text-2xl md:text-5xl font-black leading-tight mb-3">SHANGO REBORN</h2>
-            <p className="text-white/80 text-xs md:text-base line-clamp-2 max-w-2xl">The God of Thunder returns to a modern world that has forgotten its roots.</p>
+      <section className="relative w-full h-[65vh] min-h-[480px]">
+        <img 
+          src="https://picsum.photos/seed/lemonade-hero/1200/600" 
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-[2s]"
+          referrerPolicy="no-referrer"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col justify-end items-start">
+          <div className="flex gap-2 mb-3">
+            <span className="bg-primary text-primary-foreground text-[10px] font-black tracking-widest uppercase px-3 py-1 rounded-sm shadow shadow-primary/20">Featured</span>
+            <span className="bg-white/10 backdrop-blur-sm text-white text-[10px] font-black tracking-widest uppercase px-3 py-1 rounded-sm border border-white/20">Mythology</span>
+          </div>
+          <h2 className="text-white text-5xl font-black leading-[0.9] tracking-tighter mb-4 drop-shadow-xl">SHANGO<br />REBORN</h2>
+          <p className="text-white/80 text-sm line-clamp-2 max-w-[90%] mb-6 font-medium leading-relaxed">The God of Thunder returns to a modern world that has forgotten its roots.</p>
+          <div className="flex w-full gap-3 mt-2">
+            <button className="flex-1 bg-primary text-primary-foreground py-4 rounded-[16px] font-black shadow-[0_4px_20px_rgba(30,215,96,0.3)] flex justify-center items-center gap-2 transform active:scale-95 transition-all text-[15px]" onClick={() => navigate('/series/o1')}>
+              <span className="w-4 h-4 flex justify-center items-center"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span> Read
+            </button>
+            <button className="flex-1 bg-white/10 text-white border border-white/20 py-4 rounded-[16px] font-black backdrop-blur-md flex justify-center items-center gap-2 transform active:scale-95 transition-all text-[15px]">
+              <Plus size={18} /> Library
+            </button>
           </div>
         </div>
       </section>
 
-      {/* Trending & Popular */}
-      <section className="px-4 md:px-0 mt-8 md:mt-12">
-        <div className="flex items-end justify-between mb-6">
-          <h2 className="text-2xl md:text-3xl font-black tracking-tight">Trending & Popular Series</h2>
-          <button onClick={() => navigate('/rankings')} className="text-sm font-bold text-zinc-500 hover:text-black flex items-center gap-1">View all <ChevronRight size={16}/></button>
+      {/* Popular Categories */}
+      <section className="mt-8">
+        <div className="flex items-center justify-between mb-4 px-4">
+          <h2 className="text-xl font-black tracking-tighter text-white flex items-center gap-2">Explore <Sparkles className="w-5 h-5 text-primary"/></h2>
         </div>
-        
-        <div className="flex gap-2 mb-8">
-          {(['Trending', 'Popular'] as const).map(tab => (
-            <button
-              key={tab}
-              onClick={() => setHomeSubTab(tab)}
-              className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
-                homeSubTab === tab ? 'bg-black text-white' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
+        <div className="flex gap-3 px-4 overflow-x-auto pb-4 no-scrollbar">
+          {genres.map(genre => {
+            const isActive = genreFilter === genre;
+            return (
+              <button
+                key={genre}
+                onClick={() => setGenreFilter(genre)}
+                className={`px-6 py-2.5 rounded-full text-[13px] font-black tracking-wide whitespace-nowrap transition-all duration-300 ${isActive ? 'bg-primary text-black shadow-lg shadow-primary/20 scale-105' : 'bg-zinc-900 border border-white/5 text-zinc-400 hover:text-white'}`}
+              >
+                {genre}
+              </button>
+            );
+          })}
         </div>
+      </section>
 
-        <div className="grid grid-cols-3 md:grid-cols-5 gap-x-4 gap-y-10">
+      {/* Trending Mobile (Swipeable Horizontal) */}
+      <section className="mt-8">
+        <div className="flex items-center justify-between mb-6 px-4">
+          <h2 className="text-2xl font-black tracking-tighter text-white">Trending Now</h2>
+          <button className="text-xs font-black text-zinc-400 flex items-center uppercase tracking-widest gap-1" onClick={() => navigate('/rankings')}>View <ChevronRight size={14}/></button>
+        </div>
+        <div className="flex gap-4 overflow-x-auto px-4 pb-6 pt-2 no-scrollbar snap-x">
           {TRENDING_SERIES.map((s, idx) => (
-            <SeriesCard key={s.id} series={s} showRank rankNum={idx + 1} />
+            <div key={s.id} className="min-w-[80vw] snap-center relative" onClick={() => navigate(`/series/${s.id}`)}>
+              <div 
+                className="absolute -left-3 -top-4 z-20 text-[80px] font-black leading-none drop-shadow-2xl text-transparent"
+                style={{ WebkitTextStroke: '2px rgba(255,255,255,0.8)' }}
+              >
+                {idx + 1}
+              </div>
+              <div className="relative aspect-[4/5] bg-zinc-900 border border-white/5 rounded-2xl overflow-hidden shadow-2xl ml-8">
+                <img src={s.coverImage} className="w-full h-full object-cover opacity-90" referrerPolicy="no-referrer" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent" />
+                <div className="absolute bottom-0 left-0 p-5 w-full">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="bg-primary/20 text-primary px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest backdrop-blur-md">{s.genre}</span>
+                  </div>
+                  <h3 className="text-white font-black text-2xl leading-tight line-clamp-1">{s.title}</h3>
+                  <p className="text-zinc-400 text-xs font-bold mt-1 tracking-wide">by {s.creator}</p>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </section>
 
-      {/* New Releases Row */}
-      <section className="mt-12 pb-12 px-4 md:px-0">
+      {/* New Releases Mobile */}
+      <section className="mt-8 px-4">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl md:text-3xl font-black tracking-tight">New Releases</h2>
-          <span className="text-sm font-bold text-brand-yellow cursor-pointer hover:underline">View All</span>
+          <h2 className="text-2xl font-black tracking-tighter text-white">New Drops</h2>
+          <span className="text-xs font-black text-zinc-400 uppercase tracking-widest cursor-pointer">All</span>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {TRENDING_SERIES.map((s) => (
-            <SeriesCard key={`new-${s.id}`} series={s} />
+        <div className="grid grid-cols-2 gap-4">
+          {ORIGINALS_SERIES.map((s) => (
+            <SeriesCard key={s.id} series={s} />
           ))}
         </div>
       </section>
@@ -172,13 +207,13 @@ export function LemonadeMobile() {
       </div>
       
       {/* Genre Filters */}
-      <div className="flex gap-2 overflow-x-auto py-3 mb-6 no-scrollbar border-b border-zinc-50 sticky top-0 bg-white/80 backdrop-blur-md z-20">
+      <div className="flex gap-2 overflow-x-auto py-3 mb-6 no-scrollbar border-b border-white/5 sticky top-0 bg-zinc-950/80 backdrop-blur-md z-20">
         {genres.map(genre => (
           <button
             key={genre}
             onClick={() => setGenreFilter(genre)}
             className={`px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all ${
-              genreFilter === genre ? 'bg-brand-yellow text-black shadow-lg shadow-brand-yellow/20' : 'bg-zinc-50 text-zinc-400 hover:bg-zinc-100'
+              genreFilter === genre ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'bg-zinc-900 border border-white/5 text-zinc-400 hover:text-white'
             }`}
           >
             {genre}
@@ -191,18 +226,18 @@ export function LemonadeMobile() {
           <div 
             key={s.id} 
             onClick={() => navigate(`/series/${s.id}`)}
-            className="flex flex-col gap-3 cursor-pointer active:scale-95 transition-transform"
+            className="flex flex-col gap-3 cursor-pointer active:scale-95 transition-transform group"
           >
-            <div className="relative aspect-[3/4] bg-zinc-100 rounded-[2rem] overflow-hidden shadow-sm border border-zinc-50">
-              <img src={s.coverImage} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-              <div className="absolute top-0 left-0 bg-black text-white text-[8px] font-black px-3 py-1.5 rounded-br-2xl uppercase tracking-widest">
+            <div className="relative aspect-[3/4] bg-zinc-900 rounded-[2rem] overflow-hidden shadow-sm border border-white/5 shadow-black/20 group-hover:border-primary/30 transition-all">
+              <img src={s.coverImage} className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
+              <div className="absolute top-0 left-0 bg-primary text-primary-foreground text-[8px] font-black px-3 py-1.5 rounded-br-2xl uppercase tracking-widest">
                 Original
               </div>
             </div>
             <div className="px-1">
-              <h3 className="text-sm font-black leading-tight line-clamp-1 tracking-tight">{s.title}</h3>
+              <h3 className="text-sm font-black leading-tight line-clamp-1 tracking-tight text-white group-hover:text-primary transition-colors">{s.title}</h3>
               <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-1">{s.genre}</p>
-              <div className="flex items-center gap-2 mt-2 text-[10px] text-zinc-300 font-black uppercase tracking-widest">
+              <div className="flex items-center gap-2 mt-2 text-[10px] text-zinc-500 font-black uppercase tracking-widest">
                 <span>{s.reads} Reads</span>
               </div>
             </div>
@@ -216,13 +251,13 @@ export function LemonadeMobile() {
     <div className="animate-in fade-in duration-500 w-full max-w-[1200px] mx-auto px-4 md:px-0 py-8">
       {/* Submit Banner */}
       <section className="py-6">
-        <div className="bg-brand-yellow rounded-[2.5rem] p-8 text-black relative overflow-hidden shadow-2xl shadow-brand-yellow/20">
+        <div className="bg-primary rounded-[2.5rem] p-8 text-primary-foreground relative overflow-hidden shadow-2xl shadow-primary/20">
           <div className="relative z-10">
             <h2 className="text-2xl font-black mb-2 leading-tight tracking-tighter">SUBMIT YOUR WORK</h2>
-            <p className="text-black/80 text-[10px] font-bold uppercase tracking-widest mb-6 max-w-[200px]">Share your stories with the world.</p>
+            <p className="text-primary-foreground/80 text-[10px] font-bold uppercase tracking-widest mb-6 max-w-[200px]">Share your stories with the world.</p>
             <button 
               onClick={() => navigate('/studio')}
-              className="bg-white text-brand-yellow px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-xl"
+              className="bg-zinc-950 text-white hover:text-primary px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-xl transition-colors"
             >
               <Plus size={16} /> Start Uploading
             </button>
@@ -240,14 +275,14 @@ export function LemonadeMobile() {
             <div 
               key={s.id} 
               onClick={() => navigate(`/series/${s.id}`)}
-              className="flex flex-col gap-3 cursor-pointer active:scale-95 transition-transform"
+              className="flex flex-col gap-3 cursor-pointer active:scale-95 transition-transform group"
             >
-              <div className="aspect-[3/4] bg-zinc-100 rounded-[2rem] overflow-hidden border border-zinc-50 shadow-sm">
-                <img src={s.coverImage} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+              <div className="aspect-[3/4] bg-zinc-900 rounded-[2rem] overflow-hidden border border-white/5 shadow-sm shadow-black/20 group-hover:border-primary/30 transition-all">
+                <img src={s.coverImage} className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
               </div>
-              <div className="px-1">
-                <h3 className="text-sm font-black line-clamp-1 tracking-tight">{s.title}</h3>
-                <p className="text-[10px] text-zinc-400 font-bold mt-1 uppercase tracking-widest">by {s.creator}</p>
+              <div className="px-1 text-white">
+                <h3 className="text-sm font-black line-clamp-1 tracking-tight group-hover:text-primary transition-colors">{s.title}</h3>
+                <p className="text-[10px] text-zinc-500 font-bold mt-1 uppercase tracking-widest">by {s.creator}</p>
               </div>
             </div>
           ))}
@@ -268,24 +303,24 @@ export function LemonadeMobile() {
           <div 
             key={s.id} 
             onClick={() => navigate(`/series/${s.id}`)}
-            className="flex gap-4 items-center p-4 bg-zinc-50 rounded-[2rem] border border-zinc-100 cursor-pointer active:scale-98 transition-all"
+            className="flex gap-4 items-center p-4 bg-zinc-900 rounded-[2rem] border border-white/5 cursor-pointer active:scale-98 transition-all shadow-lg hover:border-primary/20 group"
           >
-            <div className="w-20 md:w-32 h-24 md:h-40 bg-zinc-200 rounded-2xl flex-shrink-0 overflow-hidden shadow-sm">
-              <img src={s.coverImage} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+            <div className="relative w-20 md:w-32 h-24 md:h-40 bg-zinc-800 rounded-2xl flex-shrink-0 overflow-hidden shadow-sm group-hover:shadow-primary/10 transition-shadow">
+              <img src={s.coverImage} className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
               {s.status === 'New chapter' && (
-                <div className="absolute top-2 right-2 w-3 h-3 bg-brand-yellow rounded-full border-2 border-white shadow-lg" />
+                <div className="absolute top-2 right-2 w-3 h-3 bg-primary rounded-full border-2 border-zinc-950 shadow-lg" />
               )}
             </div>
             <div className="flex-grow min-w-0">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between text-white group-hover:text-primary transition-colors">
                 <h3 className="font-black text-sm md:text-xl truncate tracking-tight">{s.title}</h3>
-                <ChevronRight size={16} className="text-zinc-300" />
+                <ChevronRight size={16} />
               </div>
               <p className="text-[10px] md:text-xs text-zinc-400 font-bold uppercase tracking-widest mt-1">{s.genre}</p>
               <p className="text-[10px] md:text-sm text-zinc-500 mt-2 font-black uppercase tracking-widest">{s.progress}</p>
               <p className={`text-[9px] md:text-xs mt-2 font-black uppercase tracking-widest ${
-                s.status === 'New chapter' ? 'text-brand-yellow' : 
-                s.status === 'Up to date' ? 'text-green-500' : 'text-zinc-300'
+                s.status === 'New chapter' ? 'text-primary' : 
+                s.status === 'Up to date' ? 'text-green-500' : 'text-zinc-500'
               }`}>
                 {s.status}
               </p>
@@ -294,11 +329,11 @@ export function LemonadeMobile() {
         ))}
       </div>
 
-      <div className="mt-12 p-8 bg-zinc-50 rounded-[2.5rem] border border-zinc-100 text-center">
-        <p className="text-[10px] md:text-xs font-black text-zinc-300 uppercase tracking-widest mb-6">Want to see more?</p>
+      <div className="mt-12 p-8 bg-zinc-900 rounded-[2.5rem] border border-white/5 text-center shadow-lg">
+        <p className="text-[10px] md:text-xs font-black text-zinc-500 uppercase tracking-widest mb-6">Want to see more?</p>
         <button 
           onClick={() => setActiveTab('ORIGINALS')}
-          className="w-full md:w-auto md:px-12 py-4 bg-white border border-zinc-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-brand-yellow shadow-sm active:scale-95 transition-all"
+          className="w-full md:w-auto md:px-12 py-4 bg-primary border-none rounded-2xl text-[10px] font-black uppercase tracking-widest text-primary-foreground shadow-[0_4px_20px_rgba(30,215,96,0.2)] active:scale-95 transition-all hover:bg-primary/90"
         >
           Browse Originals
         </button>
@@ -307,9 +342,9 @@ export function LemonadeMobile() {
   );
 
   return (
-    <div className="w-full bg-white flex flex-col min-h-screen">
+    <div className="w-full bg-zinc-950 text-white flex flex-col min-h-screen dark">
       {/* Main Content Area */}
-      <main className="flex-grow pb-20">
+      <main className="flex-grow pb-24">
         {activeTab === 'HOME' && renderHome()}
         {activeTab === 'ORIGINALS' && renderOriginals()}
         {activeTab === 'CANVAS' && renderCanvas()}
@@ -317,8 +352,8 @@ export function LemonadeMobile() {
       </main>
 
       {/* Bottom Tab Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-zinc-200 z-50 md:hidden">
-        <div className="flex justify-around items-center h-16 max-w-[430px] mx-auto">
+      <nav className="fixed bottom-0 left-0 right-0 bg-zinc-950/90 backdrop-blur-xl border-t border-white/5 z-50 md:hidden">
+        <div className="flex justify-around items-center h-20 max-w-[430px] mx-auto pb-2">
           {([
             { id: 'HOME' as Tab, label: 'Home', icon: Home },
             { id: 'ORIGINALS' as Tab, label: 'Originals', icon: Compass },
@@ -328,14 +363,14 @@ export function LemonadeMobile() {
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex flex-col items-center justify-center flex-1 py-2 transition-colors ${
-                activeTab === id ? 'text-brand-yellow' : 'text-zinc-400'
+              className={`flex flex-col items-center justify-center flex-1 py-1 transition-colors relative ${
+                activeTab === id ? 'text-primary' : 'text-zinc-500 hover:text-zinc-300'
               }`}
             >
-              <Icon size={22} strokeWidth={activeTab === id ? 2.5 : 1.5} />
-              <span className="text-[10px] font-bold mt-1 uppercase tracking-wide">{label}</span>
+              <Icon size={24} strokeWidth={activeTab === id ? 2.5 : 2} className="mb-1" />
+              <span className="text-[9px] font-black uppercase tracking-widest leading-none">{label}</span>
               {activeTab === id && (
-                <div className="w-1 h-1 bg-brand-yellow rounded-full mt-0.5" />
+                <motion.div layoutId="mobile-nav-indicator" className="w-1.5 h-1.5 bg-primary rounded-full absolute -top-1" />
               )}
             </button>
           ))}
