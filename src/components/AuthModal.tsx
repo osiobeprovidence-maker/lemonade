@@ -239,33 +239,35 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 px-4 py-6 backdrop-blur-sm"
+          className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 px-4 py-6 backdrop-blur-md"
           onClick={onClose}
         >
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(158,255,191,0.12),transparent_28%),radial-gradient(circle_at_bottom,rgba(255,255,255,0.08),transparent_24%)]" />
           <motion.div
-            initial={{ opacity: 0, y: 24, scale: 0.98 }}
+            initial={{ opacity: 0, y: 20, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 24, scale: 0.98 }}
-            transition={{ duration: 0.18 }}
-            className="relative max-h-[90vh] w-full max-w-xl overflow-hidden rounded-xl bg-white shadow-xl"
+            exit={{ opacity: 0, y: 18, scale: 0.97 }}
+            transition={{ duration: 0.24, ease: 'easeOut' }}
+            className="glass-modal relative max-h-[90vh] w-full max-w-md overflow-hidden rounded-[24px] text-white"
             onClick={(event) => event.stopPropagation()}
           >
             <button
               type="button"
               onClick={onClose}
-              className="absolute right-4 top-4 z-10 rounded-full p-2 text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900"
+              className="glass-button absolute right-4 top-4 z-10 rounded-full p-2 text-white/72 transition-all duration-200 hover:scale-105 hover:bg-white/18 hover:text-white"
             >
               <X className="h-5 w-5" />
             </button>
 
-            <div className="max-h-[90vh] overflow-y-auto p-6 sm:p-7">
+            <div className="absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top_left,rgba(158,255,191,0.22),transparent_58%)]" />
+            <div className="max-h-[90vh] overflow-y-auto px-5 py-6 sm:px-6 sm:py-7">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={step}
-                  initial={{ opacity: 0, x: 18 }}
+                  initial={{ opacity: 0, x: 14 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -18 }}
-                  transition={{ duration: 0.18 }}
+                  exit={{ opacity: 0, x: -12 }}
+                  transition={{ duration: 0.22 }}
                 >
                   {step === 'options' && (
                     <SignupOptions

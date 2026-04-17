@@ -11,6 +11,7 @@
 import type * as campaigns from "../campaigns.js";
 import type * as chapters from "../chapters.js";
 import type * as comments from "../comments.js";
+import type * as firebaseSync from "../firebaseSync.js";
 import type * as notifications from "../notifications.js";
 import type * as paystack from "../paystack.js";
 import type * as series from "../series.js";
@@ -27,6 +28,7 @@ declare const fullApi: ApiFromModules<{
   campaigns: typeof campaigns;
   chapters: typeof chapters;
   comments: typeof comments;
+  firebaseSync: typeof firebaseSync;
   notifications: typeof notifications;
   paystack: typeof paystack;
   series: typeof series;

@@ -35,24 +35,24 @@ export function EmailSignupForm({
   onBack,
 }: EmailSignupFormProps) {
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
-      <div className="space-y-2">
-        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-600">Lemonade</p>
-        <h2 className="text-3xl font-black tracking-tight text-zinc-950">Create your account</h2>
+    <form onSubmit={onSubmit} className="space-y-6 text-white">
+      <div className="space-y-3">
+        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.32em] text-emerald-300/88">Lemonade</p>
+        <h2 className="text-[clamp(2rem,5vw,3rem)] font-black leading-[0.95] tracking-[-0.05em] text-white">Create your account</h2>
       </div>
 
-      {error && <p className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+      {error && <p className="glass-error rounded-2xl px-4 py-3 text-sm text-red-100">{error}</p>}
 
       <div className="space-y-4">
         <label className="block space-y-2">
-          <span className="text-sm font-semibold text-zinc-900">Email</span>
+          <span className="text-sm font-semibold text-white/86">Email</span>
           <div className="relative">
-            <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+            <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/44" />
             <input
               type="email"
               value={email}
               onChange={(event) => onEmailChange(event.target.value)}
-              className="h-12 w-full rounded-md border border-gray-300 pl-11 pr-4 text-sm outline-none transition focus:border-emerald-500"
+              className="glass-input h-12 w-full rounded-2xl pl-11 pr-4 text-sm text-white outline-none transition-all duration-200 placeholder:text-white/34 focus:border-white/28 focus:bg-white/12"
               placeholder="Enter your email"
               required
             />
@@ -60,14 +60,14 @@ export function EmailSignupForm({
         </label>
 
         <label className="block space-y-2">
-          <span className="text-sm font-semibold text-zinc-900">Password</span>
+          <span className="text-sm font-semibold text-white/86">Password</span>
           <div className="relative">
-            <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+            <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/44" />
             <input
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(event) => onPasswordChange(event.target.value)}
-              className="h-12 w-full rounded-md border border-gray-300 pl-11 pr-16 text-sm outline-none transition focus:border-emerald-500"
+              className="glass-input h-12 w-full rounded-2xl pl-11 pr-16 text-sm text-white outline-none transition-all duration-200 placeholder:text-white/34 focus:border-white/28 focus:bg-white/12"
               placeholder="Create a password"
               required
               minLength={6}
@@ -75,7 +75,7 @@ export function EmailSignupForm({
             <button
               type="button"
               onClick={onTogglePassword}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-zinc-500 transition hover:text-zinc-900"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-white/54 transition hover:text-white"
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -83,14 +83,14 @@ export function EmailSignupForm({
         </label>
 
         <label className="block space-y-2">
-          <span className="text-sm font-semibold text-zinc-900">Re-enter Password</span>
+          <span className="text-sm font-semibold text-white/86">Re-enter Password</span>
           <div className="relative">
-            <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+            <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/44" />
             <input
               type={showConfirmPassword ? 'text' : 'password'}
               value={confirmPassword}
               onChange={(event) => onConfirmPasswordChange(event.target.value)}
-              className="h-12 w-full rounded-md border border-gray-300 pl-11 pr-16 text-sm outline-none transition focus:border-emerald-500"
+              className="glass-input h-12 w-full rounded-2xl pl-11 pr-16 text-sm text-white outline-none transition-all duration-200 placeholder:text-white/34 focus:border-white/28 focus:bg-white/12"
               placeholder="Re-enter your password"
               required
               minLength={6}
@@ -98,7 +98,7 @@ export function EmailSignupForm({
             <button
               type="button"
               onClick={onToggleConfirmPassword}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-zinc-500 transition hover:text-zinc-900"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-white/54 transition hover:text-white"
             >
               {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -110,7 +110,7 @@ export function EmailSignupForm({
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-xl bg-emerald-600 px-4 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full rounded-2xl bg-white px-4 py-3.5 text-sm font-semibold text-zinc-950 shadow-[0_18px_45px_rgba(0,0,0,0.22)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/92 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? 'Creating account...' : 'Continue'}
         </button>
@@ -118,7 +118,7 @@ export function EmailSignupForm({
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-2 text-sm font-medium text-zinc-500 transition hover:text-zinc-900"
+          className="inline-flex items-center gap-2 text-sm font-medium text-white/62 transition hover:text-white"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to all signup options
