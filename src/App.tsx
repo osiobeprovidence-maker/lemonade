@@ -506,23 +506,23 @@ export default function App() {
             referrerPolicy="no-referrer"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
-          <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-10 pb-16 md:pb-24 flex flex-col items-start pt-32">
-            <div className="flex items-center gap-3 mb-4">
-              <Badge className="bg-primary text-primary-foreground uppercase tracking-widest text-xs font-black px-3 py-1 shadow-lg shadow-primary/20">Featured</Badge>
-              <Badge variant="outline" className="text-white border-white/20 uppercase tracking-widest text-xs font-black px-3 py-1 backdrop-blur-sm">Action &amp; Fantasy</Badge>
+          <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-10 pb-12 md:pb-24 flex flex-col items-start pt-32">
+            <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4 flex-wrap">
+              <Badge className="bg-primary text-primary-foreground uppercase tracking-widest text-[10px] md:text-xs font-black px-2 md:px-3 py-1 shadow-lg shadow-primary/20">Featured</Badge>
+              <Badge variant="outline" className="text-white border-white/20 uppercase tracking-widest text-[10px] md:text-xs font-black px-2 md:px-3 py-1 backdrop-blur-sm">Action &amp; Fantasy</Badge>
             </div>
-            <h1 className="text-white text-5xl md:text-7xl font-black mb-4 leading-tight tracking-tighter drop-shadow-lg">
-              Surviving the Game<br />as a Barbarian
+            <h1 className="text-white text-4xl md:text-7xl font-black mb-3 md:mb-4 leading-[1.1] tracking-tighter drop-shadow-lg max-w-3xl">
+              Surviving the Game<br className="hidden md:block" /> as a Barbarian
             </h1>
-            <p className="text-white/80 text-lg md:text-xl max-w-2xl mb-8 leading-relaxed font-medium drop-shadow">
+            <p className="text-white/80 text-sm md:text-xl max-w-2xl mb-6 md:mb-8 leading-relaxed font-medium drop-shadow">
               When a hardcore gamer is sucked into his favorite punishing RPG, he must rely on his encyclopedic knowledge of the game to survive in a brutal world.
             </p>
-            <div className="flex items-center gap-4">
-              <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-[16px] px-8 py-7 text-lg font-black shadow-[0_0_40px_rgba(30,215,96,0.3)] transition-all hover:-translate-y-1" onClick={() => setCurrentView('manga')}>
-                <Play className="w-5 h-5 mr-2" fill="currentColor" /> Read Now
+            <div className="flex flex-row items-center gap-3 w-full sm:w-auto">
+              <Button className="flex-1 sm:flex-none h-auto bg-primary hover:bg-primary/90 text-primary-foreground rounded-[16px] px-3 md:px-8 py-4 md:py-6 text-sm md:text-lg font-black shadow-[0_0_40px_rgba(30,215,96,0.3)] transition-all hover:-translate-y-1" onClick={() => setCurrentView('manga')}>
+                <Play className="w-4 h-4 md:w-5 md:h-5 mr-1.5 md:mr-2" fill="currentColor" /> Read Now
               </Button>
-              <Button size="lg" variant="outline" className="border-white/20 bg-black/40 text-white hover:bg-white hover:text-black rounded-[16px] px-8 py-7 text-lg font-black backdrop-blur-md transition-all hover:-translate-y-1">
-                <Plus className="w-5 h-5 mr-2" /> Add to Library
+              <Button variant="outline" className="flex-1 sm:flex-none h-auto border-white/20 bg-black/40 text-white hover:bg-white hover:text-black rounded-[16px] px-3 md:px-8 py-4 md:py-6 text-sm md:text-lg font-black backdrop-blur-md transition-all hover:-translate-y-1">
+                <Plus className="w-4 h-4 md:w-5 md:h-5 mr-1.5 md:mr-2" /> Add to Library
               </Button>
             </div>
           </div>
