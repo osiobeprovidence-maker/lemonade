@@ -484,31 +484,48 @@ export default function App() {
     return (
     <>
       {/* Hero Banner */}
-      <div className="relative mb-12 h-[400px] w-full overflow-hidden">
+      <section className="relative mb-12 min-h-[calc(100svh-5rem)] w-full overflow-hidden">
         <img 
           src="https://picsum.photos/seed/lemonade-hero/1920/1080" 
           alt="Home Banner" 
-          className="w-full h-full object-cover saturate-[0.88] brightness-[0.7]"
+          className="absolute inset-0 h-full w-full object-cover saturate-[0.88]"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute inset-0 bg-black/20" />
-        <div className="absolute inset-0 flex items-end">
-          <div className={pageContainerClass}>
-            <div className="max-w-xl rounded-3xl bg-white/88 px-6 py-6 shadow-[0_24px_80px_rgba(15,23,42,0.14)] md:mb-4 md:px-7">
-              <Badge className="mb-4 bg-foreground text-background font-bold uppercase">Now on LEMONADE</Badge>
-              <h1 
-                className="mb-4 text-3xl font-black uppercase tracking-tighter text-zinc-950 md:text-5xl"
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,10,16,0.78)_0%,rgba(7,10,16,0.52)_38%,rgba(7,10,16,0.18)_68%,rgba(7,10,16,0.08)_100%)] md:bg-[linear-gradient(90deg,rgba(7,10,16,0.76)_0%,rgba(7,10,16,0.44)_42%,rgba(7,10,16,0.12)_72%,rgba(7,10,16,0.04)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(158,255,191,0.2),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.12),transparent_30%)]" />
+        <div className="relative flex min-h-[calc(100svh-5rem)] items-end py-6 sm:py-8 md:items-center md:py-10">
+          <div className={`${pageContainerClass} w-full`}>
+            <div className="glass-surface max-w-[min(100%,44rem)] rounded-[28px] p-5 text-white sm:p-6 md:p-8 lg:p-10">
+              <div className="mb-5 flex flex-wrap items-center gap-3">
+                <span className="inline-flex items-center rounded-full border border-white/18 bg-white/10 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-white/84 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]">
+                  Now on LEMONADE
+                </span>
+              </div>
+              <h1
+                className="max-w-[12ch] text-[clamp(2.5rem,7vw,5.9rem)] font-black uppercase tracking-[-0.06em] leading-[0.92] text-white text-balance"
               >
-                Read the latest hits!
+                Read the latest hits.
               </h1>
-              <p className="mb-6 max-w-lg text-base font-medium leading-8 text-zinc-700 md:text-lg">Tap to read stories on LEMONADE!</p>
-              <Button size="lg" className="gap-2 rounded-full px-8 font-bold" onClick={() => setCurrentView('manga')}>
-                <Play className="w-5 h-5" /> Start Reading
-              </Button>
+              <p className="mt-4 max-w-[34rem] text-[clamp(0.98rem,2vw,1.2rem)] font-medium leading-[1.6] tracking-[-0.01em] text-white/82 sm:mt-5">
+                Discover bold new comics, immersive chapters, and creator-first stories in a richer reading room built for every screen.
+              </p>
+              <div className="mt-7 flex flex-col items-start gap-3 sm:mt-8 sm:flex-row sm:items-center">
+                <Button
+                  size="lg"
+                  className="group h-auto min-h-12 rounded-full border border-white/10 bg-white px-6 py-3 text-sm font-semibold text-zinc-950 shadow-[0_18px_45px_rgba(0,0,0,0.22)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/92 hover:shadow-[0_24px_60px_rgba(0,0,0,0.28)]"
+                  onClick={() => setCurrentView('manga')}
+                >
+                  <Play className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+                  Start Reading
+                </Button>
+                <p className="text-sm font-medium tracking-[-0.01em] text-white/62">
+                  Trending updates, premium chapters, and fresh releases daily.
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Trending Section */}
       <div className={`${pageContainerClass} mb-8 py-2`}>
