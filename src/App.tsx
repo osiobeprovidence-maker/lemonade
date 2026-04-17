@@ -678,31 +678,46 @@ export default function App() {
 
   const renderOriginals = () => (
     <div className="pb-20">
-      <div className="relative h-[400px] w-full overflow-hidden mb-12">
+      <section className="relative mb-12 min-h-[calc(100svh-5rem)] w-full overflow-hidden">
         <img 
           src="https://picsum.photos/seed/lemonade-originals/1920/1080" 
           alt="Lemonade Originals" 
-          className="w-full h-full object-cover saturate-[0.9] brightness-[0.72]" 
+          className="absolute inset-0 h-full w-full object-cover saturate-[0.9]" 
           referrerPolicy="no-referrer" 
         />
-        <div className="absolute inset-0 bg-black/25" />
-        <div className="absolute inset-0 flex items-end">
-          <div className={pageContainerClass}>
-            <div className="max-w-xl rounded-3xl bg-white/88 px-6 py-6 shadow-[0_24px_80px_rgba(15,23,42,0.14)] md:mb-4 md:px-7">
-              <Badge className="mb-4 bg-foreground text-background font-bold uppercase">Lemonade Originals</Badge>
-              <h1 
-                className="mb-4 text-3xl font-black uppercase tracking-tighter text-zinc-950 md:text-5xl"
-              >
-                Original stories built for Lemonade
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,10,16,0.82)_0%,rgba(7,10,16,0.56)_36%,rgba(7,10,16,0.18)_68%,rgba(7,10,16,0.08)_100%)] md:bg-[linear-gradient(90deg,rgba(7,10,16,0.8)_0%,rgba(7,10,16,0.46)_42%,rgba(7,10,16,0.14)_72%,rgba(7,10,16,0.04)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(158,255,191,0.22),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.12),transparent_32%)]" />
+        <div className="relative flex min-h-[calc(100svh-5rem)] items-end py-6 sm:py-8 md:items-center md:py-10">
+          <div className={`${pageContainerClass} w-full`}>
+            <div className="glass-surface max-w-[min(100%,44rem)] rounded-[28px] p-5 text-white sm:p-6 md:p-8 lg:p-10">
+              <div className="mb-5 flex flex-wrap items-center gap-3">
+                <span className="inline-flex items-center rounded-full border border-white/18 bg-white/10 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-white/84 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]">
+                  Lemonade Originals
+                </span>
+              </div>
+              <h1 className="max-w-[13ch] text-[clamp(2.4rem,6.8vw,5.6rem)] font-black uppercase tracking-[-0.06em] leading-[0.92] text-white text-balance">
+                Original stories built for Lemonade.
               </h1>
-              <p className="mb-6 max-w-lg text-base font-medium leading-8 text-zinc-700 md:text-lg">Exclusive webtoons with weekly drops, strong hooks, and the polished look readers now expect from Lemonade Originals.</p>
-              <Button size="lg" className="rounded-full px-8 font-bold gap-2" onClick={() => openViewAll('originals')}>
-                <Play className="w-5 h-5" /> Browse Originals
-              </Button>
+              <p className="mt-4 max-w-[34rem] text-[clamp(0.98rem,2vw,1.18rem)] font-medium leading-[1.6] tracking-[-0.01em] text-white/82 sm:mt-5">
+                Exclusive webtoons with weekly drops, stronger hooks, and a premium reading atmosphere shaped for the next wave of Lemonade originals.
+              </p>
+              <div className="mt-7 flex flex-col items-start gap-3 sm:mt-8 sm:flex-row sm:items-center">
+                <Button
+                  size="lg"
+                  className="group h-auto min-h-12 rounded-full border border-white/10 bg-white px-6 py-3 text-sm font-semibold text-zinc-950 shadow-[0_18px_45px_rgba(0,0,0,0.22)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/92 hover:shadow-[0_24px_60px_rgba(0,0,0,0.28)]"
+                  onClick={() => openViewAll('originals')}
+                >
+                  <Play className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+                  Browse Originals
+                </Button>
+                <p className="text-sm font-medium tracking-[-0.01em] text-white/62">
+                  Weekly drops, standout launches, and fresh featured series.
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       <div className={pageContainerClass}>
         {/* Weekly Schedule Tabs */}
@@ -1887,27 +1902,46 @@ export default function App() {
 
   const renderLemon = () => (
     <div className="pb-20">
-      <div className="relative h-[400px] w-full overflow-hidden mb-12">
+      <section className="relative mb-12 min-h-[calc(100svh-5rem)] w-full overflow-hidden">
         <img 
           src="https://picsum.photos/seed/lemonade-novels/1920/1080" 
           alt="Novel Banner" 
-          className="w-full h-full object-cover saturate-[0.9] brightness-[0.72]"
+          className="absolute inset-0 h-full w-full object-cover saturate-[0.9]"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute inset-0 bg-black/20" />
-        <div className="absolute inset-0 flex items-end">
-          <div className={pageContainerClass}>
-            <div className="max-w-xl rounded-3xl bg-white/88 px-6 py-6 shadow-[0_24px_80px_rgba(15,23,42,0.14)] md:mb-4 md:px-7">
-              <Badge className="mb-4 bg-foreground text-background font-bold uppercase">Lemonade Novels</Badge>
-              <h1 className="mb-4 text-3xl font-black uppercase tracking-tighter text-zinc-950 md:text-5xl">Novels</h1>
-              <p className="mb-6 max-w-lg text-base font-medium leading-8 text-zinc-700 md:text-lg">Serial fiction with rich atmospheres, chapter-by-chapter cliffhangers, and enough detail to stay with readers long after the page ends.</p>
-              <Button size="lg" className="rounded-full px-8 font-bold gap-2" onClick={() => openSeriesDetails(NOVELS[0])}>
-                <BookOpen className="w-5 h-5" /> Start Reading
-              </Button>
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,10,16,0.82)_0%,rgba(7,10,16,0.54)_36%,rgba(7,10,16,0.18)_68%,rgba(7,10,16,0.08)_100%)] md:bg-[linear-gradient(90deg,rgba(7,10,16,0.78)_0%,rgba(7,10,16,0.44)_42%,rgba(7,10,16,0.12)_72%,rgba(7,10,16,0.04)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(185,221,255,0.2),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.12),transparent_30%)]" />
+        <div className="relative flex min-h-[calc(100svh-5rem)] items-end py-6 sm:py-8 md:items-center md:py-10">
+          <div className={`${pageContainerClass} w-full`}>
+            <div className="glass-surface max-w-[min(100%,44rem)] rounded-[28px] p-5 text-white sm:p-6 md:p-8 lg:p-10">
+              <div className="mb-5 flex flex-wrap items-center gap-3">
+                <span className="inline-flex items-center rounded-full border border-white/18 bg-white/10 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-white/84 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]">
+                  Lemonade Novels
+                </span>
+              </div>
+              <h1 className="max-w-[11ch] text-[clamp(2.4rem,6.8vw,5.6rem)] font-black uppercase tracking-[-0.06em] leading-[0.92] text-white text-balance">
+                Novels worth staying up for.
+              </h1>
+              <p className="mt-4 max-w-[34rem] text-[clamp(0.98rem,2vw,1.18rem)] font-medium leading-[1.6] tracking-[-0.01em] text-white/82 sm:mt-5">
+                Serial fiction with rich atmospheres, chapter-by-chapter cliffhangers, and immersive worlds that linger long after the page ends.
+              </p>
+              <div className="mt-7 flex flex-col items-start gap-3 sm:mt-8 sm:flex-row sm:items-center">
+                <Button
+                  size="lg"
+                  className="group h-auto min-h-12 rounded-full border border-white/10 bg-white px-6 py-3 text-sm font-semibold text-zinc-950 shadow-[0_18px_45px_rgba(0,0,0,0.22)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/92 hover:shadow-[0_24px_60px_rgba(0,0,0,0.28)]"
+                  onClick={() => openSeriesDetails(NOVELS[0])}
+                >
+                  <BookOpen className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+                  Start Reading
+                </Button>
+                <p className="text-sm font-medium tracking-[-0.01em] text-white/62">
+                  Moody chapters, premium pacing, and genre shelves worth exploring.
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       <div className={pageContainerClass}>
         {/* Novel Categories */}
