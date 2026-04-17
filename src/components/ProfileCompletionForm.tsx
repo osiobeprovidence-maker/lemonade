@@ -80,59 +80,59 @@ export function ProfileCompletionForm({
   onSubmit,
 }: ProfileCompletionFormProps) {
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
-      <div className="space-y-2">
-        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-600">Lemonade</p>
-        <h2 className="text-3xl font-black tracking-tight text-zinc-950">Complete your profile</h2>
+    <form onSubmit={onSubmit} className="space-y-6 text-white">
+      <div className="space-y-3">
+        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.32em] text-emerald-300/88">Lemonade</p>
+        <h2 className="text-[clamp(2rem,5vw,3rem)] font-black leading-[0.95] tracking-[-0.05em] text-white">Complete your profile</h2>
       </div>
 
-      {error && <p className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+      {error && <p className="glass-error rounded-2xl px-4 py-3 text-sm text-red-100">{error}</p>}
 
       <div className="space-y-4">
         <label className="block space-y-2">
-          <span className="text-sm font-semibold text-zinc-900">Profile Photo (optional)</span>
-          <label className="flex cursor-pointer items-center gap-4 rounded-xl border border-dashed border-gray-300 p-4 transition hover:border-emerald-500">
-            <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-zinc-100">
+          <span className="text-sm font-semibold text-white/86">Profile Photo (optional)</span>
+          <label className="glass-button flex cursor-pointer items-center gap-4 rounded-2xl border border-dashed p-4 transition-all duration-200 hover:bg-white/18">
+            <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-white/10">
               {profilePhotoUrl ? (
                 <img src={profilePhotoUrl} alt="Profile preview" className="h-full w-full object-cover" />
               ) : (
-                <ImagePlus className="h-5 w-5 text-zinc-400" />
+                <ImagePlus className="h-5 w-5 text-white/48" />
               )}
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-medium text-zinc-900">
+              <p className="text-sm font-medium text-white">
                 {isUploadingPhoto ? 'Uploading photo...' : 'Upload a profile photo'}
               </p>
-              <p className="text-xs text-zinc-500">JPG, PNG, or WebP up to 5MB.</p>
+              <p className="text-xs text-white/58">JPG, PNG, or WebP up to 5MB.</p>
             </div>
             <input type="file" accept="image/*" onChange={onProfilePhotoChange} className="hidden" />
           </label>
         </label>
 
         <label className="block space-y-2">
-          <span className="text-sm font-semibold text-zinc-900">Email</span>
+          <span className="text-sm font-semibold text-white/86">Email</span>
           <input
             type="email"
             value={email}
             readOnly
-            className="h-12 w-full rounded-md border border-gray-300 bg-zinc-50 px-4 text-sm text-zinc-600 outline-none"
+            className="glass-input h-12 w-full rounded-2xl px-4 text-sm text-white/72 outline-none"
           />
         </label>
 
         <label className="block space-y-2">
-          <span className="text-sm font-semibold text-zinc-900">Username</span>
+          <span className="text-sm font-semibold text-white/86">Username</span>
           <input
             type="text"
             value={username}
             onChange={(event) => onUsernameChange(event.target.value)}
-            className="h-12 w-full rounded-md border border-gray-300 px-4 text-sm outline-none transition focus:border-emerald-500"
+            className="glass-input h-12 w-full rounded-2xl px-4 text-sm text-white outline-none transition-all duration-200 placeholder:text-white/34 focus:border-white/28 focus:bg-white/12"
             placeholder="Enter username"
             required
           />
         </label>
 
         <div className="space-y-2">
-          <span className="text-sm font-semibold text-zinc-900">Birthday</span>
+          <span className="text-sm font-semibold text-white/86">Birthday</span>
           <div className="grid grid-cols-3 gap-3">
             <SelectField value={birthMonth} onChange={onBirthMonthChange} placeholder="Month" options={MONTHS} />
             <SelectField value={birthDay} onChange={onBirthDayChange} placeholder="Day" options={DAYS} />
@@ -141,20 +141,20 @@ export function ProfileCompletionForm({
         </div>
 
         <div className="space-y-2">
-          <span className="text-sm font-semibold text-zinc-900">Pronouns (optional)</span>
+          <span className="text-sm font-semibold text-white/86">Pronouns (optional)</span>
           <SelectField value={pronouns} onChange={onPronounsChange} placeholder="Select pronouns" options={PRONOUNS} />
         </div>
 
         {isEmailSignup && (
           <>
             <label className="block space-y-2">
-              <span className="text-sm font-semibold text-zinc-900">Password</span>
+              <span className="text-sm font-semibold text-white/86">Password</span>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(event) => onPasswordChange(event.target.value)}
-                  className="h-12 w-full rounded-md border border-gray-300 px-4 pr-16 text-sm outline-none transition focus:border-emerald-500"
+                  className="glass-input h-12 w-full rounded-2xl px-4 pr-16 text-sm text-white outline-none transition-all duration-200 placeholder:text-white/34 focus:border-white/28 focus:bg-white/12"
                   placeholder="Password"
                   required
                   minLength={6}
@@ -162,7 +162,7 @@ export function ProfileCompletionForm({
                 <button
                   type="button"
                   onClick={onTogglePassword}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-zinc-500 transition hover:text-zinc-900"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-white/54 transition hover:text-white"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -170,13 +170,13 @@ export function ProfileCompletionForm({
             </label>
 
             <label className="block space-y-2">
-              <span className="text-sm font-semibold text-zinc-900">Re-enter Password</span>
+              <span className="text-sm font-semibold text-white/86">Re-enter Password</span>
               <div className="relative">
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(event) => onConfirmPasswordChange(event.target.value)}
-                  className="h-12 w-full rounded-md border border-gray-300 px-4 pr-16 text-sm outline-none transition focus:border-emerald-500"
+                  className="glass-input h-12 w-full rounded-2xl px-4 pr-16 text-sm text-white outline-none transition-all duration-200 placeholder:text-white/34 focus:border-white/28 focus:bg-white/12"
                   placeholder="Re-enter password"
                   required
                   minLength={6}
@@ -184,7 +184,7 @@ export function ProfileCompletionForm({
                 <button
                   type="button"
                   onClick={onToggleConfirmPassword}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-zinc-500 transition hover:text-zinc-900"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-white/54 transition hover:text-white"
                 >
                   {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -198,7 +198,7 @@ export function ProfileCompletionForm({
         <button
           type="submit"
           disabled={loading || isUploadingPhoto}
-          className="w-full rounded-xl bg-emerald-600 px-4 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full rounded-2xl bg-white px-4 py-3.5 text-sm font-semibold text-zinc-950 shadow-[0_18px_45px_rgba(0,0,0,0.22)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/92 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? 'Saving profile...' : 'Finish signup'}
         </button>
@@ -206,7 +206,7 @@ export function ProfileCompletionForm({
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-2 text-sm font-medium text-zinc-500 transition hover:text-zinc-900"
+          className="inline-flex items-center gap-2 text-sm font-medium text-white/62 transition hover:text-white"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to all signup options
@@ -232,7 +232,7 @@ function SelectField({
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="h-12 w-full appearance-none rounded-md border border-gray-300 bg-white px-4 pr-10 text-sm outline-none transition focus:border-emerald-500"
+        className="glass-input h-12 w-full appearance-none rounded-2xl bg-transparent px-4 pr-10 text-sm text-white outline-none transition-all duration-200 focus:border-white/28 focus:bg-white/12"
       >
         <option value="">{placeholder}</option>
         {options.map((option) => (
@@ -241,7 +241,7 @@ function SelectField({
           </option>
         ))}
       </select>
-      <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+      <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/44" />
     </div>
   );
 }

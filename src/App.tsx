@@ -61,6 +61,8 @@ const STORY_STYLE_DEFAULTS = {
 
 const ALL_STORIES = [...COMICS, ...NOVELS];
 const PILL_BUTTON_BASE = "rounded-full px-4 py-1.5 text-xs font-bold whitespace-nowrap transition-all md:px-6 md:py-2 md:text-sm";
+const HOME_SECTION_HEADING_CLASS = "max-w-[13rem] text-[clamp(1.7rem,7vw,2.5rem)] font-black leading-[0.9] tracking-[-0.06em] sm:max-w-none sm:text-[clamp(1.9rem,5vw,2.5rem)]";
+const HOME_VIEW_ALL_CLASS = "flex items-center gap-1 text-[0.82rem] font-medium text-muted-foreground transition-colors hover:text-foreground sm:text-sm";
 
 const VIEW_PATHS: Record<string, string> = {
   home: '/',
@@ -75,7 +77,7 @@ const VIEW_PATHS: Record<string, string> = {
   wallet: '/wallet',
 };
 
-const VIEW_ALL_SECTIONS = ['popular', 'daily', 'originals', 'novels'] as const;
+const VIEW_ALL_SECTIONS = ['trending', 'popular', 'daily', 'originals', 'novels', 'new-releases'] as const;
 
 function findStoryById(storyId?: string | null) {
   if (!storyId) return null;
@@ -309,6 +311,12 @@ export default function App() {
     : 'border border-zinc-200 bg-white shadow-sm';
   const readerFontClass = readerStoryStyle.fontStyle === 'serif' ? 'font-serif' : 'font-sans';
   const viewAllConfig = {
+    trending: {
+      title: 'Trending & popular series',
+      eyebrow: 'Reader momentum',
+      description: 'The stories readers are opening first right now, ranked by current attention.',
+      items: COMICS.slice(0, 12),
+    },
     popular: {
       title: `${activeCategory} stories`,
       eyebrow: 'Popular on Lemonade',
@@ -332,6 +340,12 @@ export default function App() {
       eyebrow: 'Reading room',
       description: `Long-form fiction, curated for ${activeLemonCategory.toLowerCase()} readers.`,
       items: filteredNovels,
+    },
+    'new-releases': {
+      title: 'Newly released originals',
+      eyebrow: 'Fresh this week',
+      description: 'Recent launches and newly updated originals worth jumping into first.',
+      items: COMICS.filter((comic) => comic.isNew),
     },
   } as const;
 
@@ -530,10 +544,12 @@ export default function App() {
       {/* Trending Section */}
       <div className={`${pageContainerClass} mb-8 py-2`}>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
-            <span className="text-foreground font-bold uppercase">Trending</span> & POPULAR SERIES
+          <h2 className={HOME_SECTION_HEADING_CLASS}>
+            <span className="text-foreground font-bold uppercase">Trending</span> &amp; popular series
           </h2>
-          <ChevronRight className="w-5 h-5 text-muted-foreground" />
+          <button type="button" onClick={() => openViewAll('trending')} className={HOME_VIEW_ALL_CLASS}>
+            View all <ChevronRight className="h-4 w-4" />
+          </button>
         </div>
         <div className="flex gap-2 mb-4">
           <Badge className="bg-foreground text-background hover:bg-foreground/90 rounded-full px-4 py-1.5 text-sm font-bold cursor-pointer">Trending</Badge>
@@ -547,7 +563,7 @@ export default function App() {
                 <img src={comic.cover} alt={comic.title} className="w-full h-full object-cover rounded-md" referrerPolicy="no-referrer" />
                 
                 {/* Massive Number */}
-                <div className="comic-number absolute -bottom-3 -left-1 text-[60px] font-black leading-none z-10 tracking-tighter">
+                <div className="comic-number absolute -bottom-3 -left-1 z-10 text-[48px] font-black leading-none tracking-tighter sm:text-[60px]">
                   {index + 1}
                 </div>
                 
@@ -560,8 +576,8 @@ export default function App() {
                   )}
                 </div>
               </div>
-              <h3 className="font-bold text-sm leading-tight line-clamp-2 mt-3 group-hover:text-primary transition-colors">{comic.title}</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">{comic.emotion}</p>
+              <h3 className="mt-3 line-clamp-2 text-[0.82rem] font-bold leading-[1.15] group-hover:text-primary transition-colors sm:text-sm">{comic.title}</h3>
+              <p className="mt-0.5 text-[0.72rem] text-muted-foreground sm:text-xs">{comic.emotion}</p>
             </div>
           ))}
         </div>
@@ -570,12 +586,12 @@ export default function App() {
       {/* Popular Series by Category */}
       <div className={`${pageContainerClass} mb-8 py-2`}>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
-            <span className="text-foreground font-bold uppercase">Popular</span> SERIES BY CATEGORY
+          <h2 className={HOME_SECTION_HEADING_CLASS}>
+            <span className="text-foreground font-bold uppercase">Popular</span> series by category
           </h2>
-          <div onClick={() => openViewAll('popular')} className="flex items-center gap-1 text-muted-foreground text-sm cursor-pointer hover:text-foreground">
+          <button type="button" onClick={() => openViewAll('popular')} className={HOME_VIEW_ALL_CLASS}>
             View all <ChevronRight className="w-4 h-4" />
-          </div>
+          </button>
         </div>
         
         <div className="flex items-center gap-2 overflow-x-auto pb-6 no-scrollbar mb-8 border-b border-border">
@@ -601,8 +617,8 @@ export default function App() {
                   </div>
                 )}
               </div>
-              <h3 className="font-bold text-sm leading-tight line-clamp-2 group-hover:text-primary transition-colors">{comic.title}</h3>
-              <p className="text-[11px] text-muted-foreground mt-1">{comic.views} Views</p>
+              <h3 className="line-clamp-2 text-[0.82rem] font-bold leading-[1.15] group-hover:text-primary transition-colors sm:text-sm">{comic.title}</h3>
+              <p className="mt-1 text-[0.7rem] text-muted-foreground sm:text-[11px]">{comic.views} Views</p>
             </div>
           ))}
         </div>
@@ -611,9 +627,12 @@ export default function App() {
       {/* Newly Released Originals */}
       <div className={`${pageContainerClass} mb-8 py-2`}>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
-            <span className="text-foreground font-bold uppercase">Newly</span> RELEASED ORIGINALS
+          <h2 className={HOME_SECTION_HEADING_CLASS}>
+            <span className="text-foreground font-bold uppercase">Newly</span> released originals
           </h2>
+          <button type="button" onClick={() => openViewAll('new-releases')} className={HOME_VIEW_ALL_CLASS}>
+            View all <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
         <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-2 gap-y-6">
           {COMICS.filter(c => c.isNew).slice(0, 6).map((comic) => (
@@ -621,8 +640,8 @@ export default function App() {
               <div className="relative aspect-[3/4] rounded-md mb-2 overflow-hidden">
                 <img src={comic.cover} alt={comic.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" referrerPolicy="no-referrer" />
               </div>
-              <h3 className="font-bold text-sm leading-tight line-clamp-2 group-hover:text-primary transition-colors">{comic.title}</h3>
-              <p className="text-[11px] text-muted-foreground mt-1">{comic.genre}</p>
+              <h3 className="line-clamp-2 text-[0.82rem] font-bold leading-[1.15] group-hover:text-primary transition-colors sm:text-sm">{comic.title}</h3>
+              <p className="mt-1 text-[0.7rem] text-muted-foreground sm:text-[11px]">{comic.genre}</p>
             </div>
           ))}
         </div>
@@ -631,12 +650,12 @@ export default function App() {
       {/* Daily Section */}
       <div className={`${pageContainerClass} mb-8 py-2`}>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
-            <span className="text-foreground font-bold uppercase">Daily</span> UPDATES
+          <h2 className={HOME_SECTION_HEADING_CLASS}>
+            <span className="text-foreground font-bold uppercase">Daily</span> updates
           </h2>
-          <div onClick={() => openViewAll('daily')} className="flex items-center gap-1 text-muted-foreground text-sm cursor-pointer hover:text-foreground">
+          <button type="button" onClick={() => openViewAll('daily')} className={HOME_VIEW_ALL_CLASS}>
             View all <ChevronRight className="w-4 h-4" />
-          </div>
+          </button>
         </div>
         
         <div className="flex items-center gap-2 overflow-x-auto pb-6 no-scrollbar mb-8 border-b border-border">
@@ -662,11 +681,11 @@ export default function App() {
                   </div>
                 )}
               </div>
-              <p className="text-[11px] text-muted-foreground mb-0.5">{comic.genre}</p>
-              <h3 className="font-bold text-sm leading-tight line-clamp-1 group-hover:text-primary transition-colors">{comic.title}</h3>
+              <p className="mb-0.5 text-[0.68rem] text-muted-foreground sm:text-[11px]">{comic.genre}</p>
+              <h3 className="line-clamp-2 text-[0.82rem] font-bold leading-[1.15] group-hover:text-primary transition-colors sm:line-clamp-1 sm:text-sm">{comic.title}</h3>
               <div className="flex items-center gap-1 mt-1">
                 <Heart className="w-3 h-3 text-primary fill-primary" />
-                <span className="text-[11px] font-bold text-primary">{comic.likes}</span>
+                <span className="text-[0.7rem] font-bold text-primary sm:text-[11px]">{comic.likes}</span>
               </div>
             </div>
           ))}
@@ -870,13 +889,13 @@ export default function App() {
 
     return (
       <div className="mx-auto min-h-[60vh] w-full max-w-7xl px-4 py-10 md:px-6 lg:px-8">
-        <div className="mb-8 flex items-center justify-between gap-4 border-b border-border pb-6">
+        <div className="mb-8 flex flex-col gap-5 border-b border-border pb-6 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-primary">{config.eyebrow}</p>
-            <h1 className="mt-3 text-3xl font-black tracking-tighter text-zinc-950 md:text-4xl">{config.title}</h1>
-            <p className="mt-3 max-w-2xl text-sm text-muted-foreground md:text-base">{config.description}</p>
+            <p className="text-[0.72rem] font-bold uppercase tracking-[0.28em] text-primary sm:text-xs">{config.eyebrow}</p>
+            <h1 className="mt-3 max-w-[12ch] text-[clamp(2rem,7vw,4rem)] font-black leading-[0.92] tracking-[-0.06em] text-zinc-950 sm:max-w-none">{config.title}</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground md:text-base">{config.description}</p>
           </div>
-          <Button variant="outline" className="rounded-full" onClick={() => setCurrentView(viewAllSection === 'novels' ? 'Novel' : viewAllSection === 'originals' ? 'manga' : 'home')}>
+          <Button variant="outline" className="w-fit rounded-full" onClick={() => setCurrentView(viewAllSection === 'novels' ? 'Novel' : viewAllSection === 'originals' ? 'manga' : 'home')}>
             Back
           </Button>
         </div>
