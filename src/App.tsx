@@ -34,11 +34,11 @@ const COMICS = [
 ];
 
 const NOVELS = [
-  { id: 101, title: "The Alchemist of Lemonade", creator: "Novel Master", genre: "Fantasy", cover: "https://picsum.photos/seed/novel-1/400/533", views: "1.2M", likes: "45K", type: 'novel', summary: "A young alchemist discovers the secret to the ultimate lemonade, which grants magical powers." },
-  { id: 102, title: "Shadow of the Citrus", creator: "Sour King", genre: "Action", cover: "https://picsum.photos/seed/novel-2/400/533", views: "800K", likes: "32K", type: 'novel', summary: "In a world where fruit is power, one warrior fights to protect the last Novel tree." },
-  { id: 103, title: "Sweet Revenge", creator: "Sugar Queen", genre: "Drama", cover: "https://picsum.photos/seed/novel-3/400/533", views: "2.5M", likes: "120K", type: 'novel', summary: "A high society drama about betrayal and the sweetest comeback ever told." },
-  { id: 104, title: "Lemonade Stand Hero", creator: "Zest", genre: "Comedy", cover: "https://picsum.photos/seed/novel-4/400/533", views: "1.5M", likes: "88K", type: 'novel', summary: "A hilarious journey of a boy trying to build a lemonade empire in his backyard." },
-  { id: 105, title: "The Last Zest", creator: "Pulp", genre: "Sci-fi", cover: "https://picsum.photos/seed/novel-5/400/533", views: "600K", likes: "15K", type: 'novel', summary: "In a post-apocalyptic future, the last remaining Novel is the key to humanity's survival." },
+  { id: 101, title: "The Alchemist of Lemonade", creator: "Novel Master", genre: "Fantasy", cover: "https://picsum.photos/seed/novel-1/400/533", views: "1.2M", likes: "45K", type: 'novel', chapters: 38, readingMood: "Arcane slow burn", summary: "A young alchemist discovers the secret to the ultimate lemonade, which grants magical powers.", excerpt: "At dawn the syrup looked like glass, and everyone in the workshop pretended not to notice it humming." },
+  { id: 102, title: "Shadow of the Citrus", creator: "Sour King", genre: "Action", cover: "https://picsum.photos/seed/novel-2/400/533", views: "800K", likes: "32K", type: 'novel', chapters: 26, readingMood: "High-stakes action", summary: "In a world where fruit is power, one warrior fights to protect the last citrus tree.", excerpt: "Every rooftop in the district carried the smell of smoke and orange peel after the raid." },
+  { id: 103, title: "Sweet Revenge", creator: "Sugar Queen", genre: "Drama", cover: "https://picsum.photos/seed/novel-3/400/533", views: "2.5M", likes: "120K", type: 'novel', chapters: 44, readingMood: "Society drama", summary: "A high society drama about betrayal and the sweetest comeback ever told.", excerpt: "By the time the champagne reached her table, the rumor had already become a verdict." },
+  { id: 104, title: "Lemonade Stand Hero", creator: "Zest", genre: "Comedy", cover: "https://picsum.photos/seed/novel-4/400/533", views: "1.5M", likes: "88K", type: 'novel', chapters: 19, readingMood: "Bright comedy", summary: "A hilarious journey of a boy trying to build a lemonade empire in his backyard.", excerpt: "The first investor arrived on a bicycle and demanded equity before taking a sip." },
+  { id: 105, title: "The Last Zest", creator: "Pulp", genre: "Sci-fi", cover: "https://picsum.photos/seed/novel-5/400/533", views: "600K", likes: "15K", type: 'novel', chapters: 31, readingMood: "Quiet apocalypse", summary: "In a post-apocalyptic future, the last remaining citrus seed may decide whether humanity survives.", excerpt: "The archive lights flickered awake only when Mara whispered the code her mother died keeping." },
 ];
 
 const ADMIN_ADS = [
@@ -60,6 +60,7 @@ const STORY_STYLE_DEFAULTS = {
 };
 
 const ALL_STORIES = [...COMICS, ...NOVELS];
+const PILL_BUTTON_BASE = "rounded-full px-4 py-1.5 text-xs font-bold whitespace-nowrap transition-all md:px-6 md:py-2 md:text-sm";
 
 const VIEW_PATHS: Record<string, string> = {
   home: '/',
@@ -73,6 +74,8 @@ const VIEW_PATHS: Record<string, string> = {
   premium: '/premium',
   wallet: '/wallet',
 };
+
+const VIEW_ALL_SECTIONS = ['popular', 'daily', 'originals', 'novels'] as const;
 
 function findStoryById(storyId?: string | null) {
   if (!storyId) return null;
@@ -96,10 +99,15 @@ function getRouteState(pathname: string) {
     return story ? { view: story.type === 'novel' ? 'novel-reader' : 'reader', story } : null;
   }
 
+  const viewAllMatch = pathname.match(/^\/view-all\/([^/]+)\/?$/);
+  if (viewAllMatch && VIEW_ALL_SECTIONS.includes(viewAllMatch[1] as any)) {
+    return { view: 'view-all', section: viewAllMatch[1] };
+  }
+
   return null;
 }
 
-function getPathForView(view: string, selectedComic: any) {
+function getPathForView(view: string, selectedComic: any, viewAllSection: string) {
   if (view in VIEW_PATHS) {
     return VIEW_PATHS[view];
   }
@@ -110,6 +118,10 @@ function getPathForView(view: string, selectedComic: any) {
 
   if ((view === 'reader' || view === 'novel-reader') && selectedComic) {
     return `/reader/${selectedComic.id}`;
+  }
+
+  if (view === 'view-all' && viewAllSection) {
+    return `/view-all/${viewAllSection}`;
   }
 
   return null;
@@ -129,6 +141,7 @@ export default function App() {
   const [creatorType, setCreatorType] = useState<'original' | 'self' | null>(null);
   const [dashboardTab, setDashboardTab] = useState<'series' | 'monetization' | 'stats'>('series');
   const [selectedComic, setSelectedComic] = useState<any>(null);
+  const [viewAllSection, setViewAllSection] = useState<(typeof VIEW_ALL_SECTIONS)[number]>('popular');
   const [showAd, setShowAd] = useState(false);
   const [adTimeLeft, setAdTimeLeft] = useState(5);
 
@@ -170,6 +183,8 @@ export default function App() {
   const [isSavingStoryStyle, setIsSavingStoryStyle] = useState(false);
   const [storyStyleMessage, setStoryStyleMessage] = useState('');
   const convexAdminUsers = useQuery(api.users.getAllUsers, { limit: 100 });
+  const adminDashboardStats = useQuery((api as any).series.getAdminDashboardStats, {});
+  const adminCampaigns = useQuery(api.campaigns.getAllCampaigns, {});
   const selectedStoryStyle = useQuery(api.series.getStoryStyleByKey, selectedComic ? { storyKey: String(selectedComic.id) } : "skip");
   const editableStoryStyle = useQuery(api.series.getStoryStyleByKey, editableStoryKey ? { storyKey: editableStoryKey } : "skip");
   const upsertStoryStyle = useMutation(api.series.upsertStoryStyle);
@@ -189,16 +204,20 @@ export default function App() {
       setSelectedComic((prev: any) => (prev?.id === routeState.story.id ? prev : routeState.story));
     }
 
+    if ('section' in routeState && routeState.section) {
+      setViewAllSection((prev) => (prev === routeState.section ? prev : (routeState.section as (typeof VIEW_ALL_SECTIONS)[number])));
+    }
+
     setCurrentView((prev) => (prev === routeState.view ? prev : routeState.view));
   }, [location.pathname, navigate]);
 
   useEffect(() => {
-    const nextPath = getPathForView(currentView, selectedComic);
+    const nextPath = getPathForView(currentView, selectedComic, viewAllSection);
 
     if (!nextPath || nextPath === location.pathname) return;
 
     navigate(nextPath);
-  }, [currentView, selectedComic?.id, location.pathname, navigate]);
+  }, [currentView, selectedComic?.id, viewAllSection, location.pathname, navigate]);
 
   useEffect(() => {
     if (!user && !userProfile) return;
@@ -262,6 +281,7 @@ export default function App() {
   );
   const editableStories = ALL_STORIES;
   const editableStory = editableStories.find((story) => String(story.id) === editableStoryKey) || NOVELS[0];
+  const filteredNovels = NOVELS.filter((novel) => novel.genre === activeLemonCategory || activeLemonCategory === 'Drama');
   const filteredAdminUsers = (convexAdminUsers || []).filter((adminUser) => {
     const query = adminUserSearch.trim().toLowerCase();
     if (!query) return true;
@@ -288,6 +308,32 @@ export default function App() {
     ? 'border border-white/15 bg-white/10 backdrop-blur-sm'
     : 'border border-zinc-200 bg-white shadow-sm';
   const readerFontClass = readerStoryStyle.fontStyle === 'serif' ? 'font-serif' : 'font-sans';
+  const viewAllConfig = {
+    popular: {
+      title: `${activeCategory} stories`,
+      eyebrow: 'Popular on Lemonade',
+      description: `Everything readers are opening in ${activeCategory.toLowerCase()} right now.`,
+      items: COMICS.filter((comic) => comic.genre === activeCategory || activeCategory === 'Drama'),
+    },
+    daily: {
+      title: `${activeDay} drops`,
+      eyebrow: 'Weekly release board',
+      description: `Every title dropping on ${activeDay}.`,
+      items: COMICS.filter((comic) => comic.day === activeDay || activeDay === 'Sun'),
+    },
+    originals: {
+      title: 'Lemonade Originals',
+      eyebrow: 'Exclusive lineup',
+      description: 'The complete originals shelf, from breakout action to weekend drama.',
+      items: COMICS.filter((comic) => comic.isOriginal),
+    },
+    novels: {
+      title: `${activeLemonCategory} novels`,
+      eyebrow: 'Reading room',
+      description: `Long-form fiction, curated for ${activeLemonCategory.toLowerCase()} readers.`,
+      items: filteredNovels,
+    },
+  } as const;
 
   useEffect(() => {
     if (!selectedComic) return;
@@ -318,6 +364,11 @@ export default function App() {
   const openSignupModal = () => {
     setAuthMode('signup');
     setIsAuthModalOpen(true);
+  };
+
+  const openViewAll = (section: (typeof VIEW_ALL_SECTIONS)[number]) => {
+    setViewAllSection(section);
+    setCurrentView('view-all');
   };
 
   const handleProfileClick = () => {
@@ -437,14 +488,13 @@ export default function App() {
         <img 
           src="https://picsum.photos/seed/lemonade-hero/1920/1080" 
           alt="Home Banner" 
-          className="w-full h-full object-cover saturate-[0.88] brightness-[0.84]"
+          className="w-full h-full object-cover saturate-[0.88] brightness-[0.7]"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-white/72 via-white/22 to-white/0" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+        <div className="absolute inset-0 bg-black/20" />
         <div className="absolute inset-0 flex items-end">
           <div className={pageContainerClass}>
-            <div className="max-w-xl rounded-3xl bg-white/50 px-6 py-6 backdrop-blur-[2px] md:mb-4 md:px-7">
+            <div className="max-w-xl rounded-3xl bg-white/88 px-6 py-6 shadow-[0_24px_80px_rgba(15,23,42,0.14)] md:mb-4 md:px-7">
               <Badge className="mb-4 bg-foreground text-background font-bold uppercase">Now on LEMONADE</Badge>
               <h1 
                 className="mb-4 text-3xl font-black uppercase tracking-tighter text-zinc-950 md:text-5xl"
@@ -506,7 +556,7 @@ export default function App() {
           <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
             <span className="text-foreground font-bold uppercase">Popular</span> SERIES BY CATEGORY
           </h2>
-          <div className="flex items-center gap-1 text-muted-foreground text-sm cursor-pointer hover:text-foreground">
+          <div onClick={() => openViewAll('popular')} className="flex items-center gap-1 text-muted-foreground text-sm cursor-pointer hover:text-foreground">
             View all <ChevronRight className="w-4 h-4" />
           </div>
         </div>
@@ -516,7 +566,7 @@ export default function App() {
             <button
               key={category}
               onClick={() => setActiveCategory(category)}
-              className={`px-6 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all ${activeCategory === category ? 'bg-primary-dark text-primary-foreground' : 'bg-muted hover:bg-muted/80 text-muted-foreground'}`}
+              className={`${PILL_BUTTON_BASE} ${activeCategory === category ? 'bg-primary-dark text-primary-foreground' : 'bg-muted hover:bg-muted/80 text-muted-foreground'}`}
             >
               {category}
             </button>
@@ -567,7 +617,7 @@ export default function App() {
           <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
             <span className="text-foreground font-bold uppercase">Daily</span> UPDATES
           </h2>
-          <div className="flex items-center gap-1 text-muted-foreground text-sm cursor-pointer hover:text-foreground">
+          <div onClick={() => openViewAll('daily')} className="flex items-center gap-1 text-muted-foreground text-sm cursor-pointer hover:text-foreground">
             View all <ChevronRight className="w-4 h-4" />
           </div>
         </div>
@@ -577,7 +627,7 @@ export default function App() {
             <button
               key={day}
               onClick={() => setActiveDay(day)}
-              className={`px-6 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all ${activeDay === day ? 'bg-primary-dark text-primary-foreground' : 'bg-muted hover:bg-muted/80 text-muted-foreground'}`}
+              className={`${PILL_BUTTON_BASE} ${activeDay === day ? 'bg-primary-dark text-primary-foreground' : 'bg-muted hover:bg-muted/80 text-muted-foreground'}`}
             >
               {day}
             </button>
@@ -613,25 +663,24 @@ export default function App() {
     <div className="pb-20">
       <div className="relative h-[400px] w-full overflow-hidden mb-12">
         <img 
-          src="https://picsum.photos/seed/originals-hero/1920/1080" 
-          alt="Featured Original" 
-          className="w-full h-full object-cover saturate-[0.9] brightness-[0.82]" 
+          src="https://picsum.photos/seed/lemonade-originals/1920/1080" 
+          alt="Lemonade Originals" 
+          className="w-full h-full object-cover saturate-[0.9] brightness-[0.72]" 
           referrerPolicy="no-referrer" 
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-white/72 via-white/28 to-white/0" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/18 to-transparent" />
+        <div className="absolute inset-0 bg-black/25" />
         <div className="absolute inset-0 flex items-end">
           <div className={pageContainerClass}>
-            <div className="max-w-xl rounded-3xl bg-white/50 px-6 py-6 backdrop-blur-[2px] md:mb-4 md:px-7">
-              <Badge className="mb-4 bg-foreground text-background font-bold uppercase">Featured Manga / Manwha</Badge>
+            <div className="max-w-xl rounded-3xl bg-white/88 px-6 py-6 shadow-[0_24px_80px_rgba(15,23,42,0.14)] md:mb-4 md:px-7">
+              <Badge className="mb-4 bg-foreground text-background font-bold uppercase">Lemonade Originals</Badge>
               <h1 
                 className="mb-4 text-3xl font-black uppercase tracking-tighter text-zinc-950 md:text-5xl"
               >
-                The Price Is Your Everything
+                Original stories built for Lemonade
               </h1>
-              <p className="mb-6 max-w-lg text-base font-medium leading-8 text-zinc-700 md:text-lg">A reading-first destination for manga and manwha with weekly drops, high-performing romance, action, and drama titles.</p>
-              <Button size="lg" className="rounded-full px-8 font-bold gap-2" onClick={() => openSeriesDetails(COMICS[6])}>
-                <Play className="w-5 h-5" /> Start Reading
+              <p className="mb-6 max-w-lg text-base font-medium leading-8 text-zinc-700 md:text-lg">Exclusive webtoons with weekly drops, strong hooks, and the polished look readers now expect from Lemonade Originals.</p>
+              <Button size="lg" className="rounded-full px-8 font-bold gap-2" onClick={() => openViewAll('originals')}>
+                <Play className="w-5 h-5" /> Browse Originals
               </Button>
             </div>
           </div>
@@ -645,7 +694,7 @@ export default function App() {
             <button
               key={day}
               onClick={() => setActiveDay(day)}
-              className={`px-6 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all ${activeDay === day ? 'bg-primary-dark text-primary-foreground' : 'bg-muted hover:bg-muted/80 text-muted-foreground'}`}
+              className={`${PILL_BUTTON_BASE} ${activeDay === day ? 'bg-primary-dark text-primary-foreground' : 'bg-muted hover:bg-muted/80 text-muted-foreground'}`}
             >
               {day}
             </button>
@@ -682,9 +731,14 @@ export default function App() {
         </div>
 
         <div className="mb-12">
-          <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2 mb-8">
+          <div className="mb-8 flex items-center justify-between">
+            <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
             <span className="text-foreground font-bold uppercase">All</span> MANGA / MANWHA
-          </h2>
+            </h2>
+            <button type="button" onClick={() => openViewAll('originals')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+              View all <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
           <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-2 gap-y-8">
             {COMICS.filter(c => c.isOriginal).map((comic) => (
               <div key={comic.id} className="flex flex-col cursor-pointer group" onClick={() => openSeriesDetails(comic)}>
@@ -778,6 +832,50 @@ export default function App() {
       )}
     </div>
   );
+
+  const renderViewAll = () => {
+    const config = viewAllConfig[viewAllSection];
+
+    return (
+      <div className="mx-auto min-h-[60vh] w-full max-w-7xl px-4 py-10 md:px-6 lg:px-8">
+        <div className="mb-8 flex items-center justify-between gap-4 border-b border-border pb-6">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.28em] text-primary">{config.eyebrow}</p>
+            <h1 className="mt-3 text-3xl font-black tracking-tighter text-zinc-950 md:text-4xl">{config.title}</h1>
+            <p className="mt-3 max-w-2xl text-sm text-muted-foreground md:text-base">{config.description}</p>
+          </div>
+          <Button variant="outline" className="rounded-full" onClick={() => setCurrentView(viewAllSection === 'novels' ? 'Novel' : viewAllSection === 'originals' ? 'manga' : 'home')}>
+            Back
+          </Button>
+        </div>
+
+        <div className={`grid gap-6 ${viewAllSection === 'novels' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5'}`}>
+          {config.items.map((item: any) => (
+            <div key={item.id} className="group cursor-pointer" onClick={() => openSeriesDetails(item)}>
+              <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-border bg-muted">
+                <img src={item.cover} alt={item.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" referrerPolicy="no-referrer" />
+                {item.type === 'novel' ? (
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent p-4">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/70">{item.readingMood}</p>
+                  </div>
+                ) : item.isNew ? (
+                  <div className="absolute left-3 top-3 rounded-full bg-primary px-2 py-1 text-[10px] font-bold uppercase text-white">
+                    New
+                  </div>
+                ) : null}
+              </div>
+              <div className="mt-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-400">{item.genre}</p>
+                <h3 className="mt-1 text-base font-bold text-zinc-950 transition-colors group-hover:text-primary">{item.title}</h3>
+                <p className="mt-1 text-sm text-zinc-500">{item.creator}</p>
+                <p className="mt-2 text-sm leading-6 text-zinc-600 line-clamp-2">{item.excerpt || item.summary}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   const renderAuth = () => (
     <div className="px-4 py-16 max-w-md mx-auto w-full min-h-[70vh] flex flex-col items-center">
@@ -1774,19 +1872,18 @@ export default function App() {
     <div className="pb-20">
       <div className="relative h-[400px] w-full overflow-hidden mb-12">
         <img 
-          src="https://picsum.photos/seed/novel/1920/1080" 
+          src="https://picsum.photos/seed/lemonade-novels/1920/1080" 
           alt="Novel Banner" 
-          className="w-full h-full object-cover saturate-[0.9] brightness-[0.8]"
+          className="w-full h-full object-cover saturate-[0.9] brightness-[0.72]"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-white/72 via-white/24 to-white/0" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+        <div className="absolute inset-0 bg-black/20" />
         <div className="absolute inset-0 flex items-end">
           <div className={pageContainerClass}>
-            <div className="max-w-xl rounded-3xl bg-white/50 px-6 py-6 backdrop-blur-[2px] md:mb-4 md:px-7">
-              <Badge className="mb-4 bg-foreground text-background font-bold uppercase">NEW NOVEL SECTION</Badge>
-              <h1 className="mb-4 text-3xl font-black uppercase tracking-tighter text-zinc-950 md:text-5xl">Novel NOVELS</h1>
-              <p className="mb-6 max-w-lg text-base font-medium leading-8 text-zinc-700 md:text-lg">Dive into a world of words. Fresh stories, updated daily. Only on Lemonade.</p>
+            <div className="max-w-xl rounded-3xl bg-white/88 px-6 py-6 shadow-[0_24px_80px_rgba(15,23,42,0.14)] md:mb-4 md:px-7">
+              <Badge className="mb-4 bg-foreground text-background font-bold uppercase">Lemonade Novels</Badge>
+              <h1 className="mb-4 text-3xl font-black uppercase tracking-tighter text-zinc-950 md:text-5xl">Novels</h1>
+              <p className="mb-6 max-w-lg text-base font-medium leading-8 text-zinc-700 md:text-lg">Serial fiction with rich atmospheres, chapter-by-chapter cliffhangers, and enough detail to stay with readers long after the page ends.</p>
               <Button size="lg" className="rounded-full px-8 font-bold gap-2" onClick={() => openSeriesDetails(NOVELS[0])}>
                 <BookOpen className="w-5 h-5" /> Start Reading
               </Button>
@@ -1802,7 +1899,7 @@ export default function App() {
             <button
               key={cat}
               onClick={() => setActiveLemonCategory(cat)}
-              className={`px-6 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all ${activeLemonCategory === cat ? 'bg-primary-dark text-primary-foreground' : 'bg-muted hover:bg-muted/80 text-muted-foreground'}`}
+              className={`${PILL_BUTTON_BASE} ${activeLemonCategory === cat ? 'bg-primary-dark text-primary-foreground' : 'bg-muted hover:bg-muted/80 text-muted-foreground'}`}
             >
               {cat}
             </button>
@@ -1811,12 +1908,15 @@ export default function App() {
 
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
-            <span className="bg-primary-dark text-primary-foreground px-2 py-0.5 rounded">Novel</span> {activeLemonCategory.toUpperCase()} NOVELS
+            {activeLemonCategory.toUpperCase()} NOVELS
           </h2>
+          <button type="button" onClick={() => openViewAll('novels')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+            View all <ChevronRight className="h-4 w-4" />
+          </button>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-          {NOVELS.filter(n => n.genre === activeLemonCategory || activeLemonCategory === 'Drama').map((novel) => (
+          {filteredNovels.map((novel) => (
             <div key={novel.id} className="group cursor-pointer" onClick={() => openSeriesDetails(novel)}>
               <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-3 border border-border group-hover:border-primary transition-colors">
                 <img 
@@ -1825,12 +1925,17 @@ export default function App() {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">
-                  Novel
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/75">{novel.readingMood}</p>
                 </div>
               </div>
               <h3 className="font-bold text-sm line-clamp-1 group-hover:text-primary transition-colors">{novel.title}</h3>
               <p className="text-xs text-muted-foreground font-medium">{novel.creator}</p>
+              <p className="mt-2 text-xs leading-5 text-zinc-600 line-clamp-2">{novel.excerpt}</p>
+              <div className="mt-3 flex items-center gap-3 text-[11px] font-semibold text-zinc-500">
+                <span>{novel.chapters} chapters</span>
+                <span>{novel.likes} likes</span>
+              </div>
             </div>
           ))}
         </div>
@@ -1843,10 +1948,10 @@ export default function App() {
       <div className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { label: "Total Users", value: "1.2M", change: "+12%", icon: Users, color: "text-primary" },
-            { label: "Active Series", value: "8.4K", change: "+5%", icon: BookOpen, color: "text-primary" },
-            { label: "Daily Views", value: "45M", change: "+24%", icon: BarChart3, color: "text-primary" },
-            { label: "Revenue", value: "$840K", change: "+18%", icon: DollarSign, color: "text-primary" },
+            { label: "Total Users", value: adminDashboardStats?.totalUsers ?? 0, change: `${adminDashboardStats?.premiumUsers ?? 0} premium`, icon: Users, color: "text-primary" },
+            { label: "Active Series", value: adminDashboardStats?.activeSeries ?? 0, change: `${adminDashboardStats?.totalOriginals ?? 0} originals`, icon: BookOpen, color: "text-primary" },
+            { label: "Story Views", value: adminDashboardStats?.totalViews ?? 0, change: `${adminDashboardStats?.totalLikes ?? 0} likes`, icon: BarChart3, color: "text-primary" },
+            { label: "Wallet Balance", value: `$${(adminDashboardStats?.totalWalletBalance ?? 0).toLocaleString()}`, change: `${adminDashboardStats?.activeCampaigns ?? 0} active campaigns`, icon: DollarSign, color: "text-primary" },
           ].map((stat, i) => (
             <Card key={i} className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -1858,26 +1963,42 @@ export default function App() {
                 </Badge>
               </div>
               <p className="text-sm font-bold text-muted-foreground uppercase tracking-wider">{stat.label}</p>
-              <p className="text-3xl font-black mt-1">{stat.value}</p>
+              <p className="text-3xl font-black mt-1">{typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}</p>
             </Card>
           ))}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <Card className="lg:col-span-2 p-6">
-            <h3 className="text-xl font-bold mb-6">Platform Activity</h3>
-            <div className="h-[300px] w-full bg-muted/30 rounded-xl flex items-center justify-center border border-dashed border-border">
-              <p className="text-muted-foreground font-medium">Activity Chart Visualization</p>
+            <h3 className="text-xl font-bold mb-6">Latest Series</h3>
+            <div className="grid gap-4 md:grid-cols-2">
+              {(adminDashboardStats?.latestSeries || []).map((seriesItem: any) => (
+                <div key={seriesItem._id} className="rounded-2xl border border-border bg-muted/20 p-4">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-zinc-400">{seriesItem.type}</p>
+                  <h4 className="mt-2 text-lg font-bold text-zinc-950">{seriesItem.title}</h4>
+                  <p className="mt-1 text-sm text-zinc-500">{seriesItem.creatorName}</p>
+                  <div className="mt-4 flex items-center gap-4 text-xs font-semibold text-zinc-500">
+                    <span>{seriesItem.genre}</span>
+                    <span>{seriesItem.views} views</span>
+                    <span>{seriesItem.likes} likes</span>
+                  </div>
+                </div>
+              ))}
+              {adminDashboardStats && adminDashboardStats.latestSeries.length === 0 && (
+                <div className="rounded-2xl border border-dashed border-border p-6 text-sm text-muted-foreground">
+                  No series has been created yet.
+                </div>
+              )}
             </div>
           </Card>
           <Card className="p-6">
-            <h3 className="text-xl font-bold mb-6">System Health</h3>
+            <h3 className="text-xl font-bold mb-6">Live Snapshot</h3>
             <div className="space-y-6">
               {[
-                { label: "API Server", status: "Operational", color: "bg-primary" },
-                { label: "Database", status: "Operational", color: "bg-primary" },
-                { label: "Image CDN", status: "Operational", color: "bg-primary" },
-                { label: "Ad Server", status: "Degraded", color: "bg-primary-light" },
+                { label: "Comments", status: `${adminDashboardStats?.totalComments ?? 0} live`, color: "bg-primary" },
+                { label: "Campaigns", status: `${adminDashboardStats?.totalCampaigns ?? 0} total`, color: "bg-primary" },
+                { label: "Scheduled Ads", status: `${adminDashboardStats?.scheduledCampaigns ?? 0} queued`, color: "bg-primary" },
+                { label: "Series Library", status: `${adminDashboardStats?.totalSeries ?? 0} titles`, color: "bg-primary" },
               ].map((sys, i) => (
                 <div key={i} className="flex items-center justify-between">
                   <p className="font-medium">{sys.label}</p>
@@ -1959,50 +2080,60 @@ export default function App() {
     const renderAdminModeration = () => (
       <div className="space-y-6">
         <Card className="p-6">
-          <h3 className="text-xl font-bold mb-6">Pending Content Review</h3>
+          <h3 className="text-xl font-bold mb-6">Latest Content</h3>
           <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="flex items-center justify-between p-4 border border-border rounded-xl hover:bg-muted/30 transition-colors">
+            {(adminDashboardStats?.latestSeries || []).map((seriesItem: any) => (
+              <div key={seriesItem._id} className="flex items-center justify-between p-4 border border-border rounded-xl hover:bg-muted/30 transition-colors">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-16 bg-muted rounded-md overflow-hidden">
-                    <img src={`https://picsum.photos/seed/mod-${i}/100/150`} alt="Content" className="w-full h-full object-cover" />
+                    <img src={`https://picsum.photos/seed/mod-${seriesItem._id}/100/150`} alt={seriesItem.title} className="w-full h-full object-cover" />
                   </div>
                   <div>
-                    <p className="font-bold">Mystic Quest {i}</p>
-                    <p className="text-xs text-muted-foreground">Submitted by Creator_{i} • 2h ago</p>
-                    <Badge className="mt-2 bg-primary/10 text-primary border-none text-[10px]">Webtoon</Badge>
+                    <p className="font-bold">{seriesItem.title}</p>
+                    <p className="text-xs text-muted-foreground">Submitted by {seriesItem.creatorName} • {seriesItem.genre}</p>
+                    <Badge className="mt-2 bg-primary/10 text-primary border-none text-[10px] uppercase">{seriesItem.type}</Badge>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" className="rounded-full font-bold text-xs border-red-500 text-red-500 hover:bg-red-50">Reject</Button>
-                  <Button size="sm" className="rounded-full font-bold text-xs">Approve</Button>
+                  <Button size="sm" variant="outline" className="rounded-full font-bold text-xs">Review</Button>
+                  <Button size="sm" className="rounded-full font-bold text-xs">Mark Seen</Button>
                 </div>
               </div>
             ))}
+            {adminDashboardStats && adminDashboardStats.latestSeries.length === 0 && (
+              <div className="rounded-2xl border border-dashed border-border p-6 text-sm text-muted-foreground">
+                No series submissions yet.
+              </div>
+            )}
           </div>
         </Card>
 
         <Card className="p-6">
-          <h3 className="text-xl font-bold mb-6">Reported Comments</h3>
+          <h3 className="text-xl font-bold mb-6">Recent Comments</h3>
           <div className="space-y-4">
-            {[1, 2].map((i) => (
-              <div key={i} className="p-4 border border-border rounded-xl bg-red-500/5 border-red-500/20">
+            {(adminDashboardStats?.latestComments || []).map((commentItem: any) => (
+              <div key={commentItem._id} className="p-4 border border-border rounded-xl bg-muted/20">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <Flag className="w-4 h-4 text-red-500" />
-                    <span className="text-sm font-bold">Harassment Report</span>
+                    <MessageSquare className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-bold">{commentItem.userName}</span>
                   </div>
-                  <span className="text-xs text-muted-foreground">Reported by User_X • 15m ago</span>
+                  <span className="text-xs text-muted-foreground">{new Date(commentItem.createdAt).toLocaleString()}</span>
                 </div>
                 <p className="text-sm text-muted-foreground bg-white/50 dark:bg-black/20 p-3 rounded-lg mb-4">
-                  "This story is terrible and you should stop writing immediately!"
+                  "{commentItem.text}"
                 </p>
                 <div className="flex justify-end gap-2">
                   <Button size="sm" variant="ghost" className="text-xs font-bold">Dismiss</Button>
-                  <Button size="sm" variant="destructive" className="rounded-full text-xs font-bold">Delete & Warn</Button>
+                  <Button size="sm" variant="outline" className="rounded-full text-xs font-bold">Review Thread</Button>
                 </div>
               </div>
             ))}
+            {adminDashboardStats && adminDashboardStats.latestComments.length === 0 && (
+              <div className="rounded-2xl border border-dashed border-border p-6 text-sm text-muted-foreground">
+                No comments have been posted yet.
+              </div>
+            )}
           </div>
         </Card>
       </div>
@@ -2017,12 +2148,12 @@ export default function App() {
           </Button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {ADMIN_ADS.map(ad => (
-            <Card key={ad.id} className="overflow-hidden group">
+          {(adminCampaigns || []).map(ad => (
+            <Card key={ad._id} className="overflow-hidden group">
               <div className="aspect-video relative overflow-hidden">
-                <img src={ad.image} alt={ad.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <img src={`https://picsum.photos/seed/campaign-${ad._id}/800/400`} alt={ad.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute top-4 right-4">
-                  <Badge className={ad.status === 'Active' ? 'bg-primary' : 'bg-primary-light text-primary-dark'}>{ad.status}</Badge>
+                  <Badge className={ad.status === 'active' ? 'bg-primary' : 'bg-primary-light text-primary-dark'}>{ad.status}</Badge>
                 </div>
               </div>
               <div className="p-6">
@@ -2030,22 +2161,27 @@ export default function App() {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="bg-muted/50 p-3 rounded-xl">
                     <p className="text-[10px] uppercase font-bold text-muted-foreground">Views</p>
-                    <p className="text-xl font-black">{ad.views}</p>
+                    <p className="text-xl font-black">{ad.views.toLocaleString()}</p>
                   </div>
                   <div className="bg-muted/50 p-3 rounded-xl">
                     <p className="text-[10px] uppercase font-bold text-muted-foreground">Clicks</p>
-                    <p className="text-xl font-black">{ad.clicks}</p>
+                    <p className="text-xl font-black">{ad.clicks.toLocaleString()}</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
                   <Button variant="outline" className="flex-1 rounded-full font-bold">Edit</Button>
                   <Button variant="outline" className="rounded-full font-bold px-4">
-                    {ad.status === 'Active' ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {ad.status === 'active' ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </Button>
                 </div>
               </div>
             </Card>
           ))}
+          {adminCampaigns && adminCampaigns.length === 0 && (
+            <Card className="p-8 text-sm text-muted-foreground">
+              No campaigns yet. Create your first ad campaign from this panel.
+            </Card>
+          )}
         </div>
       </div>
     );
@@ -2754,6 +2890,7 @@ export default function App() {
         {currentView === 'admin' && renderAdmin()}
         {currentView === 'my' && renderMy()}
         {currentView === 'search' && renderSearch()}
+        {currentView === 'view-all' && renderViewAll()}
         {currentView === 'publish' && renderPublish()}
         {currentView === 'publish-dashboard' && renderPublishDashboard()}
         {currentView === 'publish-new' && renderPublishNew()}

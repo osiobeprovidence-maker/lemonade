@@ -65,6 +65,48 @@ export const getStoryStyleByKey = query({
   },
 });
 
+export const getAdminDashboardStats = query({
+  args: {},
+  handler: async (ctx) => {
+    const [users, series, comments, campaigns, wallets] = await Promise.all([
+      ctx.db.query("users").collect(),
+      ctx.db.query("series").collect(),
+      ctx.db.query("comments").collect(),
+      ctx.db.query("campaigns").collect(),
+      ctx.db.query("wallet").collect(),
+    ]);
+
+    const totalViews = series.reduce((sum, item) => sum + (item.views || 0), 0);
+    const totalLikes = series.reduce((sum, item) => sum + (item.likes || 0), 0);
+    const totalWalletBalance = wallets.reduce((sum, item) => sum + (item.balance || 0), 0);
+
+    const latestSeries = [...series]
+      .sort((a, b) => (b._creationTime || 0) - (a._creationTime || 0))
+      .slice(0, 4);
+
+    const latestComments = [...comments]
+      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+      .slice(0, 4);
+
+    return {
+      totalUsers: users.length,
+      premiumUsers: users.filter((item) => item.isPremium).length,
+      activeSeries: series.filter((item) => item.status === "ongoing").length,
+      totalSeries: series.length,
+      totalOriginals: series.filter((item) => item.isOriginal).length,
+      totalViews,
+      totalLikes,
+      totalComments: comments.length,
+      activeCampaigns: campaigns.filter((item) => item.status === "active").length,
+      scheduledCampaigns: campaigns.filter((item) => item.status === "scheduled").length,
+      totalCampaigns: campaigns.length,
+      totalWalletBalance,
+      latestSeries,
+      latestComments,
+    };
+  },
+});
+
 // Create series
 export const createSeries = mutation({
   args: {
