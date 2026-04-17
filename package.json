@@ -10,6 +10,7 @@
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
     "backfill:firebase-users": "tsx scripts/backfillFirebaseUsers.ts",
+    "sync:firebase-to-convex": "tsx scripts/syncFirebaseToConvex.ts",
     "convex:dev": "convex dev",
     "convex:deploy": "convex deploy",
     "convex:dashboard": "convex dashboard"

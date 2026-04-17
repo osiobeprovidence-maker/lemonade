@@ -1,11 +1,14 @@
 // @ts-nocheck
-import "dotenv/config";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { config as loadEnv } from "dotenv";
 import { initializeApp, cert, getApps, AppOptions } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
+
+loadEnv({ path: resolve(process.cwd(), ".env.local") });
+loadEnv();
 
 type FirebaseUserRecord = {
   uid: string;
