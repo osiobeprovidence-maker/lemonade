@@ -353,23 +353,21 @@ export default function App() {
         <img 
           src="https://picsum.photos/seed/lemonade-hero/1920/1080" 
           alt="Home Banner" 
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover saturate-[0.88] brightness-[0.84]"
           referrerPolicy="no-referrer"
         />
+        <div className="absolute inset-0 bg-gradient-to-r from-white/72 via-white/22 to-white/0" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
         <div className="absolute inset-0 flex items-end">
           <div className={pageContainerClass}>
-            <div className="max-w-2xl pb-8 md:pb-10">
+            <div className="max-w-xl rounded-3xl bg-white/50 px-6 py-6 backdrop-blur-[2px] md:mb-4 md:px-7">
               <Badge className="mb-4 bg-foreground text-background font-bold uppercase">Now on LEMONADE</Badge>
               <h1 
-                className="mb-4 text-3xl font-black uppercase tracking-tighter text-foreground md:text-5xl"
-                style={{
-                  textShadow: '0 2px 10px rgba(0,0,0,0.3)',
-                }}
+                className="mb-4 text-3xl font-black uppercase tracking-tighter text-zinc-950 md:text-5xl"
               >
                 Read the latest hits!
               </h1>
-              <p className="mb-6 text-base font-medium text-muted-foreground md:text-lg">Tap to read stories on LEMONADE!</p>
+              <p className="mb-6 max-w-lg text-base font-medium leading-8 text-zinc-700 md:text-lg">Tap to read stories on LEMONADE!</p>
               <Button size="lg" className="gap-2 rounded-full px-8 font-bold" onClick={() => setCurrentView('manga')}>
                 <Play className="w-5 h-5" /> Start Reading
               </Button>
@@ -533,23 +531,21 @@ export default function App() {
         <img 
           src="https://picsum.photos/seed/originals-hero/1920/1080" 
           alt="Featured Original" 
-          className="w-full h-full object-cover" 
+          className="w-full h-full object-cover saturate-[0.9] brightness-[0.82]" 
           referrerPolicy="no-referrer" 
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-white/72 via-white/28 to-white/0" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/18 to-transparent" />
         <div className="absolute inset-0 flex items-end">
           <div className={pageContainerClass}>
-            <div className="max-w-2xl pb-8 md:pb-10">
+            <div className="max-w-xl rounded-3xl bg-white/50 px-6 py-6 backdrop-blur-[2px] md:mb-4 md:px-7">
               <Badge className="mb-4 bg-foreground text-background font-bold uppercase">Featured Manga / Manwha</Badge>
               <h1 
-                className="mb-4 text-3xl font-black uppercase tracking-tighter text-foreground md:text-5xl"
-                style={{
-                  textShadow: '0 2px 10px rgba(0,0,0,0.3)',
-                }}
+                className="mb-4 text-3xl font-black uppercase tracking-tighter text-zinc-950 md:text-5xl"
               >
                 The Price Is Your Everything
               </h1>
-              <p className="mb-6 text-base font-medium text-muted-foreground md:text-lg">A reading-first destination for manga and manwha with weekly drops, high-performing romance, action, and drama titles.</p>
+              <p className="mb-6 max-w-lg text-base font-medium leading-8 text-zinc-700 md:text-lg">A reading-first destination for manga and manwha with weekly drops, high-performing romance, action, and drama titles.</p>
               <Button size="lg" className="rounded-full px-8 font-bold gap-2" onClick={() => openSeriesDetails(COMICS[6])}>
                 <Play className="w-5 h-5" /> Start Reading
               </Button>
@@ -1696,16 +1692,17 @@ export default function App() {
         <img 
           src="https://picsum.photos/seed/novel/1920/1080" 
           alt="Novel Banner" 
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover saturate-[0.9] brightness-[0.8]"
           referrerPolicy="no-referrer"
         />
+        <div className="absolute inset-0 bg-gradient-to-r from-white/72 via-white/24 to-white/0" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
         <div className="absolute inset-0 flex items-end">
           <div className={pageContainerClass}>
-            <div className="max-w-2xl pb-8 md:pb-10">
+            <div className="max-w-xl rounded-3xl bg-white/50 px-6 py-6 backdrop-blur-[2px] md:mb-4 md:px-7">
               <Badge className="mb-4 bg-foreground text-background font-bold uppercase">NEW NOVEL SECTION</Badge>
-              <h1 className="mb-4 text-3xl font-black uppercase tracking-tighter md:text-5xl">Novel NOVELS</h1>
-              <p className="mb-6 text-base font-medium text-muted-foreground md:text-lg">Dive into a world of words. Fresh stories, updated daily. Only on Lemonade.</p>
+              <h1 className="mb-4 text-3xl font-black uppercase tracking-tighter text-zinc-950 md:text-5xl">Novel NOVELS</h1>
+              <p className="mb-6 max-w-lg text-base font-medium leading-8 text-zinc-700 md:text-lg">Dive into a world of words. Fresh stories, updated daily. Only on Lemonade.</p>
               <Button size="lg" className="rounded-full px-8 font-bold gap-2" onClick={() => openSeriesDetails(NOVELS[0])}>
                 <BookOpen className="w-5 h-5" /> Start Reading
               </Button>
