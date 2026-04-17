@@ -61,7 +61,7 @@ const STORY_STYLE_DEFAULTS = {
 
 const ALL_STORIES = [...COMICS, ...NOVELS];
 const PILL_BUTTON_BASE = "rounded-full px-4 py-1.5 text-xs font-bold whitespace-nowrap transition-all md:px-6 md:py-2 md:text-sm";
-const HOME_SECTION_HEADING_CLASS = "max-w-[13rem] text-[clamp(1.7rem,7vw,2.5rem)] font-black leading-[0.9] tracking-[-0.06em] sm:max-w-none sm:text-[clamp(1.9rem,5vw,2.5rem)]";
+const HOME_SECTION_HEADING_CLASS = "text-[1.25rem] font-bold leading-tight sm:text-[1.5rem]";
 const HOME_VIEW_ALL_CLASS = "flex items-center gap-1 text-[0.82rem] font-medium text-muted-foreground transition-colors hover:text-foreground sm:text-sm";
 
 const VIEW_PATHS: Record<string, string> = {
@@ -545,7 +545,7 @@ export default function App() {
       <div className={`${pageContainerClass} mb-8 py-2`}>
         <div className="flex items-center justify-between mb-6">
           <h2 className={HOME_SECTION_HEADING_CLASS}>
-            <span className="text-foreground font-bold uppercase">Trending</span> &amp; popular series
+            Trending &amp; Popular Series
           </h2>
           <button type="button" onClick={() => openViewAll('trending')} className={HOME_VIEW_ALL_CLASS}>
             View all <ChevronRight className="h-4 w-4" />
@@ -587,7 +587,7 @@ export default function App() {
       <div className={`${pageContainerClass} mb-8 py-2`}>
         <div className="flex items-center justify-between mb-6">
           <h2 className={HOME_SECTION_HEADING_CLASS}>
-            <span className="text-foreground font-bold uppercase">Popular</span> series by category
+            Popular Series by Category
           </h2>
           <button type="button" onClick={() => openViewAll('popular')} className={HOME_VIEW_ALL_CLASS}>
             View all <ChevronRight className="w-4 h-4" />
@@ -628,7 +628,7 @@ export default function App() {
       <div className={`${pageContainerClass} mb-8 py-2`}>
         <div className="flex items-center justify-between mb-6">
           <h2 className={HOME_SECTION_HEADING_CLASS}>
-            <span className="text-foreground font-bold uppercase">Newly</span> released originals
+            Newly Released Originals
           </h2>
           <button type="button" onClick={() => openViewAll('new-releases')} className={HOME_VIEW_ALL_CLASS}>
             View all <ChevronRight className="w-4 h-4" />
@@ -651,7 +651,7 @@ export default function App() {
       <div className={`${pageContainerClass} mb-8 py-2`}>
         <div className="flex items-center justify-between mb-6">
           <h2 className={HOME_SECTION_HEADING_CLASS}>
-            <span className="text-foreground font-bold uppercase">Daily</span> updates
+            Daily Updates
           </h2>
           <button type="button" onClick={() => openViewAll('daily')} className={HOME_VIEW_ALL_CLASS}>
             View all <ChevronRight className="w-4 h-4" />
@@ -754,8 +754,8 @@ export default function App() {
 
         <div className="mb-12">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
-              <span className="text-foreground font-bold uppercase">Manga / Manwha</span>
+            <h2 className="text-xl font-bold tracking-tight sm:text-2xl flex items-center gap-2">
+              Manga / Manhwa
             </h2>
           </div>
 
@@ -783,8 +783,8 @@ export default function App() {
 
         <div className="mb-12">
           <div className="mb-8 flex items-center justify-between">
-            <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
-            <span className="text-foreground font-bold uppercase">All</span> MANGA / MANWHA
+            <h2 className="text-xl font-bold tracking-tight sm:text-2xl flex items-center gap-2">
+              All Manga / Manhwa
             </h2>
             <button type="button" onClick={() => openViewAll('originals')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
               View all <ChevronRight className="h-4 w-4" />
