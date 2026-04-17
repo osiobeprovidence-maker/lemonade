@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from './contexts/AuthContext';
 import { useMutation, useQuery } from 'convex/react';
@@ -59,9 +59,66 @@ const STORY_STYLE_DEFAULTS = {
   fontStyle: 'serif' as 'serif' | 'sans',
 };
 
+const ALL_STORIES = [...COMICS, ...NOVELS];
+
+const VIEW_PATHS: Record<string, string> = {
+  home: '/',
+  manga: '/manga',
+  Novel: '/novels',
+  my: '/my',
+  search: '/search',
+  profile: '/profile',
+  admin: '/admin',
+  'ads-manager': '/ads-manager',
+  premium: '/premium',
+  wallet: '/wallet',
+};
+
+function findStoryById(storyId?: string | null) {
+  if (!storyId) return null;
+
+  return ALL_STORIES.find((story) => String(story.id) === storyId) || null;
+}
+
+function getRouteState(pathname: string) {
+  const view = Object.entries(VIEW_PATHS).find(([, path]) => path === pathname)?.[0];
+  if (view) return { view };
+
+  const seriesMatch = pathname.match(/^\/series\/([^/]+)\/?$/);
+  if (seriesMatch) {
+    const story = findStoryById(seriesMatch[1]);
+    return story ? { view: 'series-details', story } : null;
+  }
+
+  const readerMatch = pathname.match(/^\/reader\/([^/]+)\/?$/);
+  if (readerMatch) {
+    const story = findStoryById(readerMatch[1]);
+    return story ? { view: story.type === 'novel' ? 'novel-reader' : 'reader', story } : null;
+  }
+
+  return null;
+}
+
+function getPathForView(view: string, selectedComic: any) {
+  if (view in VIEW_PATHS) {
+    return VIEW_PATHS[view];
+  }
+
+  if (view === 'series-details' && selectedComic) {
+    return `/series/${selectedComic.id}`;
+  }
+
+  if ((view === 'reader' || view === 'novel-reader') && selectedComic) {
+    return `/reader/${selectedComic.id}`;
+  }
+
+  return null;
+}
+
 export default function App() {
   const { user, logout, userProfile, updateUserProfile } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [currentView, setCurrentView] = useState('home');
   const [activeCategory, setActiveCategory] = useState('Drama');
   const [activeDay, setActiveDay] = useState('Sun');
@@ -116,6 +173,33 @@ export default function App() {
   const selectedStoryStyle = useQuery(api.series.getStoryStyleByKey, selectedComic ? { storyKey: String(selectedComic.id) } : "skip");
   const editableStoryStyle = useQuery(api.series.getStoryStyleByKey, editableStoryKey ? { storyKey: editableStoryKey } : "skip");
   const upsertStoryStyle = useMutation(api.series.upsertStoryStyle);
+
+  useEffect(() => {
+    const routeState = getRouteState(location.pathname);
+
+    if (!routeState) {
+      if (location.pathname !== '/') {
+        navigate('/', { replace: true });
+      }
+      setCurrentView('home');
+      return;
+    }
+
+    if ('story' in routeState && routeState.story) {
+      setSelectedComic((prev: any) => (prev?.id === routeState.story.id ? prev : routeState.story));
+    }
+
+    setCurrentView((prev) => (prev === routeState.view ? prev : routeState.view));
+  }, [location.pathname, navigate]);
+
+  useEffect(() => {
+    const nextPath = getPathForView(currentView, selectedComic);
+
+    if (!nextPath || nextPath === location.pathname) return;
+
+    navigate(nextPath);
+  }, [currentView, selectedComic?.id, location.pathname, navigate]);
+
   useEffect(() => {
     if (!user && !userProfile) return;
 
@@ -169,14 +253,14 @@ export default function App() {
 
   const skipAd = () => {
     setShowAd(false);
-    setCurrentView('reader');
+    setCurrentView(selectedComic?.type === 'novel' ? 'novel-reader' : 'reader');
   };
 
   const filteredComics = COMICS.filter(comic => 
     comic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     comic.genre.toLowerCase().includes(searchQuery.toLowerCase())
   );
-  const editableStories = [...NOVELS, ...COMICS];
+  const editableStories = ALL_STORIES;
   const editableStory = editableStories.find((story) => String(story.id) === editableStoryKey) || NOVELS[0];
   const filteredAdminUsers = (convexAdminUsers || []).filter((adminUser) => {
     const query = adminUserSearch.trim().toLowerCase();

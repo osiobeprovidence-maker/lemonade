@@ -1,24 +1,33 @@
+import { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { Login } from './pages/Login';
-import App from './App';
+
+const Login = lazy(() => import('./pages/Login').then((module) => ({ default: module.Login })));
+const App = lazy(() => import('./App'));
+
+function RouteFallback() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background text-muted-foreground">
+      Loading Lemonade...
+    </div>
+  );
+}
 
 export default function Router() {
   const { user } = useAuth();
 
   return (
-    <Routes>
-      {/* Public route - everyone sees homepage first */}
-      <Route path="/" element={<App />} />
-      
-      {/* Login route - redirect to home if already logged in */}
-      <Route
-        path="/login"
-        element={user ? <Navigate to="/" replace /> : <Login />}
-      />
-      
-      {/* Catch all redirect to home */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <Suspense fallback={<RouteFallback />}>
+      <Routes>
+        {/* Login route - redirect to home if already logged in */}
+        <Route
+          path="/login"
+          element={user ? <Navigate to="/" replace /> : <Login />}
+        />
+
+        {/* App shell handles in-product routes */}
+        <Route path="*" element={<App />} />
+      </Routes>
+    </Suspense>
   );
 }
