@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
+    "backfill:firebase-users": "tsx scripts/backfillFirebaseUsers.ts",
     "convex:dev": "convex dev",
     "convex:deploy": "convex deploy",
     "convex:dashboard": "convex dashboard"
@@ -29,6 +30,7 @@
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
     "firebase": "^11.3.1",
+    "firebase-admin": "^13.4.0",
     "framer-motion": "^12.38.0",
     "lucide-react": "^0.546.0",
     "react": "^19.0.0",
