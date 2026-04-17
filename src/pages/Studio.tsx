@@ -117,7 +117,7 @@ export function Studio() {
                 </div>
                 <div>
                   <h3 className="text-sm font-bold mb-1">Publish</h3>
-                  <p className="text-xs text-zinc-400">Upload your manga or webtoons easily.</p>
+                  <p className="text-xs text-zinc-400">Upload your manga or afronimations easily.</p>
                 </div>
               </div>
               <div className="flex gap-4">

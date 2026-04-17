@@ -19,18 +19,18 @@ import { updateProfile as updateFirebaseProfile } from 'firebase/auth';
 import { uploadProfilePhoto } from './lib/profilePhoto';
 
 const COMICS = [
-  { id: 1, title: "Surviving the Game as a Barbarian", creator: "K. Ryo", emotion: "Fantasy", genre: "Fantasy", cover: "https://picsum.photos/seed/barbarian/400/533", rankChange: 37, views: "53M", likes: "1.2M", day: "Mon", isNew: true, isOriginal: true, type: 'webtoon' },
-  { id: 2, title: "The Knight Only Lives Today", creator: "Ami", emotion: "Fantasy", genre: "Fantasy", cover: "https://picsum.photos/seed/knight/400/533", rankChange: 34, views: "12M", likes: "800K", day: "Tue", isNew: false, isOriginal: true, type: 'webtoon' },
-  { id: 3, title: "For Your Murder", creator: "J.D.", emotion: "Drama", genre: "Drama", cover: "https://picsum.photos/seed/murder/400/533", rankChange: -2, views: "315K", likes: "174K", day: "Wed", isNew: true, isOriginal: false, type: 'webtoon' },
-  { id: 4, title: "Falling For It", creator: "S. Lin", emotion: "Romance", genre: "Romance", cover: "https://picsum.photos/seed/falling/400/533", rankChange: 31, views: "675K", likes: "388K", day: "Thu", isNew: false, isOriginal: true, type: 'webtoon' },
-  { id: 5, title: "Return of the Blossoming Blade", creator: "T.K.", emotion: "Action", genre: "Action", cover: "https://picsum.photos/seed/blade/400/533", rankChange: 27, views: "194M", likes: "1.1M", day: "Fri", isNew: true, isOriginal: true, type: 'webtoon' },
-  { id: 6, title: "Undercover Wife", creator: "Lila", emotion: "Romance", genre: "Romance", cover: "https://picsum.photos/seed/wife/400/533", rankChange: -4, views: "4M", likes: "232K", day: "Sat", isNew: false, isOriginal: false, type: 'webtoon' },
-  { id: 7, title: "The Price Is Your Everything", creator: "Webtoon", emotion: "Drama", genre: "Drama", cover: "https://picsum.photos/seed/price/400/533", rankChange: 10, views: "53M", likes: "1.3M", day: "Sun", isNew: true, isOriginal: true, type: 'webtoon' },
-  { id: 8, title: "Daytime in the Bunker", creator: "Webtoon", emotion: "Drama", genre: "Drama", cover: "https://picsum.photos/seed/bunker/400/533", rankChange: 5, views: "315K", likes: "174K", day: "Sun", isNew: true, isOriginal: true, type: 'webtoon' },
-  { id: 9, title: "My Wavering Husband", creator: "Webtoon", emotion: "Drama", genre: "Drama", cover: "https://picsum.photos/seed/wavering/400/533", rankChange: 2, views: "675K", likes: "388K", day: "Sun", isNew: true, isOriginal: true, type: 'webtoon' },
-  { id: 10, title: "Acception", creator: "Webtoon", emotion: "Drama", genre: "Drama", cover: "https://picsum.photos/seed/acception/400/533", rankChange: -1, views: "194M", likes: "1.1M", day: "Sun", isNew: false, isOriginal: true, type: 'webtoon' },
-  { id: 11, title: "Adopting a Zombie", creator: "Webtoon", emotion: "Drama", genre: "Drama", cover: "https://picsum.photos/seed/zombie/400/533", rankChange: 0, views: "4M", likes: "232K", day: "Sun", isNew: false, isOriginal: true, type: 'webtoon' },
-  { id: 12, title: "Behind Her Highness's Smile", creator: "Webtoon", emotion: "Drama", genre: "Drama", cover: "https://picsum.photos/seed/smile/400/533", rankChange: 12, views: "28M", likes: "1.3M", day: "Sun", isNew: false, isOriginal: true, type: 'webtoon' },
+  { id: 1, title: "Surviving the Game as a Barbarian", creator: "K. Ryo", emotion: "Fantasy", genre: "Fantasy", cover: "https://picsum.photos/seed/barbarian/400/533", rankChange: 37, views: "53M", likes: "1.2M", day: "Mon", isNew: true, isOriginal: true, type: 'series' },
+  { id: 2, title: "The Knight Only Lives Today", creator: "Ami", emotion: "Fantasy", genre: "Fantasy", cover: "https://picsum.photos/seed/knight/400/533", rankChange: 34, views: "12M", likes: "800K", day: "Tue", isNew: false, isOriginal: true, type: 'series' },
+  { id: 3, title: "For Your Murder", creator: "J.D.", emotion: "Drama", genre: "Drama", cover: "https://picsum.photos/seed/murder/400/533", rankChange: -2, views: "315K", likes: "174K", day: "Wed", isNew: true, isOriginal: false, type: 'series' },
+  { id: 4, title: "Falling For It", creator: "S. Lin", emotion: "Romance", genre: "Romance", cover: "https://picsum.photos/seed/falling/400/533", rankChange: 31, views: "675K", likes: "388K", day: "Thu", isNew: false, isOriginal: true, type: 'series' },
+  { id: 5, title: "Return of the Blossoming Blade", creator: "T.K.", emotion: "Action", genre: "Action", cover: "https://picsum.photos/seed/blade/400/533", rankChange: 27, views: "194M", likes: "1.1M", day: "Fri", isNew: true, isOriginal: true, type: 'series' },
+  { id: 6, title: "Undercover Wife", creator: "Lila", emotion: "Romance", genre: "Romance", cover: "https://picsum.photos/seed/wife/400/533", rankChange: -4, views: "4M", likes: "232K", day: "Sat", isNew: false, isOriginal: false, type: 'series' },
+  { id: 7, title: "The Price Is Your Everything", creator: "Lemonade", emotion: "Drama", genre: "Drama", cover: "https://picsum.photos/seed/price/400/533", rankChange: 10, views: "53M", likes: "1.3M", day: "Sun", isNew: true, isOriginal: true, type: 'series' },
+  { id: 8, title: "Daytime in the Bunker", creator: "Lemonade", emotion: "Drama", genre: "Drama", cover: "https://picsum.photos/seed/bunker/400/533", rankChange: 5, views: "315K", likes: "174K", day: "Sun", isNew: true, isOriginal: true, type: 'series' },
+  { id: 9, title: "My Wavering Husband", creator: "Lemonade", emotion: "Drama", genre: "Drama", cover: "https://picsum.photos/seed/wavering/400/533", rankChange: 2, views: "675K", likes: "388K", day: "Sun", isNew: true, isOriginal: true, type: 'series' },
+  { id: 10, title: "Acception", creator: "Lemonade", emotion: "Drama", genre: "Drama", cover: "https://picsum.photos/seed/acception/400/533", rankChange: -1, views: "194M", likes: "1.1M", day: "Sun", isNew: false, isOriginal: true, type: 'series' },
+  { id: 11, title: "Adopting a Zombie", creator: "Lemonade", emotion: "Drama", genre: "Drama", cover: "https://picsum.photos/seed/zombie/400/533", rankChange: 0, views: "4M", likes: "232K", day: "Sun", isNew: false, isOriginal: true, type: 'series' },
+  { id: 12, title: "Behind Her Highness's Smile", creator: "Lemonade", emotion: "Drama", genre: "Drama", cover: "https://picsum.photos/seed/smile/400/533", rankChange: 12, views: "28M", likes: "1.3M", day: "Sun", isNew: false, isOriginal: true, type: 'series' },
 ];
 
 const NOVELS = [
@@ -172,7 +172,7 @@ export default function App() {
     ]
   });
   const [newComment, setNewComment] = useState('');
-  const [publishType, setPublishType] = useState<'webtoon' | 'novel'>('webtoon');
+  const [publishType, setPublishType] = useState<'series' | 'novel'>('series');
   const [adminUserSearch, setAdminUserSearch] = useState('');
   const [editableStoryKey, setEditableStoryKey] = useState(String(NOVELS[0].id));
   const [storyCoverImage, setStoryCoverImage] = useState('');
@@ -661,7 +661,7 @@ export default function App() {
                 Original stories built for Lemonade.
               </h1>
               <p className="mt-4 max-w-[34rem] text-[clamp(0.98rem,2vw,1.18rem)] font-medium leading-[1.6] tracking-[-0.01em] text-white/82 sm:mt-5">
-                Exclusive webtoons with weekly drops, stronger hooks, and a premium reading atmosphere shaped for the next wave of Lemonade originals.
+                Exclusive afronimations with weekly Drops, stronger hooks, and a premium reading atmosphere shaped for the next wave of Lemonade African stories.
               </p>
               <div className="mt-7 flex flex-col items-start gap-3 sm:mt-8 sm:flex-row sm:items-center">
                 <Button

@@ -37,7 +37,7 @@ const MOCK_SERIES = [
   {
     id: '4',
     title: 'Naija High',
-    creatorName: 'Chioma Webtoons',
+    creatorName: 'Chioma Afronimation',
     coverImage: 'https://picsum.photos/seed/school/600/800',
     subscriberCount: 1500,
     viewCount: 32000,
