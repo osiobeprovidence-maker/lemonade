@@ -103,7 +103,7 @@ export function ProfileCompletionForm({
               <p className="text-sm font-medium text-white">
                 {isUploadingPhoto ? 'Uploading photo...' : 'Upload a profile photo'}
               </p>
-              <p className="text-xs text-white/58">JPG, PNG, or WebP up to 5MB.</p>
+              <p className="text-xs text-white/58">JPG, PNG, or WebP up to 100MB.</p>
             </div>
             <input type="file" accept="image/*" onChange={onProfilePhotoChange} className="hidden" />
           </label>
@@ -134,9 +134,9 @@ export function ProfileCompletionForm({
         <div className="space-y-2">
           <span className="text-sm font-semibold text-white/86">Birthday</span>
           <div className="grid grid-cols-3 gap-3">
-            <SelectField value={birthMonth} onChange={onBirthMonthChange} placeholder="Month" options={MONTHS} />
-            <SelectField value={birthDay} onChange={onBirthDayChange} placeholder="Day" options={DAYS} />
-            <SelectField value={birthYear} onChange={onBirthYearChange} placeholder="Year" options={YEARS} />
+            <SelectField value={birthMonth} onChange={onBirthMonthChange} placeholder="Month" options={MONTHS} required />
+            <SelectField value={birthDay} onChange={onBirthDayChange} placeholder="Day" options={DAYS} required />
+            <SelectField value={birthYear} onChange={onBirthYearChange} placeholder="Year" options={YEARS} required />
           </div>
         </div>
 
@@ -221,22 +221,25 @@ function SelectField({
   onChange,
   placeholder,
   options,
+  required = false,
 }: {
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
   options: string[];
+  required?: boolean;
 }) {
   return (
     <div className="relative">
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="glass-input h-12 w-full appearance-none rounded-2xl bg-transparent px-4 pr-10 text-sm text-white outline-none transition-all duration-200 focus:border-white/28 focus:bg-white/12"
+        required={required}
+        className="glass-input h-12 w-full appearance-none rounded-2xl bg-transparent px-4 pr-10 text-sm text-white outline-none transition-all duration-200 focus:border-white/28 focus:bg-white/12 invalid:text-white/34"
       >
-        <option value="">{placeholder}</option>
+        <option value="" disabled>{placeholder}</option>
         {options.map((option) => (
-          <option key={option} value={option}>
+          <option key={option} value={option} className="bg-zinc-900">
             {option}
           </option>
         ))}

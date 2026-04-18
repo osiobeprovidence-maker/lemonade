@@ -73,6 +73,14 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
     const file = event.target.files?.[0];
     if (!file || !auth.currentUser) return;
 
+    // Check file size (100MB limit)
+    const MAX_FILE_SIZE = 100 * 1024 * 1024;
+    if (file.size > MAX_FILE_SIZE) {
+      setError('Image size too large. Maximum allowed size is 100MB.');
+      event.target.value = '';
+      return;
+    }
+
     try {
       setError('');
       setIsUploadingPhoto(true);
