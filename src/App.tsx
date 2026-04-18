@@ -1697,10 +1697,12 @@ export default function App() {
 
         <div className="space-y-2">
           <label className="text-sm font-bold">Display Name</label>
-          <input type="text" value={userName} onChange={(e) => setUserName(e.target.value)} className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none" required />
+          <p className="text-xs text-muted-foreground">This is the public name readers will see on your profile and comments.</p>
+          <input type="text" value={userName} onChange={(e) => setUserName(e.target.value)} placeholder="Enter your display name" className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none" required />
         </div>
         <div className="space-y-2">
           <label className="text-sm font-bold">Bio</label>
+          <p className="text-xs text-muted-foreground">Share a short intro about yourself, your taste, or what you create.</p>
           <textarea value={userBio} onChange={(e) => setUserBio(e.target.value)} placeholder="Tell us about yourself..." className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none min-h-[100px]" />
         </div>
         <div className="space-y-2">
@@ -1710,14 +1712,17 @@ export default function App() {
         </div>
         <div className="space-y-2">
           <label className="text-sm font-bold">Pronouns</label>
+          <p className="text-xs text-muted-foreground">Optional. This helps other users refer to you correctly.</p>
           <input type="text" value={profilePronouns} onChange={(e) => setProfilePronouns(e.target.value)} placeholder="e.g. she/her, he/him, they/them" className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none" />
         </div>
         <div className="space-y-2">
           <label className="text-sm font-bold">Birthday</label>
+          <p className="text-xs text-muted-foreground">Use your date of birth for profile and account settings.</p>
           <input type="date" value={profileBirthday} onChange={(e) => setProfileBirthday(e.target.value)} className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none" />
         </div>
         <div className="space-y-3">
           <label className="text-sm font-bold">Favorite Genres (Select up to 3)</label>
+          <p className="text-xs text-muted-foreground">We use this to personalize recommendations across Lemonade.</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {CATEGORIES.map((cat) => (
               <label key={`profile-${cat}`} className={`flex items-center gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all ${selectedGenres.includes(cat) ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}>
@@ -1753,7 +1758,7 @@ export default function App() {
           />
           <div>
             <p className="font-bold">Marketing Emails</p>
-            <p className="text-sm text-muted-foreground">Receive product updates, offers, and creator tips by email.</p>
+            <p className="text-sm text-muted-foreground">Turn this on if you want product updates, offers, and creator tips by email.</p>
           </div>
         </label>
         <Button type="submit" className="w-full rounded-full py-6 font-bold" disabled={isSavingProfile || isUploadingProfilePic}>

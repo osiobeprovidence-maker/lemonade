@@ -1,6 +1,12 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
+function omitUndefined<T extends Record<string, unknown>>(value: T) {
+  return Object.fromEntries(
+    Object.entries(value).filter(([, entryValue]) => entryValue !== undefined)
+  );
+}
+
 // Get or create user
 export const getUser = query({
   args: { firebaseUid: v.string() },
@@ -77,7 +83,22 @@ export const updateUserProfile = mutation({
 
     if (!user) throw new Error("User not found");
 
-    await ctx.db.patch(user._id, updates);
+    const sanitizedUpdates = omitUndefined({
+      displayName: updates.displayName,
+      bio: updates.bio,
+      photoURL: updates.photoURL,
+      genres: updates.genres,
+      dropSomethingLink: updates.dropSomethingLink,
+      birthMonth: updates.birthMonth,
+      birthDay: updates.birthDay,
+      birthYear: updates.birthYear,
+      pronouns: updates.pronouns,
+      marketingEmails: updates.marketingEmails,
+      acceptedTerms: updates.acceptedTerms,
+      onboardingCompleted: updates.onboardingCompleted,
+    });
+
+    await ctx.db.patch(user._id, sanitizedUpdates);
     return user._id;
   },
 });
