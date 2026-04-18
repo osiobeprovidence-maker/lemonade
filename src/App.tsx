@@ -2861,47 +2861,8 @@ export default function App() {
     );
   };
 
-  return (
+    return (
     <div className="min-h-screen bg-zinc-950 text-white dark">
-      {/* Top Navigation */}
-      <nav className="sticky top-0 bg-zinc-950/80 backdrop-blur-xl border-b border-white/5 w-full z-50 transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-10 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-6 md:gap-10 h-full">
-            {/* Mobile Hamburger Menu */}
-            <Sheet>
-              <SheetTrigger className="md:hidden -ml-2 flex items-center justify-center w-10 h-10 rounded-full transition-colors cursor-pointer text-zinc-400 hover:bg-white/5 hover:text-white">
-                <Menu className="w-6 h-6" />
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[280px] p-0 border-r border-white/10 bg-zinc-950 text-white">
-                <SheetHeader className="sr-only">
-                  <SheetTitle>Navigation Menu</SheetTitle>
-                </SheetHeader>
-                <div className="p-6 border-b border-white/5">
-                  <div 
-                    className="flex items-center gap-2 text-primary mb-8 cursor-pointer transform hover:scale-105 transition-transform"
-                    onClick={() => { setCurrentView('home'); }}
-                  >
-                    <Logo />
-                  </div>
-                  <div className="flex flex-col gap-6 font-black text-lg tracking-tight">
-                    <div onClick={() => setCurrentView('manga')} className="text-zinc-300 hover:text-primary cursor-pointer transition-colors">Originals</div>
-                    <div onClick={() => setCurrentView('Novel')} className="text-zinc-300 hover:text-primary cursor-pointer transition-colors">
-                      Novels
-                    </div>
-                    <div onClick={handleMyClick} className="text-zinc-300 hover:text-primary cursor-pointer transition-colors">Library</div>
-                  </div>
-                </div>
-                <div className="p-6 flex flex-col gap-5 font-bold text-zinc-400">
-                  {!isLoggedIn && (
-                    <div onClick={openSignupModal} className="flex items-center gap-3 hover:text-white cursor-pointer transition-colors"><User className="w-5 h-5" /> Sign Up</div>
-                  )}
-                  <div onClick={handlePublishClick} className="flex items-center gap-3 text-primary hover:text-primary/80 cursor-pointer transition-colors"><PenTool className="w-5 h-5" /> Publish</div>
-                  <div onClick={() => setCurrentView('ads-manager')} className="flex items-center gap-3 hover:text-white cursor-pointer transition-colors"><BarChart3 className="w-5 h-5" /> Ads Manager</div>
-                  <div onClick={handleMyClick} className="flex items-center gap-3 hover:text-white cursor-pointer transition-colors"><Star className="w-5 h-5" /> Subscriptions</div>
-                </div>
-              </SheetContent>
-            </Sheet>
-
       {/* Header / Navigation */}
       <nav className="sticky top-0 z-[60] w-full border-b border-white/5 bg-zinc-950/90 backdrop-blur-xl h-[5rem]">
         <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 md:px-6 lg:px-10">
