@@ -2,7 +2,7 @@ import { updateProfile, type User } from 'firebase/auth';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { storage } from './firebase';
 
-const MAX_PROFILE_PHOTO_SIZE = 5 * 1024 * 1024;
+const MAX_PROFILE_PHOTO_SIZE = 100 * 1024 * 1024;
 
 export async function uploadProfilePhoto(user: User, file: File) {
   if (!file.type.startsWith('image/')) {
@@ -10,7 +10,7 @@ export async function uploadProfilePhoto(user: User, file: File) {
   }
 
   if (file.size > MAX_PROFILE_PHOTO_SIZE) {
-    throw new Error('Profile photos must be 5MB or smaller.');
+    throw new Error('Profile photos must be 100MB or smaller.');
   }
 
   const fileExtension = file.name.split('.').pop() || 'jpg';
