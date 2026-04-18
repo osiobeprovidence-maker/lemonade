@@ -274,11 +274,16 @@ export default function App() {
   const [dropSomethingLink, setDropSomethingLink] = useState('');
   const [isPremium, setIsPremium] = useState(false);
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [publishGenres, setPublishGenres] = useState<string[]>([]);
+  const [profilePronouns, setProfilePronouns] = useState('');
+  const [profileBirthday, setProfileBirthday] = useState('');
+  const [marketingEmailsEnabled, setMarketingEmailsEnabled] = useState(false);
   const [likedComics, setLikedComics] = useState<Set<StoryId>>(new Set());
   const [isReaderMenuOpen, setIsReaderMenuOpen] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [profileSaveError, setProfileSaveError] = useState('');
+  const [profileSaveMessage, setProfileSaveMessage] = useState('');
   const [isUploadingProfilePic, setIsUploadingProfilePic] = useState(false);
   const profileImageInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -398,6 +403,13 @@ export default function App() {
     setUserProfilePic(userProfile?.photoURL || user?.photoURL || null);
     setDropSomethingLink(userProfile?.dropSomethingLink || '');
     setSelectedGenres(userProfile?.genres || []);
+    setProfilePronouns(userProfile?.pronouns || '');
+    setMarketingEmailsEnabled(Boolean(userProfile?.marketingEmails));
+    setProfileBirthday(
+      userProfile?.birthYear && userProfile?.birthMonth && userProfile?.birthDay
+        ? `${String(userProfile.birthYear).padStart(4, '0')}-${String(userProfile.birthMonth).padStart(2, '0')}-${String(userProfile.birthDay).padStart(2, '0')}`
+        : ''
+    );
     setIsPremium(Boolean(userProfile?.isPremium));
   }, [user, userProfile]);
 
@@ -592,12 +604,14 @@ export default function App() {
     if (!file || !user) return;
 
     setProfileSaveError('');
+    setProfileSaveMessage('');
     setIsUploadingProfilePic(true);
 
     try {
       const photoURL = await uploadProfilePhoto(user, file);
       await updateUserProfile({ photoURL });
       setUserProfilePic(photoURL);
+      setProfileSaveMessage('Profile picture uploaded and saved.');
     } catch (error) {
       console.error('Profile photo upload failed:', error);
       setProfileSaveError(error instanceof Error ? error.message : 'Profile photo upload failed. Please try again.');
@@ -615,12 +629,18 @@ export default function App() {
     }
 
     setProfileSaveError('');
+    setProfileSaveMessage('');
     setIsSavingProfile(true);
 
     try {
       const cleanName = userName.trim() || 'Lemonade Reader';
       const cleanBio = userBio.trim();
       const cleanDropSomethingLink = dropSomethingLink.trim();
+      const cleanPronouns = profilePronouns.trim();
+      const [birthYearRaw, birthMonthRaw, birthDayRaw] = profileBirthday ? profileBirthday.split('-') : [];
+      const birthYear = birthYearRaw ? Number(birthYearRaw) : undefined;
+      const birthMonth = birthMonthRaw || undefined;
+      const birthDay = birthDayRaw ? Number(birthDayRaw) : undefined;
 
       await updateFirebaseProfile(auth.currentUser ?? user, {
         displayName: cleanName,
@@ -633,8 +653,15 @@ export default function App() {
         photoURL: userProfilePic || undefined,
         genres: selectedGenres,
         dropSomethingLink: cleanDropSomethingLink || undefined,
+        birthYear,
+        birthMonth,
+        birthDay,
+        pronouns: cleanPronouns || undefined,
+        marketingEmails: marketingEmailsEnabled,
+        onboardingCompleted: true,
       });
 
+      setProfileSaveMessage('Profile updated successfully.');
       setCurrentView('profile');
     } catch (error) {
       console.error('Failed to save profile:', error);
@@ -1398,29 +1425,29 @@ export default function App() {
             <label className="text-sm font-bold">Series Genres (Select up to 3)</label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {CATEGORIES.map(cat => (
-                <label key={cat} className={`flex items-center gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all ${selectedGenres.includes(cat) ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}>
+                <label key={cat} className={`flex items-center gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all ${publishGenres.includes(cat) ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}>
                   <input 
                     type="checkbox" 
                     className="hidden"
-                    checked={selectedGenres.includes(cat)}
+                    checked={publishGenres.includes(cat)}
                     onChange={(e) => {
                       if (e.target.checked) {
-                        if (selectedGenres.length < 3) {
-                          setSelectedGenres([...selectedGenres, cat]);
+                        if (publishGenres.length < 3) {
+                          setPublishGenres([...publishGenres, cat]);
                         }
                       } else {
-                        setSelectedGenres(selectedGenres.filter(g => g !== cat));
+                        setPublishGenres(publishGenres.filter(g => g !== cat));
                       }
                     }}
                   />
-                  <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${selectedGenres.includes(cat) ? 'bg-primary border-primary' : 'border-muted-foreground'}`}>
-                    {selectedGenres.includes(cat) && <Check className="w-3 h-3 text-white" />}
+                  <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${publishGenres.includes(cat) ? 'bg-primary border-primary' : 'border-muted-foreground'}`}>
+                    {publishGenres.includes(cat) && <Check className="w-3 h-3 text-white" />}
                   </div>
                   <span className="text-sm font-medium">{cat}</span>
                 </label>
               ))}
             </div>
-            <p className="text-xs text-muted-foreground">Chosen: {selectedGenres.join(', ') || 'None'}</p>
+            <p className="text-xs text-muted-foreground">Chosen: {publishGenres.join(', ') || 'None'}</p>
           </div>
 
           <div className="space-y-2">
@@ -1485,6 +1512,16 @@ export default function App() {
       {userBio && (
         <div className="mb-6">
           <p className="text-sm">{userBio}</p>
+        </div>
+      )}
+
+      {(profilePronouns || profileBirthday || selectedGenres.length > 0) && (
+        <div className="mb-8 flex flex-wrap gap-2">
+          {profilePronouns && <Badge variant="secondary">{profilePronouns}</Badge>}
+          {profileBirthday && <Badge variant="secondary">{profileBirthday}</Badge>}
+          {selectedGenres.map((genre) => (
+            <Badge key={genre} variant="outline">{genre}</Badge>
+          ))}
         </div>
       )}
 
@@ -1632,7 +1669,11 @@ export default function App() {
                     variant="ghost" 
                     size="sm" 
                     className="rounded-full font-bold text-red-500 hover:text-red-600 hover:bg-red-50"
-                    onClick={() => setUserProfilePic(null)}
+                    onClick={() => {
+                      setProfileSaveError('');
+                      setProfileSaveMessage('Profile picture will be removed when you save changes.');
+                      setUserProfilePic(null);
+                    }}
                   >
                     Remove
                   </Button>
@@ -1645,6 +1686,12 @@ export default function App() {
         {profileSaveError && (
           <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
             {profileSaveError}
+          </div>
+        )}
+
+        {profileSaveMessage && (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+            {profileSaveMessage}
           </div>
         )}
 
@@ -1661,6 +1708,54 @@ export default function App() {
           <p className="text-xs text-muted-foreground mb-2">Add your DropSomething link so fans can support you directly.</p>
           <input type="url" value={dropSomethingLink} onChange={(e) => setDropSomethingLink(e.target.value)} placeholder="https://dropsomething.com/yourusername" className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none" />
         </div>
+        <div className="space-y-2">
+          <label className="text-sm font-bold">Pronouns</label>
+          <input type="text" value={profilePronouns} onChange={(e) => setProfilePronouns(e.target.value)} placeholder="e.g. she/her, he/him, they/them" className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none" />
+        </div>
+        <div className="space-y-2">
+          <label className="text-sm font-bold">Birthday</label>
+          <input type="date" value={profileBirthday} onChange={(e) => setProfileBirthday(e.target.value)} className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none" />
+        </div>
+        <div className="space-y-3">
+          <label className="text-sm font-bold">Favorite Genres (Select up to 3)</label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {CATEGORIES.map((cat) => (
+              <label key={`profile-${cat}`} className={`flex items-center gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all ${selectedGenres.includes(cat) ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}>
+                <input
+                  type="checkbox"
+                  className="hidden"
+                  checked={selectedGenres.includes(cat)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      if (selectedGenres.length < 3) {
+                        setSelectedGenres([...selectedGenres, cat]);
+                      }
+                    } else {
+                      setSelectedGenres(selectedGenres.filter((genre) => genre !== cat));
+                    }
+                  }}
+                />
+                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${selectedGenres.includes(cat) ? 'bg-primary border-primary' : 'border-muted-foreground'}`}>
+                  {selectedGenres.includes(cat) && <Check className="w-3 h-3 text-white" />}
+                </div>
+                <span className="text-sm font-medium">{cat}</span>
+              </label>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">Selected: {selectedGenres.join(', ') || 'None'}</p>
+        </div>
+        <label className="flex items-start gap-3 rounded-xl border border-border p-4 cursor-pointer">
+          <input
+            type="checkbox"
+            className="mt-1 h-4 w-4 accent-primary"
+            checked={marketingEmailsEnabled}
+            onChange={(e) => setMarketingEmailsEnabled(e.target.checked)}
+          />
+          <div>
+            <p className="font-bold">Marketing Emails</p>
+            <p className="text-sm text-muted-foreground">Receive product updates, offers, and creator tips by email.</p>
+          </div>
+        </label>
         <Button type="submit" className="w-full rounded-full py-6 font-bold" disabled={isSavingProfile || isUploadingProfilePic}>
           {isSavingProfile ? 'Saving...' : 'Save Changes'}
         </Button>

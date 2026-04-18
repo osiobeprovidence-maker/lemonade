@@ -123,14 +123,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const updateUserProfile = async (data: Partial<ConvexUserProfile>) => {
     if (!user) return;
 
-    if (data.displayName || data.photoURL) {
+    if ("displayName" in data || "photoURL" in data) {
       await updateProfile(user, {
-        displayName: data.displayName ?? user.displayName,
-        photoURL: data.photoURL ?? user.photoURL,
+        displayName: data.displayName ?? user.displayName ?? null,
+        photoURL: data.photoURL ?? user.photoURL ?? null,
       });
     }
 
-    await updateUserProfileMutation({
+    const payload = {
       firebaseUid: user.uid,
       displayName: data.displayName,
       bio: data.bio,
@@ -144,8 +144,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       marketingEmails: data.marketingEmails,
       acceptedTerms: data.acceptedTerms,
       onboardingCompleted: data.onboardingCompleted,
+    };
+
+    await updateUserProfileMutation(payload);
+
+    setUserProfile((current) => {
+      if (!current) return current;
+      return {
+        ...current,
+        ...data,
+      };
     });
-    // Refresh profile by triggering a re-render (Convex will update automatically)
   };
 
   return (
