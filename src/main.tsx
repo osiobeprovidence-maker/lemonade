@@ -6,7 +6,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import Router from './Router';
 import './index.css';
 
-const convexUrl = import.meta.env.VITE_CONVEX_URL || 'https://strong-salamander-825.eu-west-1.convex.cloud';
+const rawConvexUrl = import.meta.env.VITE_CONVEX_URL || 'https://strong-salamander-825.eu-west-1.convex.cloud';
+const convexUrl = rawConvexUrl.replace(/\/$/, '');
 const convex = new ConvexReactClient(convexUrl);
 
 createRoot(document.getElementById('root')!).render(
