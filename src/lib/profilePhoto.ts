@@ -1,25 +1,11 @@
 import { updateProfile, type User } from 'firebase/auth';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { storage } from './firebase';
+import { ConvexHttpClient } from 'convex/browser';
+import { api } from '../../convex/_generated/api';
 
-const MAX_PROFILE_PHOTO_SIZE = 100 * 1024 * 1024;
-const MAX_INLINE_PROFILE_PHOTO_SIZE = 2 * 1024 * 1024;
-
-function readFileAsDataUrl(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        resolve(reader.result);
-        return;
-      }
-
-      reject(new Error('Could not read the selected image.'));
-    };
-    reader.onerror = () => reject(new Error('Could not read the selected image.'));
-    reader.readAsDataURL(file);
-  });
-}
+const MAX_PROFILE_PHOTO_SIZE = 10 * 1024 * 1024;
+const rawConvexUrl = import.meta.env.VITE_CONVEX_URL || 'https://strong-salamander-825.eu-west-1.convex.cloud';
+const convexUrl = rawConvexUrl.replace(/\/$/, '');
+const convex = new ConvexHttpClient(convexUrl);
 
 export async function uploadProfilePhoto(user: User, file: File) {
   if (!file.type.startsWith('image/')) {
@@ -27,26 +13,35 @@ export async function uploadProfilePhoto(user: User, file: File) {
   }
 
   if (file.size > MAX_PROFILE_PHOTO_SIZE) {
-    throw new Error('Profile photos must be 100MB or smaller.');
+    throw new Error('Profile photos must be 10MB or smaller.');
   }
 
-  const fileExtension = file.name.split('.').pop() || 'jpg';
-  const storageRef = ref(storage, `profile-pictures/${user.uid}-${Date.now()}.${fileExtension}`);
+  const uploadUrl = await convex.mutation(api.users.generateProfilePhotoUploadUrl, {
+    firebaseUid: user.uid,
+  });
 
-  let photoURL: string;
+  const uploadResult = await fetch(uploadUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': file.type,
+    },
+    body: file,
+  });
 
-  try {
-    await uploadBytes(storageRef, file, { contentType: file.type });
-    photoURL = await getDownloadURL(storageRef);
-  } catch (error) {
-    if (file.size > MAX_INLINE_PROFILE_PHOTO_SIZE) {
-      throw new Error('Profile photo upload failed. Please try a smaller image (2MB or less).');
-    }
-
-    photoURL = await readFileAsDataUrl(file);
-    console.warn('Falling back to inline profile photo storage.', error);
+  if (!uploadResult.ok) {
+    throw new Error('Could not upload the selected profile photo.');
   }
 
-  await updateProfile(user, { photoURL });
-  return photoURL;
+  const { storageId } = await uploadResult.json();
+  if (!storageId) {
+    throw new Error('Profile photo upload did not return a valid storage id.');
+  }
+
+  const savedPhoto = await convex.mutation(api.users.saveProfilePhoto, {
+    firebaseUid: user.uid,
+    storageId,
+  });
+
+  await updateProfile(user, { photoURL: savedPhoto.photoURL });
+  return savedPhoto.photoURL;
 }

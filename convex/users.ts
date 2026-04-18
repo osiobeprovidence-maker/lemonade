@@ -110,6 +110,67 @@ export const updateUserProfile = mutation({
   },
 });
 
+export const generateProfilePhotoUploadUrl = mutation({
+  args: {
+    firebaseUid: v.string(),
+  },
+  handler: async (ctx) => {
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+export const saveProfilePhoto = mutation({
+  args: {
+    firebaseUid: v.string(),
+    storageId: v.id("_storage"),
+  },
+  handler: async (ctx, args) => {
+    let user = await ctx.db
+      .query("users")
+      .withIndex("by_firebase_uid", (q) => q.eq("firebaseUid", args.firebaseUid))
+      .first();
+
+    if (!user) {
+      const userId = await ctx.db.insert("users", {
+        firebaseUid: args.firebaseUid,
+        role: "reader",
+        isPremium: false,
+        genres: [],
+        marketingEmails: false,
+        acceptedTerms: false,
+        onboardingCompleted: false,
+      });
+
+      await ctx.db.insert("wallet", {
+        userId,
+        balance: 0,
+        transactions: [],
+      });
+
+      user = await ctx.db.get(userId);
+    }
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const photoURL = await ctx.storage.getUrl(args.storageId);
+    if (!photoURL) {
+      throw new Error("Could not access the uploaded profile photo");
+    }
+
+    await ctx.db.patch(user._id, {
+      profilePic: args.storageId,
+      photoURL,
+    });
+
+    return {
+      storageId: args.storageId,
+      photoURL,
+    };
+  },
+});
+
 export const createUserProfile = mutation({
   args: {
     userId: v.string(),
