@@ -130,6 +130,47 @@ function getPathForView(view: string, selectedComic: any, viewAllSection: string
   return null;
 }
 
+const HomeSkeleton = () => (
+  <div className="flex flex-col gap-16 pb-24 dark bg-zinc-950 min-h-screen">
+    {/* Hero Skeleton */}
+    <section className="relative w-full h-[80vh] min-h-[600px] flex items-end justify-center overflow-hidden bg-zinc-900/50">
+      <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-10 pb-12 md:pb-24 flex flex-col items-start pt-32 animate-pulse">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <p className="text-zinc-700 font-black tracking-widest uppercase text-2xl opacity-50">Loading Stories...</p>
+        </div>
+        <Skeleton className="h-6 w-32 mb-4 bg-zinc-800/50" />
+        <Skeleton className="h-20 w-3/4 mb-4 bg-zinc-800/50" />
+        <Skeleton className="h-6 w-1/2 mb-8 bg-zinc-800/50" />
+        <div className="flex gap-3">
+          <Skeleton className="h-14 w-40 rounded-[16px] bg-zinc-800/50" />
+          <Skeleton className="h-14 w-40 rounded-[16px] bg-zinc-800/50" />
+        </div>
+      </div>
+    </section>
+
+    <div className="max-w-7xl mx-auto w-full px-6 lg:px-10 flex flex-col gap-20">
+      <section>
+        <Skeleton className="h-8 w-48 mb-6 bg-zinc-800/50" />
+        <div className="flex gap-3 overflow-hidden">
+          {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-10 w-24 rounded-full shrink-0 bg-zinc-800/50" />)}
+        </div>
+      </section>
+
+      <section>
+        <Skeleton className="h-10 w-64 mb-8 bg-zinc-800/50" />
+        <div className="flex gap-6 overflow-hidden">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="min-w-[280px] w-[280px] ml-10">
+              <Skeleton className="aspect-[4/5] rounded-[16px] bg-zinc-800/50" />
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  </div>
+);
+
 export default function App() {
   const { user, logout, userProfile, updateUserProfile } = useAuth();
   const navigate = useNavigate();
@@ -514,44 +555,6 @@ export default function App() {
       setIsSavingStoryStyle(false);
     }
   };
-
-  const HomeSkeleton = () => (
-    <div className="flex flex-col gap-16 pb-24 dark">
-      {/* Hero Skeleton */}
-      <section className="relative w-full h-[80vh] min-h-[600px] flex items-end justify-center overflow-hidden bg-zinc-900">
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-10 pb-12 md:pb-24 flex flex-col items-start pt-32">
-          <Skeleton className="h-6 w-32 mb-4" />
-          <Skeleton className="h-20 w-3/4 mb-4" />
-          <Skeleton className="h-6 w-1/2 mb-8" />
-          <div className="flex gap-3">
-            <Skeleton className="h-14 w-40 rounded-[16px]" />
-            <Skeleton className="h-14 w-40 rounded-[16px]" />
-          </div>
-        </div>
-      </section>
-
-      <div className="max-w-7xl mx-auto w-full px-6 lg:px-10 flex flex-col gap-20">
-        <section>
-          <Skeleton className="h-8 w-48 mb-6" />
-          <div className="flex gap-3 overflow-hidden">
-            {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-10 w-24 rounded-full shrink-0" />)}
-          </div>
-        </section>
-
-        <section>
-          <Skeleton className="h-10 w-64 mb-8" />
-          <div className="flex gap-6 overflow-hidden">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="min-w-[280px] w-[280px] ml-10">
-                <Skeleton className="aspect-[4/5] rounded-[16px]" />
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
-    </div>
-  );
 
   const renderHome = () => {
     if (backendSeries === undefined) return <HomeSkeleton />;
