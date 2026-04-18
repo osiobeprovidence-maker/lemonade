@@ -910,8 +910,8 @@ export default function App() {
         <div className="mb-8 flex flex-col gap-5 border-b border-border pb-6 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div>
             <p className="text-[0.72rem] font-bold uppercase tracking-[0.28em] text-primary sm:text-xs">{config.eyebrow}</p>
-            <h1 className="mt-3 max-w-[12ch] text-[clamp(2rem,7vw,4rem)] font-black leading-[0.92] tracking-[-0.06em] text-zinc-950 sm:max-w-none">{config.title}</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground md:text-base">{config.description}</p>
+            <h1 className="mt-3 max-w-[12ch] text-[clamp(2rem,7vw,4rem)] font-black leading-[0.92] tracking-[-0.06em] text-white sm:max-w-none">{config.title}</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-400 md:text-base">{config.description}</p>
           </div>
           <Button variant="outline" className="w-fit rounded-full" onClick={() => setCurrentView(viewAllSection === 'novels' ? 'Novel' : viewAllSection === 'originals' ? 'manga' : 'home')}>
             Back
@@ -935,7 +935,7 @@ export default function App() {
               </div>
               <div className="mt-3">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-400">{item.genre}</p>
-                <h3 className="mt-1 text-base font-bold text-zinc-950 transition-colors group-hover:text-primary">{item.title}</h3>
+                <h3 className="mt-1 text-base font-bold text-white transition-colors group-hover:text-primary">{item.title}</h3>
                 <p className="mt-1 text-sm text-zinc-500">{item.creator}</p>
                 <p className="mt-2 text-sm leading-6 text-zinc-600 line-clamp-2">{item.excerpt || item.summary}</p>
               </div>
@@ -2019,8 +2019,8 @@ export default function App() {
               </div>
               <h3 className="font-bold text-sm line-clamp-1 group-hover:text-primary transition-colors">{novel.title}</h3>
               <p className="text-xs text-muted-foreground font-medium">{novel.creator}</p>
-              <p className="mt-2 text-xs leading-5 text-zinc-600 line-clamp-2">{novel.excerpt}</p>
-              <div className="mt-3 flex items-center gap-3 text-[11px] font-semibold text-zinc-500">
+              <p className="mt-2 text-xs leading-5 text-zinc-400 line-clamp-2">{novel.excerpt}</p>
+              <div className="mt-3 flex items-center gap-3 text-[11px] font-semibold text-zinc-400">
                 <span>{novel.chapters} chapters</span>
                 <span>{novel.likes} likes</span>
               </div>
@@ -2063,8 +2063,8 @@ export default function App() {
               {(adminDashboardStats?.latestSeries || []).map((seriesItem: any) => (
                 <div key={seriesItem._id} className="rounded-2xl border border-border bg-muted/20 p-4">
                   <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-zinc-400">{seriesItem.type}</p>
-                  <h4 className="mt-2 text-lg font-bold text-zinc-950">{seriesItem.title}</h4>
-                  <p className="mt-1 text-sm text-zinc-500">{seriesItem.creatorName}</p>
+                  <h4 className="mt-2 text-lg font-bold text-white">{seriesItem.title}</h4>
+                  <p className="mt-1 text-sm text-zinc-400">{seriesItem.creatorName}</p>
                   <div className="mt-4 flex items-center gap-4 text-xs font-semibold text-zinc-500">
                     <span>{seriesItem.genre}</span>
                     <span>{seriesItem.views} views</span>
