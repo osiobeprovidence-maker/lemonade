@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Heart, ChevronRight, Menu, Bell, User, Star, Clock, Home, Compass, PenTool, Facebook, Twitter, Instagram, Youtube, Plus, X, Play, SkipForward, DollarSign, Coins, BarChart3, Settings, BadgeCheck, Share2, MoreVertical, List, Check, Upload, BookOpen, ShieldCheck, Users, MessageSquare, Flag, Megaphone, Trash2, Eye, EyeOff, Settings2 } from 'lucide-react';
+import { Search, Heart, ChevronRight, Menu, Bell, User, Star, Clock, Home, Compass, PenTool, Facebook, Twitter, Instagram, Youtube, Plus, X, Play, SkipForward, DollarSign, Coins, BarChart3, Settings, BadgeCheck, Share2, MoreVertical, List, Check, Upload, BookOpen, ShieldCheck, Users, MessageSquare, Flag, Megaphone, Trash2, Eye, EyeOff, Settings2, ExternalLink, Lock, Sparkles } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Logo } from './components/Logo';
 import { AuthModal } from './components/AuthModal';
@@ -58,8 +58,41 @@ type StoryComment = {
   date: string;
 };
 
+type CreatorDropVisibility = 'public' | 'premium';
+
+type CreatorMoment = {
+  id: string;
+  title: string;
+  description: string;
+  label: string;
+  visibility: CreatorDropVisibility;
+  accent: string;
+};
+
 const isComicStory = (story: Story): story is ComicStory => story.type === 'series';
 const isNovelStory = (story: Story): story is NovelStory => story.type === 'novel';
+
+const parseCompactMetric = (value?: string | number) => {
+  if (typeof value === 'number') return value;
+  if (!value) return 0;
+
+  const trimmed = value.trim().toUpperCase();
+  const multiplier = trimmed.endsWith('M') ? 1_000_000 : trimmed.endsWith('K') ? 1_000 : 1;
+  const normalized = trimmed.replace(/[^0-9.]/g, '');
+  const parsed = Number.parseFloat(normalized);
+
+  if (Number.isNaN(parsed)) return 0;
+  return parsed * multiplier;
+};
+
+const formatCompactMetric = (value: number) =>
+  new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: value >= 1000 ? 1 : 0 }).format(value);
+
+const normalizeExternalUrl = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+};
 
 const COMICS: ComicStory[] = [
   { id: 1, title: "Surviving the Game as a Barbarian", creator: "K. Ryo", emotion: "Fantasy", genre: "Fantasy", cover: "https://picsum.photos/seed/barbarian/400/533", rankChange: 37, views: "53M", likes: "1.2M", day: "Mon", isNew: true, isOriginal: true, type: 'series' },
@@ -101,6 +134,9 @@ const STORY_STYLE_DEFAULTS = {
   layoutStyle: 'classic' as 'classic' | 'immersive',
   fontStyle: 'serif' as 'serif' | 'sans',
 };
+const DEFAULT_CREATOR_SUPPORT_HEADLINE = 'Support my next drop';
+const DEFAULT_CREATOR_DROP_TITLE = 'Behind the scenes drop';
+const DEFAULT_CREATOR_DROP_DESCRIPTION = 'Share previews, bonus pages, sketches, or a premium note for your biggest fans.';
 
 const ALL_STORIES: Story[] = [...COMICS, ...NOVELS];
 const PILL_BUTTON_BASE = "rounded-full px-4 py-1.5 text-xs font-bold whitespace-nowrap transition-all md:px-6 md:py-2 md:text-sm";
@@ -272,6 +308,10 @@ export default function App() {
   const [userBio, setUserBio] = useState('');
   const [userProfilePic, setUserProfilePic] = useState<string | null>(null);
   const [dropSomethingLink, setDropSomethingLink] = useState('');
+  const [creatorSupportHeadline, setCreatorSupportHeadline] = useState(DEFAULT_CREATOR_SUPPORT_HEADLINE);
+  const [creatorDropTitle, setCreatorDropTitle] = useState(DEFAULT_CREATOR_DROP_TITLE);
+  const [creatorDropDescription, setCreatorDropDescription] = useState(DEFAULT_CREATOR_DROP_DESCRIPTION);
+  const [creatorDropVisibility, setCreatorDropVisibility] = useState<CreatorDropVisibility>('public');
   const [isPremium, setIsPremium] = useState(false);
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [publishGenres, setPublishGenres] = useState<string[]>([]);
@@ -280,6 +320,9 @@ export default function App() {
   const [marketingEmailsEnabled, setMarketingEmailsEnabled] = useState(false);
   const [likedComics, setLikedComics] = useState<Set<StoryId>>(new Set());
   const [likedEpisodes, setLikedEpisodes] = useState<Set<string>>(new Set());
+  const [followedCreators, setFollowedCreators] = useState<Set<string>>(new Set());
+  const [likedCreators, setLikedCreators] = useState<Set<string>>(new Set());
+  const [likedCreatorDrops, setLikedCreatorDrops] = useState<Set<string>>(new Set());
   const [isReaderMenuOpen, setIsReaderMenuOpen] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
@@ -430,6 +473,67 @@ export default function App() {
     setIsPremium(Boolean(userProfile?.isPremium));
   }, [user, userProfile]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const scope = user?.uid || 'guest';
+
+    try {
+      const creatorStudioRaw = window.localStorage.getItem(`lemonade:creator-studio:${scope}`);
+      if (creatorStudioRaw) {
+        const creatorStudio = JSON.parse(creatorStudioRaw);
+        setCreatorSupportHeadline(creatorStudio.creatorSupportHeadline || DEFAULT_CREATOR_SUPPORT_HEADLINE);
+        setCreatorDropTitle(creatorStudio.creatorDropTitle || DEFAULT_CREATOR_DROP_TITLE);
+        setCreatorDropDescription(creatorStudio.creatorDropDescription || DEFAULT_CREATOR_DROP_DESCRIPTION);
+        setCreatorDropVisibility(creatorStudio.creatorDropVisibility === 'premium' ? 'premium' : 'public');
+      } else {
+        setCreatorSupportHeadline(DEFAULT_CREATOR_SUPPORT_HEADLINE);
+        setCreatorDropTitle(DEFAULT_CREATOR_DROP_TITLE);
+        setCreatorDropDescription(DEFAULT_CREATOR_DROP_DESCRIPTION);
+        setCreatorDropVisibility('public');
+      }
+
+      const fanSocialRaw = window.localStorage.getItem(`lemonade:fan-social:${scope}`);
+      if (fanSocialRaw) {
+        const fanSocial = JSON.parse(fanSocialRaw);
+        setLikedComics(new Set(fanSocial.likedComics || []));
+        setLikedEpisodes(new Set(fanSocial.likedEpisodes || []));
+        setFollowedCreators(new Set(fanSocial.followedCreators || []));
+        setLikedCreators(new Set(fanSocial.likedCreators || []));
+        setLikedCreatorDrops(new Set(fanSocial.likedCreatorDrops || []));
+      } else {
+        setLikedComics(new Set());
+        setLikedEpisodes(new Set());
+        setFollowedCreators(new Set());
+        setLikedCreators(new Set());
+        setLikedCreatorDrops(new Set());
+      }
+    } catch (error) {
+      console.error('Could not load local creator data:', error);
+    }
+  }, [user?.uid]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const scope = user?.uid || 'guest';
+
+    try {
+      window.localStorage.setItem(
+        `lemonade:fan-social:${scope}`,
+        JSON.stringify({
+          likedComics: Array.from(likedComics),
+          likedEpisodes: Array.from(likedEpisodes),
+          followedCreators: Array.from(followedCreators),
+          likedCreators: Array.from(likedCreators),
+          likedCreatorDrops: Array.from(likedCreatorDrops),
+        })
+      );
+    } catch (error) {
+      console.error('Could not save fan activity:', error);
+    }
+  }, [user?.uid, likedComics, likedEpisodes, followedCreators, likedCreators, likedCreatorDrops]);
+
   const toggleLike = (comicId: StoryId) => {
     setLikedComics(prev => {
       const newSet = new Set(prev);
@@ -451,6 +555,42 @@ export default function App() {
         next.delete(episodeKey);
       } else {
         next.add(episodeKey);
+      }
+      return next;
+    });
+  };
+
+  const toggleCreatorFollow = (creatorName: string) => {
+    setFollowedCreators((prev) => {
+      const next = new Set(prev);
+      if (next.has(creatorName)) {
+        next.delete(creatorName);
+      } else {
+        next.add(creatorName);
+      }
+      return next;
+    });
+  };
+
+  const toggleCreatorLike = (creatorName: string) => {
+    setLikedCreators((prev) => {
+      const next = new Set(prev);
+      if (next.has(creatorName)) {
+        next.delete(creatorName);
+      } else {
+        next.add(creatorName);
+      }
+      return next;
+    });
+  };
+
+  const toggleCreatorDropLike = (dropId: string) => {
+    setLikedCreatorDrops((prev) => {
+      const next = new Set(prev);
+      if (next.has(dropId)) {
+        next.delete(dropId);
+      } else {
+        next.add(dropId);
       }
       return next;
     });
@@ -484,6 +624,15 @@ export default function App() {
     setCurrentView('series-details');
   };
 
+  const openSupportLink = (url?: string) => {
+    const normalizedUrl = normalizeExternalUrl(url || '');
+    if (!normalizedUrl) return;
+
+    if (typeof window !== 'undefined') {
+      window.open(normalizedUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   const skipAd = () => {
     setShowAd(false);
     setCurrentView(selectedComic?.type === 'novel' ? 'novel-reader' : 'reader');
@@ -506,6 +655,46 @@ export default function App() {
       adminUser.firebaseUid.toLowerCase().includes(query)
     );
   });
+  const creatorProfiles = React.useMemo(() => {
+    const groupedStories = allStories.reduce<Record<string, Story[]>>((acc, story) => {
+      acc[story.creator] = [...(acc[story.creator] || []), story];
+      return acc;
+    }, {});
+
+    return Object.fromEntries(
+      Object.entries(groupedStories).map(([creator, stories]) => {
+        const totalViews = stories.reduce((sum, story) => sum + parseCompactMetric(story.views), 0);
+        const totalLikes = stories.reduce((sum, story) => sum + parseCompactMetric(story.likes), 0);
+        const publicMoments: CreatorMoment[] = stories.slice(0, 3).map((story, index) => ({
+          id: `${creator}-${String(story.id)}-${index}`,
+          title: story.title,
+          description:
+            story.summary ||
+            (story.type === 'novel'
+              ? `A premium preview from ${story.creator} with a stronger emotional hook for loyal readers.`
+              : `New panels, creator notes, and a clean public drop from ${story.creator}.`),
+          label: story.type === 'novel' ? 'Public preview' : 'Public update',
+          visibility: 'public',
+          accent: index % 2 === 0 ? 'from-primary/30 via-primary/10 to-transparent' : 'from-amber-500/30 via-amber-400/10 to-transparent',
+        }));
+
+        return [
+          creator,
+          {
+            tagline: `Premium ${stories[0]?.type === 'novel' ? 'storyteller' : 'creator'} on Lemonade`,
+            intro:
+              stories[0]?.summary ||
+              `${creator} shares polished updates, early looks, and public moments for fans who want to stay close to the work.`,
+            supportLabel: 'Support the next drop',
+            supportUrl: '',
+            totalViews,
+            totalLikes,
+            publicMoments,
+          },
+        ];
+      })
+    );
+  }, [allStories]);
 
   const pageContainerClass = "mx-auto w-full max-w-7xl px-6 sm:px-8 lg:px-10";
   const readerStoryStyle = {
@@ -666,7 +855,7 @@ export default function App() {
     try {
       const cleanName = userName.trim() || 'Lemonade Reader';
       const cleanBio = userBio.trim();
-      const cleanDropSomethingLink = dropSomethingLink.trim();
+      const cleanDropSomethingLink = normalizeExternalUrl(dropSomethingLink);
       const cleanPronouns = profilePronouns.trim();
       const [birthYearRaw, birthMonthRaw, birthDayRaw] = profileBirthday ? profileBirthday.split('-') : [];
       const birthYear = birthYearRaw ? Number(birthYearRaw) : undefined;
@@ -691,6 +880,19 @@ export default function App() {
         marketingEmails: marketingEmailsEnabled,
         onboardingCompleted: true,
       });
+
+      if (typeof window !== 'undefined') {
+        const scope = user?.uid || 'guest';
+        window.localStorage.setItem(
+          `lemonade:creator-studio:${scope}`,
+          JSON.stringify({
+            creatorSupportHeadline: creatorSupportHeadline.trim() || DEFAULT_CREATOR_SUPPORT_HEADLINE,
+            creatorDropTitle: creatorDropTitle.trim() || DEFAULT_CREATOR_DROP_TITLE,
+            creatorDropDescription: creatorDropDescription.trim() || DEFAULT_CREATOR_DROP_DESCRIPTION,
+            creatorDropVisibility,
+          })
+        );
+      }
 
       setProfileSaveMessage('Profile updated successfully.');
       setCurrentView('profile');
@@ -1556,11 +1758,41 @@ export default function App() {
         {!marketingEmailsEnabled && <p>Marketing emails: Disabled</p>}
       </div>
 
-      {dropSomethingLink && (
-        <div className="mb-8">
-          <a href={dropSomethingLink} className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline bg-primary/10 px-4 py-2 rounded-full">
-            <Heart className="w-4 h-4 fill-primary" /> Support me on DropSomething
-          </a>
+      {(dropSomethingLink || creatorDropTitle.trim()) && (
+        <div className="mb-8 overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 p-6 text-white shadow-[0_24px_90px_rgba(0,0,0,0.28)]">
+          <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.35em] text-primary/80">Creator support</p>
+              <h3 className="text-2xl font-black tracking-tight">{creatorDropTitle.trim() || 'Your next public drop'}</h3>
+              <p className="mt-2 max-w-xl text-sm text-white/65">
+                {creatorDropDescription.trim() || 'Set up a public or premium drop so fans can follow your work and support your next release.'}
+              </p>
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold uppercase tracking-[0.25em] text-white/70">
+              {creatorDropVisibility === 'premium' ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+              {creatorDropVisibility === 'premium' ? 'Premium drop' : 'Public drop'}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            {dropSomethingLink && (
+              <Button
+                type="button"
+                className="rounded-full bg-primary px-5 font-bold text-primary-foreground hover:bg-primary/90"
+                onClick={() => openSupportLink(dropSomethingLink)}
+              >
+                <DollarSign className="mr-2 h-4 w-4" /> Open DropSomething
+              </Button>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-full border-white/15 bg-transparent px-5 font-bold text-white hover:bg-white/10 hover:text-white"
+              onClick={() => setCurrentView('edit-profile')}
+            >
+              <Sparkles className="mr-2 h-4 w-4" /> Edit creator setup
+            </Button>
+          </div>
         </div>
       )}
 
@@ -1740,6 +1972,66 @@ export default function App() {
           <label className="text-sm font-bold">DropSomething Link</label>
           <p className="text-xs text-muted-foreground mb-2">Add your DropSomething link so fans can support you directly.</p>
           <input type="url" value={dropSomethingLink} onChange={(e) => setDropSomethingLink(e.target.value)} placeholder="https://dropsomething.com/yourusername" className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none" />
+        </div>
+        <div className="space-y-4 rounded-[24px] border border-border bg-muted/20 p-5">
+          <div>
+            <label className="text-sm font-bold">Creator Drop Setup</label>
+            <p className="mt-1 text-xs text-muted-foreground">Build a premium creator page with a featured drop fans can follow, like, and unlock.</p>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-bold">Support Headline</label>
+            <input
+              type="text"
+              value={creatorSupportHeadline}
+              onChange={(e) => setCreatorSupportHeadline(e.target.value)}
+              placeholder="Support my next drop"
+              className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-bold">Featured Drop Title</label>
+            <input
+              type="text"
+              value={creatorDropTitle}
+              onChange={(e) => setCreatorDropTitle(e.target.value)}
+              placeholder="Spring sketchbook drop"
+              className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-bold">Featured Drop Description</label>
+            <textarea
+              value={creatorDropDescription}
+              onChange={(e) => setCreatorDropDescription(e.target.value)}
+              placeholder="Tell fans what they get when they support or follow this drop."
+              className="w-full min-h-[110px] bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none"
+            />
+          </div>
+          <div className="space-y-3">
+            <label className="text-sm font-bold">Drop Visibility</label>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setCreatorDropVisibility('public')}
+                className={`rounded-2xl border p-4 text-left transition-all ${creatorDropVisibility === 'public' ? 'border-primary bg-primary/5' : 'border-border bg-background hover:border-primary/40'}`}
+              >
+                <div className="mb-2 flex items-center gap-2 text-sm font-bold">
+                  <Eye className="h-4 w-4 text-primary" /> Public
+                </div>
+                <p className="text-xs text-muted-foreground">Anyone can see this drop on your creator page.</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => setCreatorDropVisibility('premium')}
+                className={`rounded-2xl border p-4 text-left transition-all ${creatorDropVisibility === 'premium' ? 'border-primary bg-primary/5' : 'border-border bg-background hover:border-primary/40'}`}
+              >
+                <div className="mb-2 flex items-center gap-2 text-sm font-bold">
+                  <Lock className="h-4 w-4 text-primary" /> Premium
+                </div>
+                <p className="text-xs text-muted-foreground">Fans see the preview and need Premium to unlock the full drop.</p>
+              </button>
+            </div>
+          </div>
         </div>
         <div className="space-y-2">
           <label className="text-sm font-bold">Pronouns</label>
@@ -2985,44 +3277,249 @@ export default function App() {
   );
 
   const renderCreatorProfile = () => {
-    const creatorComics = COMICS.filter(c => c.creator === selectedComic?.creator) || [];
-    const displayComics = creatorComics.length > 0 ? creatorComics : (selectedComic ? [selectedComic] : []);
+    const creatorName = selectedComic?.creator || '';
+    const creatorStories = allStories.filter((story) => story.creator === creatorName);
+    const displayComics = creatorStories.length > 0 ? creatorStories : (selectedComic ? [selectedComic] : []);
+    const fallbackProfile = creatorProfiles[creatorName] || {
+      tagline: 'Premium creator on Lemonade',
+      intro: 'A creator building worlds, sharing drops, and inviting fans into the process.',
+      supportLabel: 'Support the next drop',
+      supportUrl: '',
+      totalViews: 0,
+      totalLikes: 0,
+      publicMoments: [] as CreatorMoment[],
+    };
+    const isOwnCreatorProfile = Boolean(creatorName) && [userName, userProfile?.displayName, user?.displayName].filter(Boolean).includes(creatorName);
+    const supportUrl = isOwnCreatorProfile ? normalizeExternalUrl(dropSomethingLink) : normalizeExternalUrl(fallbackProfile.supportUrl);
+    const featuredDrop: CreatorMoment = {
+      id: `${creatorName}-featured-drop`,
+      title: isOwnCreatorProfile ? creatorDropTitle.trim() || DEFAULT_CREATOR_DROP_TITLE : `${creatorName}'s supporter drop`,
+      description: isOwnCreatorProfile
+        ? creatorDropDescription.trim() || DEFAULT_CREATOR_DROP_DESCRIPTION
+        : `${fallbackProfile.intro} Fans can follow, like, and support the next release directly from this page.`,
+      label: 'Featured drop',
+      visibility: isOwnCreatorProfile ? creatorDropVisibility : (supportUrl ? 'premium' : 'public'),
+      accent: 'from-primary/35 via-emerald-400/10 to-transparent',
+    };
+    const creatorMoments = [
+      ...(featuredDrop.visibility === 'public' ? [featuredDrop] : []),
+      ...fallbackProfile.publicMoments.filter((moment) => moment.id !== featuredDrop.id),
+    ].slice(0, 4);
+    const isFollowingCreator = followedCreators.has(creatorName);
+    const isCreatorLiked = likedCreators.has(creatorName);
+    const visibleFeaturedDrop = featuredDrop.visibility === 'public' || isPremium;
+    const followerCount = formatCompactMetric((fallbackProfile.totalViews / 180) + (isFollowingCreator ? 1 : 0));
+    const creatorLikeCount = formatCompactMetric((fallbackProfile.totalLikes / 220) + (isCreatorLiked ? 1 : 0));
+    const supporterCount = formatCompactMetric((fallbackProfile.totalLikes / 950) + (supportUrl ? 14 : 6));
 
     return (
-      <div className="px-4 py-12 max-w-4xl mx-auto w-full min-h-[60vh]">
+      <div className="px-4 py-8 md:py-12 max-w-6xl mx-auto w-full min-h-[60vh]">
         <Button variant="ghost" onClick={() => setCurrentView('series-details')} className="mb-6 -ml-4 gap-2">
           <ChevronRight className="w-4 h-4 rotate-180" /> Back to Series
         </Button>
-        
-        <div className="flex flex-col items-center text-center mb-12">
-          <div className="w-32 h-32 bg-muted rounded-full overflow-hidden border-4 border-primary/20 mb-6">
-            <img src={`https://picsum.photos/seed/${selectedComic?.creator}/200/200`} alt={selectedComic?.creator} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-          </div>
-          <h1 className="text-4xl font-black tracking-tighter mb-2 flex items-center gap-2 justify-center">
-            {selectedComic?.creator}
-            <BadgeCheck className="w-6 h-6 text-primary" />
-          </h1>
-          <p className="text-muted-foreground max-w-lg mx-auto mb-6">
-            Comic artist and storyteller. Creating worlds full of magic, action, and romance. Thanks for reading my series!
-          </p>
-          <div className="flex gap-4">
-            <Button className="rounded-full px-8 font-bold">Follow</Button>
-            <Button variant="outline" className="rounded-full px-8 font-bold gap-2"><DollarSign className="w-4 h-4" /> Support</Button>
-          </div>
-        </div>
 
-        <h3 className="text-2xl font-bold mb-6">Series by {selectedComic?.creator}</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {displayComics.map(comic => (
-            <Card key={comic.id} className="overflow-hidden cursor-pointer group border-0 bg-transparent shadow-none" onClick={() => openSeriesDetails(comic)}>
-              <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-3">
-                <img src={comic.cover} alt={comic.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" referrerPolicy="no-referrer" />
+        <section className="relative overflow-hidden rounded-[36px] border border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(34,197,94,0.18),transparent_38%),radial-gradient(circle_at_top_right,rgba(251,191,36,0.16),transparent_32%),linear-gradient(135deg,#05070b_0%,#0f1117_45%,#090b0f_100%)] px-6 py-8 text-white shadow-[0_28px_110px_rgba(0,0,0,0.32)] md:px-10 md:py-12">
+          <div className="absolute inset-0 opacity-20">
+            <img
+              src={selectedComic?.cover}
+              alt={selectedComic?.title}
+              className="h-full w-full object-cover mix-blend-screen"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+          <div className="relative z-10 grid gap-10 lg:grid-cols-[minmax(0,1.35fr)_340px]">
+            <div>
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/8 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.35em] text-white/70">
+                <Sparkles className="h-3.5 w-3.5 text-primary" /> Premium creator space
               </div>
-              <h3 className="font-bold line-clamp-1 group-hover:text-primary transition-colors">{comic.title}</h3>
-              <p className="text-sm text-muted-foreground">{comic.genre}</p>
-            </Card>
-          ))}
-        </div>
+              <div className="mb-6 flex items-center gap-4">
+                <div className="h-24 w-24 overflow-hidden rounded-full border-4 border-primary/25 bg-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
+                  <img src={`https://picsum.photos/seed/${creatorName}/200/200`} alt={creatorName} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary/80">{fallbackProfile.tagline}</p>
+                  <h1 className="mt-1 flex items-center gap-2 text-4xl font-black tracking-tight md:text-5xl">
+                    {creatorName}
+                    <BadgeCheck className="h-6 w-6 text-primary" />
+                  </h1>
+                </div>
+              </div>
+
+              <p className="max-w-2xl text-base leading-7 text-white/72 md:text-lg">
+                {isOwnCreatorProfile ? userBio || fallbackProfile.intro : fallbackProfile.intro}
+              </p>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Button
+                  className={`rounded-full px-7 font-bold ${isFollowingCreator ? 'bg-white text-zinc-950 hover:bg-white/90' : 'bg-primary text-primary-foreground hover:bg-primary/90'}`}
+                  onClick={() => toggleCreatorFollow(creatorName)}
+                >
+                  <Users className="mr-2 h-4 w-4" /> {isFollowingCreator ? 'Following' : 'Follow'}
+                </Button>
+                <Button
+                  variant="outline"
+                  className={`rounded-full border-white/15 px-7 font-bold ${isCreatorLiked ? 'bg-white/12 text-white' : 'bg-transparent text-white'} hover:bg-white/10 hover:text-white`}
+                  onClick={() => toggleCreatorLike(creatorName)}
+                >
+                  <Heart className={`mr-2 h-4 w-4 ${isCreatorLiked ? 'fill-current' : ''}`} /> {isCreatorLiked ? 'Liked' : 'Like creator'}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="rounded-full border-white/15 bg-transparent px-7 font-bold text-white hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  onClick={() => openSupportLink(supportUrl)}
+                  disabled={!supportUrl}
+                >
+                  <DollarSign className="mr-2 h-4 w-4" /> Support
+                </Button>
+              </div>
+
+              <div className="mt-10 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-[24px] border border-white/10 bg-white/6 p-4 backdrop-blur-sm">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-white/45">Followers</p>
+                  <p className="mt-3 text-3xl font-black">{followerCount}</p>
+                </div>
+                <div className="rounded-[24px] border border-white/10 bg-white/6 p-4 backdrop-blur-sm">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-white/45">Creator likes</p>
+                  <p className="mt-3 text-3xl font-black">{creatorLikeCount}</p>
+                </div>
+                <div className="rounded-[24px] border border-white/10 bg-white/6 p-4 backdrop-blur-sm">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-white/45">Supporters</p>
+                  <p className="mt-3 text-3xl font-black">{supporterCount}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-[30px] border border-white/10 bg-black/30 p-6 backdrop-blur-xl">
+              <div className="mb-5 flex items-center justify-between">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.32em] text-primary/75">{creatorSupportHeadline.trim() || fallbackProfile.supportLabel}</p>
+                  <h3 className="mt-2 text-2xl font-black">{featuredDrop.title}</h3>
+                </div>
+                <div className="rounded-full border border-white/10 bg-white/5 p-2">
+                  {featuredDrop.visibility === 'premium' ? <Lock className="h-4 w-4 text-primary" /> : <Eye className="h-4 w-4 text-primary" />}
+                </div>
+              </div>
+              <p className="text-sm leading-6 text-white/70">{featuredDrop.description}</p>
+
+              <div className="mt-6 rounded-[24px] border border-white/10 bg-white/5 p-4">
+                <div className="mb-3 flex items-center justify-between text-xs font-bold uppercase tracking-[0.26em] text-white/45">
+                  <span>{featuredDrop.visibility === 'premium' ? 'Premium drop' : 'Public drop'}</span>
+                  <span>{featuredDrop.label}</span>
+                </div>
+                {visibleFeaturedDrop ? (
+                  <p className="text-sm text-white/78">
+                    Fans can open this drop, like it, and keep following the creator journey right from the profile page.
+                  </p>
+                ) : (
+                  <p className="text-sm text-white/65">
+                    This drop is premium-only. Fans can preview it here, then upgrade to Premium to unlock the full release.
+                  </p>
+                )}
+              </div>
+
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Button
+                  className="rounded-full bg-primary px-5 font-bold text-primary-foreground hover:bg-primary/90"
+                  onClick={() => openSupportLink(supportUrl)}
+                  disabled={!supportUrl}
+                >
+                  <ExternalLink className="mr-2 h-4 w-4" /> {supportUrl ? 'Open DropSomething' : 'Add support link'}
+                </Button>
+                {featuredDrop.visibility === 'premium' && !isPremium && (
+                  <Button
+                    variant="outline"
+                    className="rounded-full border-white/15 bg-transparent px-5 font-bold text-white hover:bg-white/10 hover:text-white"
+                    onClick={() => setCurrentView('premium')}
+                  >
+                    <BadgeCheck className="mr-2 h-4 w-4" /> Unlock with Premium
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div>
+            <div className="mb-6 flex items-end justify-between">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.34em] text-primary/70">Made public by creator</p>
+                <h3 className="mt-2 text-3xl font-black tracking-tight">Public drops fans can like</h3>
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              {creatorMoments.map((moment) => {
+                const isDropLiked = likedCreatorDrops.has(moment.id);
+
+                return (
+                  <article key={moment.id} className="group relative overflow-hidden rounded-[28px] border border-white/10 bg-zinc-950 text-white shadow-[0_16px_60px_rgba(0,0,0,0.18)]">
+                    <div className={`absolute inset-0 bg-gradient-to-br ${moment.accent}`} />
+                    <div className="relative p-6">
+                      <div className="mb-4 flex items-center justify-between">
+                        <span className="rounded-full border border-white/10 bg-white/8 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.28em] text-white/60">{moment.label}</span>
+                        <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.26em] text-white/55">
+                          {moment.visibility === 'premium' ? 'Premium' : 'Public'}
+                        </span>
+                      </div>
+                      <h4 className="text-2xl font-black tracking-tight">{moment.title}</h4>
+                      <p className="mt-3 text-sm leading-6 text-white/70">{moment.description}</p>
+                      <div className="mt-6 flex items-center justify-between">
+                        <Button
+                          variant="outline"
+                          className={`rounded-full border-white/15 bg-transparent px-4 font-bold text-white hover:bg-white/10 hover:text-white ${isDropLiked ? 'bg-white/12' : ''}`}
+                          onClick={() => toggleCreatorDropLike(moment.id)}
+                        >
+                          <Heart className={`mr-2 h-4 w-4 ${isDropLiked ? 'fill-current' : ''}`} />
+                          {isDropLiked ? 'Liked' : 'Like'}
+                        </Button>
+                        <span className="text-xs font-medium uppercase tracking-[0.24em] text-white/45">Fan signal</span>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+
+          <aside className="space-y-4">
+            <div className="rounded-[30px] border border-border bg-card p-6">
+              <p className="text-[11px] font-bold uppercase tracking-[0.34em] text-primary/70">Premium perks</p>
+              <h3 className="mt-2 text-2xl font-black tracking-tight">Better access for top fans</h3>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                Follow creators, like their public drops, then unlock premium-only notes, previews, and supporter releases with Lemonade Premium.
+              </p>
+              {!isPremium && (
+                <Button className="mt-5 w-full rounded-full font-bold" onClick={() => setCurrentView('premium')}>
+                  Go Premium
+                </Button>
+              )}
+            </div>
+
+            <div className="rounded-[30px] border border-border bg-card p-6">
+              <p className="text-[11px] font-bold uppercase tracking-[0.34em] text-primary/70">Published work</p>
+              <h3 className="mt-2 text-2xl font-black tracking-tight">Series by {creatorName}</h3>
+              <div className="mt-5 space-y-3">
+                {displayComics.slice(0, 4).map((comic) => (
+                  <button
+                    key={comic.id}
+                    type="button"
+                    className="flex w-full items-center gap-3 rounded-2xl border border-border p-2 text-left transition-colors hover:border-primary/40 hover:bg-muted/30"
+                    onClick={() => openSeriesDetails(comic)}
+                  >
+                    <div className="h-16 w-12 overflow-hidden rounded-xl bg-muted">
+                      <img src={comic.cover} alt={comic.title} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate font-bold">{comic.title}</p>
+                      <p className="text-xs text-muted-foreground">{comic.genre}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </aside>
+        </section>
       </div>
     );
   };
