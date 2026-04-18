@@ -1525,6 +1525,11 @@ export default function App() {
         </div>
       )}
 
+      <div className="mb-8 space-y-2 text-sm text-muted-foreground">
+        {marketingEmailsEnabled && <p>Marketing emails: Enabled</p>}
+        {!marketingEmailsEnabled && <p>Marketing emails: Disabled</p>}
+      </div>
+
       {dropSomethingLink && (
         <div className="mb-8">
           <a href={dropSomethingLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline bg-primary/10 px-4 py-2 rounded-full">

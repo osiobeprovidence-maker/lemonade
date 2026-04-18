@@ -53,6 +53,15 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const CLEARABLE_PROFILE_FIELDS = [
+  'bio',
+  'photoURL',
+  'dropSomethingLink',
+  'birthMonth',
+  'birthDay',
+  'birthYear',
+  'pronouns',
+] as const;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -130,6 +139,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     }
 
+    const clearFields = CLEARABLE_PROFILE_FIELDS.filter((field) => field in data && data[field] === undefined);
+
     const payload = {
       firebaseUid: user.uid,
       displayName: data.displayName,
@@ -144,6 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       marketingEmails: data.marketingEmails,
       acceptedTerms: data.acceptedTerms,
       onboardingCompleted: data.onboardingCompleted,
+      clearFields: clearFields.length > 0 ? clearFields : undefined,
     };
 
     await updateUserProfileMutation(payload);

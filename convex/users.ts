@@ -73,9 +73,10 @@ export const updateUserProfile = mutation({
     marketingEmails: v.optional(v.boolean()),
     acceptedTerms: v.optional(v.boolean()),
     onboardingCompleted: v.optional(v.boolean()),
+    clearFields: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
-    const { firebaseUid, ...updates } = args;
+    const { firebaseUid, clearFields, ...updates } = args;
     const user = await ctx.db
       .query("users")
       .withIndex("by_firebase_uid", (q) => q.eq("firebaseUid", firebaseUid))
@@ -98,7 +99,13 @@ export const updateUserProfile = mutation({
       onboardingCompleted: updates.onboardingCompleted,
     });
 
-    await ctx.db.patch(user._id, sanitizedUpdates);
+    const patchPayload: Record<string, unknown> = { ...sanitizedUpdates };
+
+    for (const field of clearFields ?? []) {
+      patchPayload[field] = undefined;
+    }
+
+    await ctx.db.patch(user._id, patchPayload);
     return user._id;
   },
 });
