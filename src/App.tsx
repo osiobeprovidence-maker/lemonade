@@ -598,7 +598,7 @@ export default function App() {
           {/* Popular Categories */}
           <section>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-black tracking-tighter text-white flex items-center gap-2">Popular Categories</h2>
+              <h2 className="text-2xl font-black tracking-tighter text-white">Popular Categories</h2>
             </div>
             <div className="flex items-center gap-3 overflow-x-auto pb-4 no-scrollbar">
               {['All', ...CATEGORIES].map((cat, i) => {
@@ -619,7 +619,7 @@ export default function App() {
           {/* Trending (Horizontal Scroll with Ranking Numbers - Medium Cards) */}
           <section>
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-3xl font-black tracking-tighter text-white flex items-center gap-3">
+              <h2 className="text-3xl font-black tracking-tighter text-white">
                 Trending Now
               </h2>
               <button className="text-xs font-black text-zinc-400 hover:text-primary transition-colors flex items-center gap-1 uppercase tracking-widest" onClick={() => openViewAll('trending')}>View All <ChevronRight className="w-4 h-4" /></button>

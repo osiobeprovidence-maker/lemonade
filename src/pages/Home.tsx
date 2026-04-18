@@ -127,7 +127,7 @@ export function Home() {
         {/* Trending Section */}
         <section className="px-4 py-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-black tracking-tight flex items-center gap-2">
+            <h2 className="text-lg font-black tracking-tight">
               Trending Now
             </h2>
             <Link to="/rankings" className="text-[10px] font-black text-brand-yellow uppercase tracking-widest">View All</Link>
@@ -151,7 +151,7 @@ export function Home() {
         {/* New Releases */}
         <section className="px-4 py-8 bg-zinc-50/50">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-lg font-black tracking-tight flex items-center gap-2">
+            <h2 className="text-lg font-black tracking-tight">
               New Releases
             </h2>
             <Link to="/new-releases" className="text-[10px] font-black text-brand-yellow uppercase tracking-widest">View All</Link>
