@@ -11,7 +11,8 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Heart, ChevronRight, Menu, Bell, User, Star, Clock, Home, Compass, PenTool, Facebook, Twitter, Instagram, Youtube, Plus, X, Play, SkipForward, DollarSign, BarChart3, Settings, BadgeCheck, Share2, MoreVertical, List, Check, Upload, BookOpen, ShieldCheck, Users, MessageSquare, Flag, Megaphone, Trash2, Eye, EyeOff, Settings2, Sparkles, Zap } from 'lucide-react';
+import { Search, Heart, ChevronRight, Menu, Bell, User, Star, Clock, Home, Compass, PenTool, Facebook, Twitter, Instagram, Youtube, Plus, X, Play, SkipForward, DollarSign, BarChart3, Settings, BadgeCheck, Share2, MoreVertical, List, Check, Upload, BookOpen, ShieldCheck, Users, MessageSquare, Flag, Megaphone, Trash2, Eye, EyeOff, Settings2 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Logo } from './components/Logo';
 import { AuthModal } from './components/AuthModal';
 import { auth } from './lib/firebase';
@@ -79,10 +80,10 @@ const VIEW_PATHS: Record<string, string> = {
 
 const VIEW_ALL_SECTIONS = ['trending', 'popular', 'daily', 'originals', 'novels', 'new-releases'] as const;
 
-function findStoryById(storyId?: string | null) {
+function findStoryById(storyId?: string | null, stories: any[] = []) {
   if (!storyId) return null;
 
-  return ALL_STORIES.find((story) => String(story.id) === storyId) || null;
+  return stories.find((story) => String(story.id) === storyId) || null;
 }
 
 function getRouteState(pathname: string) {
@@ -97,7 +98,7 @@ function getRouteState(pathname: string) {
 
   const readerMatch = pathname.match(/^\/reader\/([^/]+)\/?$/);
   if (readerMatch) {
-    const story = findStoryById(readerMatch[1]);
+    const story = findStoryById(readerMatch[1], stories);
     return story ? { view: story.type === 'novel' ? 'novel-reader' : 'reader', story } : null;
   }
 
@@ -191,8 +192,28 @@ export default function App() {
   const editableStoryStyle = useQuery(api.series.getStoryStyleByKey, editableStoryKey ? { storyKey: editableStoryKey } : "skip");
   const upsertStoryStyle = useMutation(api.series.upsertStoryStyle);
 
+  // Convex Data Queries
+  const backendSeries = useQuery(api.series.getAllSeries, { limit: 100 });
+  
+  // Dynamic Content Derivation
+  const allStories = React.useMemo(() => {
+    if (!backendSeries || backendSeries.length === 0) return ALL_STORIES;
+    return backendSeries.map(s => ({
+      ...s,
+      id: s._id,
+      creator: s.creatorName,
+      cover: s.coverImageUrl || s.coverImage || "https://picsum.photos/seed/default/400/533",
+      type: s.type === 'novel' ? 'novel' : 'series',
+      day: s.releaseDay || 'Sun',
+      rankChange: Math.floor(Math.random() * 40), // Placeholder for dynamic ranking
+    }));
+  }, [backendSeries]);
+
+  const displayComics = React.useMemo(() => allStories.filter(s => s.type === 'series'), [allStories]);
+  const displayNovels = React.useMemo(() => allStories.filter(s => s.type === 'novel'), [allStories]);
+
   useEffect(() => {
-    const routeState = getRouteState(location.pathname);
+    const routeState = getRouteState(location.pathname, allStories);
 
     if (!routeState) {
       if (location.pathname !== '/') {
@@ -211,7 +232,7 @@ export default function App() {
     }
 
     setCurrentView((prev) => (prev === routeState.view ? prev : routeState.view));
-  }, [location.pathname, navigate]);
+  }, [location.pathname, navigate, allStories]);
 
   useEffect(() => {
     const nextPath = getPathForView(currentView, selectedComic, viewAllSection);
@@ -277,13 +298,13 @@ export default function App() {
     setCurrentView(selectedComic?.type === 'novel' ? 'novel-reader' : 'reader');
   };
 
-  const filteredComics = COMICS.filter(comic => 
+  const filteredComics = displayComics.filter(comic => 
     comic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     comic.genre.toLowerCase().includes(searchQuery.toLowerCase())
   );
-  const editableStories = ALL_STORIES;
-  const editableStory = editableStories.find((story) => String(story.id) === editableStoryKey) || NOVELS[0];
-  const filteredNovels = NOVELS.filter((novel) => novel.genre === activeLemonCategory || activeLemonCategory === 'Drama');
+  const editableStories = allStories;
+  const editableStory = editableStories.find((story) => String(story.id) === editableStoryKey) || (displayNovels[0] || NOVELS[0]);
+  const filteredNovels = displayNovels.filter((novel) => novel.genre === activeLemonCategory || activeLemonCategory === 'Drama');
   const filteredAdminUsers = (convexAdminUsers || []).filter((adminUser) => {
     const query = adminUserSearch.trim().toLowerCase();
     if (!query) return true;
@@ -315,25 +336,25 @@ export default function App() {
       title: 'Trending & popular series',
       eyebrow: 'Reader momentum',
       description: 'The stories readers are opening first right now, ranked by current attention.',
-      items: COMICS.slice(0, 12),
+      items: displayComics.slice(0, 12),
     },
     popular: {
       title: `${activeCategory} stories`,
       eyebrow: 'Popular on Lemonade',
       description: `Everything readers are opening in ${activeCategory.toLowerCase()} right now.`,
-      items: COMICS.filter((comic) => comic.genre === activeCategory || activeCategory === 'Drama'),
+      items: displayComics.filter((comic) => comic.genre === activeCategory || activeCategory === 'Drama'),
     },
     daily: {
       title: `${activeDay} drops`,
       eyebrow: 'Weekly release board',
       description: `Every title dropping on ${activeDay}.`,
-      items: COMICS.filter((comic) => comic.day === activeDay || activeDay === 'Sun'),
+      items: displayComics.filter((comic) => comic.day === activeDay || activeDay === 'Sun'),
     },
     originals: {
       title: 'Lemonade Originals',
       eyebrow: 'Exclusive lineup',
       description: 'The complete originals shelf, from breakout action to weekend drama.',
-      items: COMICS.filter((comic) => comic.isOriginal),
+      items: displayComics.filter((comic) => comic.isOriginal),
     },
     novels: {
       title: `${activeLemonCategory} novels`,
@@ -345,7 +366,7 @@ export default function App() {
       title: 'Newly released originals',
       eyebrow: 'Fresh this week',
       description: 'Recent launches and newly updated originals worth jumping into first.',
-      items: COMICS.filter((comic) => comic.isNew),
+      items: displayComics.filter((comic) => comic.isNew),
     },
   } as const;
 
@@ -494,14 +515,56 @@ export default function App() {
     }
   };
 
+  const HomeSkeleton = () => (
+    <div className="flex flex-col gap-16 pb-24 dark">
+      {/* Hero Skeleton */}
+      <section className="relative w-full h-[80vh] min-h-[600px] flex items-end justify-center overflow-hidden bg-zinc-900">
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-10 pb-12 md:pb-24 flex flex-col items-start pt-32">
+          <Skeleton className="h-6 w-32 mb-4" />
+          <Skeleton className="h-20 w-3/4 mb-4" />
+          <Skeleton className="h-6 w-1/2 mb-8" />
+          <div className="flex gap-3">
+            <Skeleton className="h-14 w-40 rounded-[16px]" />
+            <Skeleton className="h-14 w-40 rounded-[16px]" />
+          </div>
+        </div>
+      </section>
+
+      <div className="max-w-7xl mx-auto w-full px-6 lg:px-10 flex flex-col gap-20">
+        <section>
+          <Skeleton className="h-8 w-48 mb-6" />
+          <div className="flex gap-3 overflow-hidden">
+            {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-10 w-24 rounded-full shrink-0" />)}
+          </div>
+        </section>
+
+        <section>
+          <Skeleton className="h-10 w-64 mb-8" />
+          <div className="flex gap-6 overflow-hidden">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="min-w-[280px] w-[280px] ml-10">
+                <Skeleton className="aspect-[4/5] rounded-[16px]" />
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+
   const renderHome = () => {
+    if (backendSeries === undefined) return <HomeSkeleton />;
+
+    const featuredStory = displayComics[0] || COMICS[0];
+
     return (
       <div className="flex flex-col gap-16 pb-24 dark">
         {/* Large Featured Hero Section */}
         <section className="relative w-full h-[80vh] min-h-[600px] flex items-end justify-center overflow-hidden group">
           <img 
-            src="https://picsum.photos/seed/featured/1920/1080" 
-            alt="Featured Hero" 
+            src={featuredStory.cover} 
+            alt={featuredStory.title} 
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105"
             referrerPolicy="no-referrer"
           />
@@ -509,18 +572,21 @@ export default function App() {
           <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-10 pb-12 md:pb-24 flex flex-col items-start pt-32">
             <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4 flex-wrap">
               <Badge className="bg-primary text-primary-foreground uppercase tracking-widest text-[10px] md:text-xs font-black px-3 md:px-3 py-1 shadow-lg shadow-primary/20 rounded-md">Featured</Badge>
-              <Badge variant="outline" className="text-white border-white/20 uppercase tracking-widest text-[10px] md:text-xs font-black px-3 md:px-3 py-1 backdrop-blur-sm rounded-md">Action &amp; Fantasy</Badge>
+              <Badge variant="outline" className="text-white border-white/20 uppercase tracking-widest text-[10px] md:text-xs font-black px-3 md:px-3 py-1 backdrop-blur-sm rounded-md">{featuredStory.genre}</Badge>
             </div>
             <h1 className="text-white text-[2.8rem] md:text-7xl font-black mb-4 md:mb-4 leading-[1] tracking-tighter drop-shadow-lg max-w-3xl">
-              Surviving the<br />Game<br />as a Barbarian
+              {featuredStory.title}
             </h1>
-            <p className="text-white/84 text-base md:text-xl max-w-2xl mb-8 md:mb-8 leading-relaxed font-medium drop-shadow-md">
-              When a hardcore gamer is sucked into his favorite punishing RPG, he must rely on his encyclopedic knowledge of the game to survive in a brutal world.
+            <p className="text-white/84 text-base md:text-xl max-w-2xl mb-8 md:mb-8 leading-relaxed font-medium drop-shadow-md line-clamp-3">
+              {featuredStory.summary || "A gripping new series featuring powerful themes and unforgettable characters. Start your journey into this world today."}
             </p>
             <div className="flex flex-row items-center gap-3 w-full sm:w-auto mt-2">
-              <Button className="flex-1 sm:flex-none h-auto bg-primary hover:bg-primary/90 text-primary-foreground rounded-[16px] px-3 md:px-8 py-5 md:py-6 text-sm md:text-lg font-black shadow-[0_4px_20px_rgba(30,215,96,0.3)] transition-all hover:-translate-y-1" onClick={() => setCurrentView('reader')}>
+              <button 
+                className="flex-1 sm:flex-none h-auto bg-primary hover:bg-primary/90 text-primary-foreground rounded-[16px] px-3 md:px-8 py-5 md:py-6 text-sm md:text-lg font-black shadow-[0_4px_20px_rgba(30,215,96,0.3)] transition-all hover:-translate-y-1 flex items-center justify-center gap-2" 
+                onClick={() => openSeriesDetails(featuredStory)}
+              >
                 <Play className="w-5 h-5 md:w-5 md:h-5 mr-1.5 md:mr-2" fill="currentColor" /> Read Now
-              </Button>
+              </button>
               <Button variant="outline" className="flex-1 sm:flex-none h-auto border-white/20 bg-black/40 text-white hover:bg-white hover:text-black rounded-[16px] px-3 md:px-8 py-5 md:py-6 text-sm md:text-lg font-black backdrop-blur-md transition-all hover:-translate-y-1">
                 <Plus className="w-5 h-5 md:w-5 md:h-5 mr-1.5 md:mr-2" /> Add to Library
               </Button>
@@ -532,7 +598,7 @@ export default function App() {
           {/* Popular Categories */}
           <section>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-black tracking-tighter text-white flex items-center gap-2">Popular Categories <Sparkles className="w-6 h-6 text-primary" /></h2>
+              <h2 className="text-2xl font-black tracking-tighter text-white flex items-center gap-2">Popular Categories</h2>
             </div>
             <div className="flex items-center gap-3 overflow-x-auto pb-4 no-scrollbar">
               {['All', ...CATEGORIES].map((cat, i) => {
@@ -554,12 +620,12 @@ export default function App() {
           <section>
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-3xl font-black tracking-tighter text-white flex items-center gap-3">
-                Trending Now <Zap className="w-7 h-7 text-primary" fill="currentColor" />
+                Trending Now
               </h2>
               <button className="text-xs font-black text-zinc-400 hover:text-primary transition-colors flex items-center gap-1 uppercase tracking-widest" onClick={() => openViewAll('trending')}>View All <ChevronRight className="w-4 h-4" /></button>
             </div>
             <div className="flex gap-6 overflow-x-auto pb-8 pt-4 no-scrollbar snap-x relative mask-image-fade-right">
-              {COMICS.slice(0, 10).map((comic, i) => (
+              {displayComics.slice(0, 10).map((comic, i) => (
                 <div key={comic.id} className="min-w-[280px] w-[280px] snap-start relative group cursor-pointer" onClick={() => openSeriesDetails(comic)}>
                   <div 
                     className="absolute -left-3 top-6 z-20 text-[100px] font-black leading-none drop-shadow-2xl transition-transform duration-300 group-hover:scale-110 group-hover:text-primary"
@@ -590,7 +656,7 @@ export default function App() {
               <button className="text-xs font-black text-zinc-400 hover:text-primary transition-colors flex items-center gap-1 uppercase tracking-widest" onClick={() => openViewAll('new-releases')}>View All <ChevronRight className="w-4 h-4" /></button>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-              {COMICS.filter(c => c.isNew).slice(0, 6).map(comic => (
+              {displayComics.filter(c => c.isNew).slice(0, 6).map(comic => (
                 <div key={comic.id} className="flex flex-col group cursor-pointer" onClick={() => openSeriesDetails(comic)}>
                   <div className="relative aspect-[3/4] rounded-[14px] overflow-hidden mb-3 bg-zinc-900 border border-white/5 transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-[0_12px_30px_rgba(30,215,96,0.15)] group-hover:border-primary/30">
                     <img src={comic.cover} alt={comic.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90 group-hover:opacity-100" />
@@ -614,7 +680,11 @@ export default function App() {
               <h2 className="text-3xl font-black tracking-tighter text-white">Recommended For You</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {COMICS.slice(1, 3).map(comic => (
+              {displayComics
+                .filter(c => !displayComics.slice(0, 10).find(tc => tc.id === c.id)) // Exclude top trending
+                .filter(c => selectedGenres.length === 0 || selectedGenres.includes(c.genre)) // Match user genres
+                .slice(0, 4)
+                .map(comic => (
                 <div key={comic.id} className="flex h-[220px] bg-zinc-900/50 border border-white/5 rounded-[20px] overflow-hidden group cursor-pointer hover:bg-zinc-900 hover:border-primary/20 transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)]" onClick={() => openSeriesDetails(comic)}>
                   <div className="w-2/5 h-full relative overflow-hidden">
                     <img src={comic.cover} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90 group-hover:opacity-100" />
@@ -623,7 +693,9 @@ export default function App() {
                   <div className="w-3/5 p-6 md:p-8 flex flex-col justify-center relative">
                     <Badge className="w-fit bg-white/5 text-zinc-300 border-none text-[10px] uppercase font-black tracking-wider px-2 mb-3 group-hover:bg-primary/10 group-hover:text-primary transition-colors">{comic.genre}</Badge>
                     <h3 className="text-2xl font-black text-white mb-2 line-clamp-1 group-hover:text-primary transition-colors">{comic.title}</h3>
-                    <p className="text-sm text-zinc-400 line-clamp-2 mb-5 leading-relaxed font-medium">{comic.creator} brings an explosive new story to the platform. Don't miss this masterpiece.</p>
+                    <p className="text-sm text-zinc-400 line-clamp-2 mb-5 leading-relaxed font-medium">
+                      {comic.summary || `${comic.creator} brings an explosive new story to the platform. Don't miss this masterpiece.`}
+                    </p>
                     <div className="flex items-center gap-4 text-xs font-black text-zinc-500 mt-auto">
                       <span className="flex items-center gap-1 group-hover:text-white transition-colors"><Heart className="w-4 h-4 text-primary" fill="currentColor" /> {comic.likes}</span>
                       <span className="flex items-center gap-1 group-hover:text-white transition-colors"><Eye className="w-4 h-4" /> {comic.views}</span>
@@ -703,7 +775,7 @@ export default function App() {
           </div>
 
           <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-2 gap-y-8">
-            {COMICS.filter(c => c.isOriginal && (c.day === activeDay || activeDay === 'Sun')).map((comic) => (
+            {displayComics.filter(c => c.isOriginal && (c.day === activeDay || activeDay === 'Sun')).map((comic) => (
               <div key={comic.id} className="flex flex-col cursor-pointer group" onClick={() => openSeriesDetails(comic)}>
                 <div className="relative aspect-[3/4] rounded-md mb-2 overflow-hidden">
                   <img src={comic.cover} alt={comic.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" referrerPolicy="no-referrer" />
@@ -734,7 +806,7 @@ export default function App() {
             </button>
           </div>
           <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-2 gap-y-8">
-            {COMICS.filter(c => c.isOriginal).map((comic) => (
+            {displayComics.filter(c => c.isOriginal).map((comic) => (
               <div key={comic.id} className="flex flex-col cursor-pointer group" onClick={() => openSeriesDetails(comic)}>
                 <div className="relative aspect-[3/4] rounded-md mb-2 overflow-hidden">
                   <img src={comic.cover} alt={comic.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" referrerPolicy="no-referrer" />
@@ -761,7 +833,7 @@ export default function App() {
       </div>
       
       <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-2 gap-y-8">
-        {COMICS.slice(0, 3).map((comic) => (
+        {displayComics.slice(0, 3).map((comic) => (
           <div key={comic.id} className="flex flex-col cursor-pointer group" onClick={() => openSeriesDetails(comic)}>
             <div className="relative aspect-[3/4] rounded-md mb-2 overflow-hidden">
               <img src={comic.cover} alt={comic.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
@@ -2445,7 +2517,7 @@ export default function App() {
                 <div className={`rounded-2xl p-5 ${readerCardClasses}`}>
                   <p className={`text-xs font-semibold uppercase tracking-[0.25em] ${readerMutedTextClasses}`}>More Like This</p>
                   <div className="mt-4 space-y-4">
-                    {NOVELS.filter((novel) => novel.id !== selectedComic?.id).slice(0, 3).map((novel) => (
+                    {displayNovels.filter((novel) => novel.id !== selectedComic?.id).slice(0, 3).map((novel) => (
                       <button
                         key={novel.id}
                         type="button"
