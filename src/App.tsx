@@ -12,6 +12,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/co
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Heart, ChevronRight, Menu, Bell, User, Star, Clock, Home, Compass, PenTool, Facebook, Twitter, Instagram, Youtube, Plus, X, Play, SkipForward, DollarSign, BarChart3, Settings, BadgeCheck, Share2, MoreVertical, List, Check, Upload, BookOpen, ShieldCheck, Users, MessageSquare, Flag, Megaphone, Trash2, Eye, EyeOff, Settings2, Sparkles, Zap } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Logo } from './components/Logo';
 import { AuthModal } from './components/AuthModal';
 import { auth } from './lib/firebase';
@@ -514,14 +515,56 @@ export default function App() {
     }
   };
 
+  const HomeSkeleton = () => (
+    <div className="flex flex-col gap-16 pb-24 dark">
+      {/* Hero Skeleton */}
+      <section className="relative w-full h-[80vh] min-h-[600px] flex items-end justify-center overflow-hidden bg-zinc-900">
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-10 pb-12 md:pb-24 flex flex-col items-start pt-32">
+          <Skeleton className="h-6 w-32 mb-4" />
+          <Skeleton className="h-20 w-3/4 mb-4" />
+          <Skeleton className="h-6 w-1/2 mb-8" />
+          <div className="flex gap-3">
+            <Skeleton className="h-14 w-40 rounded-[16px]" />
+            <Skeleton className="h-14 w-40 rounded-[16px]" />
+          </div>
+        </div>
+      </section>
+
+      <div className="max-w-7xl mx-auto w-full px-6 lg:px-10 flex flex-col gap-20">
+        <section>
+          <Skeleton className="h-8 w-48 mb-6" />
+          <div className="flex gap-3 overflow-hidden">
+            {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-10 w-24 rounded-full shrink-0" />)}
+          </div>
+        </section>
+
+        <section>
+          <Skeleton className="h-10 w-64 mb-8" />
+          <div className="flex gap-6 overflow-hidden">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="min-w-[280px] w-[280px] ml-10">
+                <Skeleton className="aspect-[4/5] rounded-[16px]" />
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+
   const renderHome = () => {
+    if (backendSeries === undefined) return <HomeSkeleton />;
+
+    const featuredStory = displayComics[0] || COMICS[0];
+
     return (
       <div className="flex flex-col gap-16 pb-24 dark">
         {/* Large Featured Hero Section */}
         <section className="relative w-full h-[80vh] min-h-[600px] flex items-end justify-center overflow-hidden group">
           <img 
-            src="https://picsum.photos/seed/featured/1920/1080" 
-            alt="Featured Hero" 
+            src={featuredStory.cover} 
+            alt={featuredStory.title} 
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105"
             referrerPolicy="no-referrer"
           />
@@ -529,18 +572,21 @@ export default function App() {
           <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-10 pb-12 md:pb-24 flex flex-col items-start pt-32">
             <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4 flex-wrap">
               <Badge className="bg-primary text-primary-foreground uppercase tracking-widest text-[10px] md:text-xs font-black px-3 md:px-3 py-1 shadow-lg shadow-primary/20 rounded-md">Featured</Badge>
-              <Badge variant="outline" className="text-white border-white/20 uppercase tracking-widest text-[10px] md:text-xs font-black px-3 md:px-3 py-1 backdrop-blur-sm rounded-md">Action &amp; Fantasy</Badge>
+              <Badge variant="outline" className="text-white border-white/20 uppercase tracking-widest text-[10px] md:text-xs font-black px-3 md:px-3 py-1 backdrop-blur-sm rounded-md">{featuredStory.genre}</Badge>
             </div>
             <h1 className="text-white text-[2.8rem] md:text-7xl font-black mb-4 md:mb-4 leading-[1] tracking-tighter drop-shadow-lg max-w-3xl">
-              Surviving the<br />Game<br />as a Barbarian
+              {featuredStory.title}
             </h1>
-            <p className="text-white/84 text-base md:text-xl max-w-2xl mb-8 md:mb-8 leading-relaxed font-medium drop-shadow-md">
-              When a hardcore gamer is sucked into his favorite punishing RPG, he must rely on his encyclopedic knowledge of the game to survive in a brutal world.
+            <p className="text-white/84 text-base md:text-xl max-w-2xl mb-8 md:mb-8 leading-relaxed font-medium drop-shadow-md line-clamp-3">
+              {featuredStory.summary || "A gripping new series featuring powerful themes and unforgettable characters. Start your journey into this world today."}
             </p>
             <div className="flex flex-row items-center gap-3 w-full sm:w-auto mt-2">
-              <Button className="flex-1 sm:flex-none h-auto bg-primary hover:bg-primary/90 text-primary-foreground rounded-[16px] px-3 md:px-8 py-5 md:py-6 text-sm md:text-lg font-black shadow-[0_4px_20px_rgba(30,215,96,0.3)] transition-all hover:-translate-y-1" onClick={() => setCurrentView('reader')}>
+              <button 
+                className="flex-1 sm:flex-none h-auto bg-primary hover:bg-primary/90 text-primary-foreground rounded-[16px] px-3 md:px-8 py-5 md:py-6 text-sm md:text-lg font-black shadow-[0_4px_20px_rgba(30,215,96,0.3)] transition-all hover:-translate-y-1 flex items-center justify-center gap-2" 
+                onClick={() => openSeriesDetails(featuredStory)}
+              >
                 <Play className="w-5 h-5 md:w-5 md:h-5 mr-1.5 md:mr-2" fill="currentColor" /> Read Now
-              </Button>
+              </button>
               <Button variant="outline" className="flex-1 sm:flex-none h-auto border-white/20 bg-black/40 text-white hover:bg-white hover:text-black rounded-[16px] px-3 md:px-8 py-5 md:py-6 text-sm md:text-lg font-black backdrop-blur-md transition-all hover:-translate-y-1">
                 <Plus className="w-5 h-5 md:w-5 md:h-5 mr-1.5 md:mr-2" /> Add to Library
               </Button>
@@ -634,7 +680,11 @@ export default function App() {
               <h2 className="text-3xl font-black tracking-tighter text-white">Recommended For You</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {displayComics.slice(1, 4).map(comic => (
+              {displayComics
+                .filter(c => !displayComics.slice(0, 10).find(tc => tc.id === c.id)) // Exclude top trending
+                .filter(c => selectedGenres.length === 0 || selectedGenres.includes(c.genre)) // Match user genres
+                .slice(0, 4)
+                .map(comic => (
                 <div key={comic.id} className="flex h-[220px] bg-zinc-900/50 border border-white/5 rounded-[20px] overflow-hidden group cursor-pointer hover:bg-zinc-900 hover:border-primary/20 transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)]" onClick={() => openSeriesDetails(comic)}>
                   <div className="w-2/5 h-full relative overflow-hidden">
                     <img src={comic.cover} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90 group-hover:opacity-100" />
@@ -643,7 +693,9 @@ export default function App() {
                   <div className="w-3/5 p-6 md:p-8 flex flex-col justify-center relative">
                     <Badge className="w-fit bg-white/5 text-zinc-300 border-none text-[10px] uppercase font-black tracking-wider px-2 mb-3 group-hover:bg-primary/10 group-hover:text-primary transition-colors">{comic.genre}</Badge>
                     <h3 className="text-2xl font-black text-white mb-2 line-clamp-1 group-hover:text-primary transition-colors">{comic.title}</h3>
-                    <p className="text-sm text-zinc-400 line-clamp-2 mb-5 leading-relaxed font-medium">{comic.creator} brings an explosive new story to the platform. Don't miss this masterpiece.</p>
+                    <p className="text-sm text-zinc-400 line-clamp-2 mb-5 leading-relaxed font-medium">
+                      {comic.summary || `${comic.creator} brings an explosive new story to the platform. Don't miss this masterpiece.`}
+                    </p>
                     <div className="flex items-center gap-4 text-xs font-black text-zinc-500 mt-auto">
                       <span className="flex items-center gap-1 group-hover:text-white transition-colors"><Heart className="w-4 h-4 text-primary" fill="currentColor" /> {comic.likes}</span>
                       <span className="flex items-center gap-1 group-hover:text-white transition-colors"><Eye className="w-4 h-4" /> {comic.views}</span>
