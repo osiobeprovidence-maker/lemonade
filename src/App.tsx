@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Heart, ChevronRight, Menu, Bell, User, Star, Clock, Home, Compass, PenTool, Facebook, Twitter, Instagram, Youtube, Plus, X, Play, SkipForward, DollarSign, BarChart3, Settings, BadgeCheck, Share2, MoreVertical, List, Check, Upload, BookOpen, ShieldCheck, Users, MessageSquare, Flag, Megaphone, Trash2, Eye, EyeOff, Settings2 } from 'lucide-react';
+import { Search, Heart, ChevronRight, Menu, Bell, User, Star, Clock, Home, Compass, PenTool, Facebook, Twitter, Instagram, Youtube, Plus, X, Play, SkipForward, DollarSign, Coins, BarChart3, Settings, BadgeCheck, Share2, MoreVertical, List, Check, Upload, BookOpen, ShieldCheck, Users, MessageSquare, Flag, Megaphone, Trash2, Eye, EyeOff, Settings2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Logo } from './components/Logo';
 import { AuthModal } from './components/AuthModal';
@@ -1509,7 +1509,7 @@ export default function App() {
           <div className="flex flex-wrap gap-2 mt-3">
             <Button variant="outline" size="sm" className="rounded-full font-bold" onClick={() => setCurrentView('edit-profile')}>Edit Profile</Button>
             <Button variant="default" size="sm" className="rounded-full font-bold bg-primary/10 text-primary hover:bg-primary/20 border-none" onClick={() => setCurrentView('wallet')}>
-              <DollarSign className="w-3 h-3 mr-1" /> My Wallet
+              <Coins className="w-3 h-3 mr-1" /> My Wallet
             </Button>
             {!isPremium && (
               <Button variant="default" size="sm" className="rounded-full font-bold bg-primary/10 text-primary hover:bg-primary/20 border-none" onClick={() => setCurrentView('premium')}>
@@ -1800,14 +1800,14 @@ export default function App() {
       <h2 className="text-xl font-bold mb-4">Coin Packages</h2>
       <div className="space-y-4">
         {[
-          { coins: 100, price: "$0.99" },
-          { coins: 500, price: "$4.99", bonus: "+50 Bonus" },
-          { coins: 1000, price: "$9.99", bonus: "+150 Bonus" },
+          { coins: 100, price: "NGN 1,500" },
+          { coins: 500, price: "NGN 7,500", bonus: "+50 Bonus" },
+          { coins: 1000, price: "NGN 15,000", bonus: "+150 Bonus" },
         ].map((pkg, i) => (
           <div key={i} className="flex items-center justify-between p-4 border border-border rounded-xl hover:border-primary transition-colors cursor-pointer">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                <DollarSign className="w-5 h-5 text-primary-dark" />
+                <Coins className="w-5 h-5 text-primary-dark" />
               </div>
               <div>
                 <p className="font-bold">{pkg.coins} Coins</p>
@@ -2186,10 +2186,10 @@ export default function App() {
                 </span>
               </div>
               <h1 className="max-w-[11ch] text-[clamp(2.4rem,6.8vw,5.6rem)] font-black uppercase tracking-[-0.06em] leading-[0.92] text-white text-balance">
-                Novels worth staying up for.
+                Stories you can sink into.
               </h1>
               <p className="mt-4 max-w-[34rem] text-[clamp(0.98rem,2vw,1.18rem)] font-medium leading-[1.6] tracking-[-0.01em] text-white/82 sm:mt-5">
-                Serial fiction with rich atmospheres, chapter-by-chapter cliffhangers, and immersive worlds that linger long after the page ends.
+                Discover long-form fiction with sharper twists, richer character arcs, and chapter drops built to keep readers coming back every night.
               </p>
               <div className="mt-7 flex flex-col items-start gap-3 sm:mt-8 sm:flex-row sm:items-center">
                 <Button
@@ -2201,7 +2201,7 @@ export default function App() {
                   Start Reading
                 </Button>
                 <p className="text-sm font-medium tracking-[-0.01em] text-white/62">
-                  Moody chapters, premium pacing, and genre shelves worth exploring.
+                  Fresh romance, thrillers, and slow-burn drama in one reading lane.
                 </p>
               </div>
             </div>
