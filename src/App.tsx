@@ -19,7 +19,49 @@ import { auth } from './lib/firebase';
 import { updateProfile as updateFirebaseProfile } from 'firebase/auth';
 import { uploadProfilePhoto } from './lib/profilePhoto';
 
-const COMICS = [
+type StoryId = number | string;
+
+interface StoryBase {
+  id: StoryId;
+  title: string;
+  creator: string;
+  genre: string;
+  cover: string;
+  views: string;
+  likes: string;
+  summary?: string;
+}
+
+interface ComicStory extends StoryBase {
+  type: 'series';
+  emotion?: string;
+  rankChange: number;
+  day: string;
+  isNew: boolean;
+  isOriginal: boolean;
+}
+
+interface NovelStory extends StoryBase {
+  type: 'novel';
+  chapters: number;
+  readingMood: string;
+  summary: string;
+  excerpt: string;
+}
+
+type Story = ComicStory | NovelStory;
+type StoryComment = {
+  id: number;
+  user: string;
+  text: string;
+  likes: number;
+  date: string;
+};
+
+const isComicStory = (story: Story): story is ComicStory => story.type === 'series';
+const isNovelStory = (story: Story): story is NovelStory => story.type === 'novel';
+
+const COMICS: ComicStory[] = [
   { id: 1, title: "Surviving the Game as a Barbarian", creator: "K. Ryo", emotion: "Fantasy", genre: "Fantasy", cover: "https://picsum.photos/seed/barbarian/400/533", rankChange: 37, views: "53M", likes: "1.2M", day: "Mon", isNew: true, isOriginal: true, type: 'series' },
   { id: 2, title: "The Knight Only Lives Today", creator: "Ami", emotion: "Fantasy", genre: "Fantasy", cover: "https://picsum.photos/seed/knight/400/533", rankChange: 34, views: "12M", likes: "800K", day: "Tue", isNew: false, isOriginal: true, type: 'series' },
   { id: 3, title: "For Your Murder", creator: "J.D.", emotion: "Drama", genre: "Drama", cover: "https://picsum.photos/seed/murder/400/533", rankChange: -2, views: "315K", likes: "174K", day: "Wed", isNew: true, isOriginal: false, type: 'series' },
@@ -34,7 +76,7 @@ const COMICS = [
   { id: 12, title: "Behind Her Highness's Smile", creator: "Lemonade", emotion: "Drama", genre: "Drama", cover: "https://picsum.photos/seed/smile/400/533", rankChange: 12, views: "28M", likes: "1.3M", day: "Sun", isNew: false, isOriginal: true, type: 'series' },
 ];
 
-const NOVELS = [
+const NOVELS: NovelStory[] = [
   { id: 101, title: "The Alchemist of Lemonade", creator: "Novel Master", genre: "Fantasy", cover: "https://picsum.photos/seed/novel-1/400/533", views: "1.2M", likes: "45K", type: 'novel', chapters: 38, readingMood: "Arcane slow burn", summary: "A young alchemist discovers the secret to the ultimate lemonade, which grants magical powers.", excerpt: "At dawn the syrup looked like glass, and everyone in the workshop pretended not to notice it humming." },
   { id: 102, title: "Shadow of the Citrus", creator: "Sour King", genre: "Action", cover: "https://picsum.photos/seed/novel-2/400/533", views: "800K", likes: "32K", type: 'novel', chapters: 26, readingMood: "High-stakes action", summary: "In a world where fruit is power, one warrior fights to protect the last citrus tree.", excerpt: "Every rooftop in the district carried the smell of smoke and orange peel after the raid." },
   { id: 103, title: "Sweet Revenge", creator: "Sugar Queen", genre: "Drama", cover: "https://picsum.photos/seed/novel-3/400/533", views: "2.5M", likes: "120K", type: 'novel', chapters: 44, readingMood: "Society drama", summary: "A high society drama about betrayal and the sweetest comeback ever told.", excerpt: "By the time the champagne reached her table, the rumor had already become a verdict." },
@@ -60,7 +102,7 @@ const STORY_STYLE_DEFAULTS = {
   fontStyle: 'serif' as 'serif' | 'sans',
 };
 
-const ALL_STORIES = [...COMICS, ...NOVELS];
+const ALL_STORIES: Story[] = [...COMICS, ...NOVELS];
 const PILL_BUTTON_BASE = "rounded-full px-4 py-1.5 text-xs font-bold whitespace-nowrap transition-all md:px-6 md:py-2 md:text-sm";
 const HOME_SECTION_HEADING_CLASS = "text-[1.25rem] font-bold leading-tight sm:text-[1.5rem]";
 const HOME_VIEW_ALL_CLASS = "flex items-center gap-1 text-[0.82rem] font-medium text-muted-foreground transition-colors hover:text-foreground sm:text-sm";
@@ -72,28 +114,51 @@ const VIEW_PATHS: Record<string, string> = {
   my: '/my',
   search: '/search',
   profile: '/profile',
+  'edit-profile': '/profile/edit',
+  'email-preferences': '/profile/email-preferences',
+  'privacy-settings': '/profile/privacy',
   admin: '/admin',
   'ads-manager': '/ads-manager',
+  'create-campaign': '/create-campaign',
   premium: '/premium',
   wallet: '/wallet',
+  publish: '/publish',
+  'publish-dashboard': '/publish/dashboard',
+  'publish-new': '/publish/new',
+  'publish-episode': '/publish/episode',
+  'edit-series': '/publish/edit-series',
 };
 
 const VIEW_ALL_SECTIONS = ['trending', 'popular', 'daily', 'originals', 'novels', 'new-releases'] as const;
 
-function findStoryById(storyId?: string | null, stories: any[] = []) {
+function findStoryById(storyId?: string | null, stories: Story[] = ALL_STORIES) {
   if (!storyId) return null;
 
   return stories.find((story) => String(story.id) === storyId) || null;
 }
 
-function getRouteState(pathname: string) {
+function getRouteState(pathname: string, stories: Story[] = ALL_STORIES) {
   const view = Object.entries(VIEW_PATHS).find(([, path]) => path === pathname)?.[0];
   if (view) return { view };
 
+  if (pathname === '/login') {
+    return { view: 'auth', authMode: 'login' as const };
+  }
+
+  if (pathname === '/signup') {
+    return { view: 'auth', authMode: 'signup' as const };
+  }
+
   const seriesMatch = pathname.match(/^\/series\/([^/]+)\/?$/);
   if (seriesMatch) {
-    const story = findStoryById(seriesMatch[1]);
+    const story = findStoryById(seriesMatch[1], stories);
     return story ? { view: 'series-details', story } : null;
+  }
+
+  const creatorMatch = pathname.match(/^\/creator\/([^/]+)\/?$/);
+  if (creatorMatch) {
+    const story = findStoryById(creatorMatch[1], stories);
+    return story ? { view: 'creator-profile', story } : null;
   }
 
   const readerMatch = pathname.match(/^\/reader\/([^/]+)\/?$/);
@@ -110,13 +175,26 @@ function getRouteState(pathname: string) {
   return null;
 }
 
-function getPathForView(view: string, selectedComic: any, viewAllSection: string) {
+function getPathForView(
+  view: string,
+  selectedComic: Story | null,
+  viewAllSection: string,
+  authMode: 'login' | 'signup',
+) {
   if (view in VIEW_PATHS) {
     return VIEW_PATHS[view];
   }
 
+  if (view === 'auth') {
+    return authMode === 'signup' ? '/signup' : '/login';
+  }
+
   if (view === 'series-details' && selectedComic) {
     return `/series/${selectedComic.id}`;
+  }
+
+  if (view === 'creator-profile' && selectedComic) {
+    return `/creator/${selectedComic.id}`;
   }
 
   if ((view === 'reader' || view === 'novel-reader') && selectedComic) {
@@ -184,7 +262,7 @@ export default function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [creatorType, setCreatorType] = useState<'original' | 'self' | null>(null);
   const [dashboardTab, setDashboardTab] = useState<'series' | 'monetization' | 'stats'>('series');
-  const [selectedComic, setSelectedComic] = useState<any>(null);
+  const [selectedComic, setSelectedComic] = useState<Story | null>(null);
   const [viewAllSection, setViewAllSection] = useState<(typeof VIEW_ALL_SECTIONS)[number]>('popular');
   const [showAd, setShowAd] = useState(false);
   const [adTimeLeft, setAdTimeLeft] = useState(5);
@@ -196,8 +274,9 @@ export default function App() {
   const [dropSomethingLink, setDropSomethingLink] = useState('');
   const [isPremium, setIsPremium] = useState(false);
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-  const [likedComics, setLikedComics] = useState<Set<number>>(new Set());
+  const [likedComics, setLikedComics] = useState<Set<StoryId>>(new Set());
   const [isReaderMenuOpen, setIsReaderMenuOpen] = useState(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [profileSaveError, setProfileSaveError] = useState('');
   const [isUploadingProfilePic, setIsUploadingProfilePic] = useState(false);
@@ -207,14 +286,14 @@ export default function App() {
   const [adminTab, setAdminTab] = useState<'dashboard' | 'users' | 'moderation' | 'ads'>('dashboard');
   const [activeLemonCategory, setActiveLemonCategory] = useState('Drama');
   const [previousView, setPreviousView] = useState('home');
-  const [comments, setComments] = useState<Record<number, any[]>>({
+  const [comments, setComments] = useState<Record<string, StoryComment[]>>({
     1: [
       { id: 1, user: "LemonLover", text: "This is amazing!", likes: 12, date: "2h ago" },
       { id: 2, user: "CitrusFan", text: "Can't wait for the next chapter!", likes: 5, date: "5h ago" }
     ]
   });
   const [newComment, setNewComment] = useState('');
-  const [publishType, setPublishType] = useState<'series' | 'novel'>('series');
+  const [publishType, setPublishType] = useState<'webtoon' | 'novel'>('webtoon');
   const [adminUserSearch, setAdminUserSearch] = useState('');
   const [editableStoryKey, setEditableStoryKey] = useState(String(NOVELS[0].id));
   const [storyCoverImage, setStoryCoverImage] = useState('');
@@ -237,21 +316,45 @@ export default function App() {
   const backendSeries = useQuery(api.series.getAllSeries, { limit: 100 });
   
   // Dynamic Content Derivation
-  const allStories = React.useMemo(() => {
+  const allStories = React.useMemo<Story[]>(() => {
     if (!backendSeries || backendSeries.length === 0) return ALL_STORIES;
-    return backendSeries.map(s => ({
-      ...s,
-      id: s._id,
-      creator: s.creatorName,
-      cover: s.coverImageUrl || s.coverImage || "https://picsum.photos/seed/default/400/533",
-      type: s.type === 'novel' ? 'novel' : 'series',
-      day: s.releaseDay || 'Sun',
-      rankChange: Math.floor(Math.random() * 40), // Placeholder for dynamic ranking
-    }));
+    return backendSeries.map((s) => {
+      const baseStory = {
+        id: s._id,
+        title: s.title,
+        creator: s.creatorName,
+        genre: s.genre,
+        cover: s.coverImageUrl || "https://picsum.photos/seed/default/400/533",
+        views: String(s.views ?? 0),
+        likes: String(s.likes ?? 0),
+        summary: s.summary || undefined,
+      };
+
+      if (s.type === 'novel') {
+        return {
+          ...baseStory,
+          type: 'novel' as const,
+          chapters: 0,
+          readingMood: s.emotion || 'Long-form fiction',
+          summary: s.summary || 'No summary available yet.',
+          excerpt: s.summary || 'Start reading this new Lemonade novel.',
+        };
+      }
+
+      return {
+        ...baseStory,
+        type: 'series' as const,
+        emotion: s.emotion || undefined,
+        rankChange: Math.floor(Math.random() * 40),
+        day: s.releaseDay || 'Sun',
+        isNew: Boolean(s.isNew),
+        isOriginal: Boolean(s.isOriginal),
+      };
+    });
   }, [backendSeries]);
 
-  const displayComics = React.useMemo(() => allStories.filter(s => s.type === 'series'), [allStories]);
-  const displayNovels = React.useMemo(() => allStories.filter(s => s.type === 'novel'), [allStories]);
+  const displayComics = React.useMemo(() => allStories.filter(isComicStory), [allStories]);
+  const displayNovels = React.useMemo(() => allStories.filter(isNovelStory), [allStories]);
 
   useEffect(() => {
     const routeState = getRouteState(location.pathname, allStories);
@@ -265,7 +368,11 @@ export default function App() {
     }
 
     if ('story' in routeState && routeState.story) {
-      setSelectedComic((prev: any) => (prev?.id === routeState.story.id ? prev : routeState.story));
+      setSelectedComic((prev) => (prev?.id === routeState.story.id ? prev : routeState.story));
+    }
+
+    if ('authMode' in routeState && routeState.authMode) {
+      setAuthMode((prev) => (prev === routeState.authMode ? prev : routeState.authMode));
     }
 
     if ('section' in routeState && routeState.section) {
@@ -276,12 +383,12 @@ export default function App() {
   }, [location.pathname, navigate, allStories]);
 
   useEffect(() => {
-    const nextPath = getPathForView(currentView, selectedComic, viewAllSection);
+    const nextPath = getPathForView(currentView, selectedComic, viewAllSection, authMode);
 
     if (!nextPath || nextPath === location.pathname) return;
 
     navigate(nextPath);
-  }, [currentView, selectedComic?.id, viewAllSection, location.pathname, navigate]);
+  }, [currentView, selectedComic?.id, viewAllSection, authMode, location.pathname, navigate]);
 
   useEffect(() => {
     if (!user && !userProfile) return;
@@ -294,7 +401,7 @@ export default function App() {
     setIsPremium(Boolean(userProfile?.isPremium));
   }, [user, userProfile]);
 
-  const toggleLike = (comicId: number) => {
+  const toggleLike = (comicId: StoryId) => {
     setLikedComics(prev => {
       const newSet = new Set(prev);
       if (newSet.has(comicId)) {
@@ -306,7 +413,7 @@ export default function App() {
     });
   };
 
-  const startReading = (comic: any) => {
+  const startReading = (comic: Story) => {
     setSelectedComic(comic);
     if (comic.type === 'novel') {
       setCurrentView('novel-reader');
@@ -329,7 +436,7 @@ export default function App() {
     }
   };
 
-  const openSeriesDetails = (comic: any) => {
+  const openSeriesDetails = (comic: Story) => {
     setSelectedComic(comic);
     setCurrentView('series-details');
   };
@@ -473,6 +580,11 @@ export default function App() {
     } else {
       openSignupModal();
     }
+  };
+
+  const handleMobileNavSelect = (view: string) => {
+    setIsMobileNavOpen(false);
+    setCurrentView(view);
   };
 
   const handleProfileImageSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -1861,8 +1973,9 @@ export default function App() {
     </div>
   );
 
-  const renderCommentSection = (contentId: number) => {
-    const contentComments = comments[contentId] || [];
+  const renderCommentSection = (contentId: StoryId) => {
+    const commentKey = String(contentId);
+    const contentComments = comments[commentKey] || [];
     
     const handleAddComment = (e: React.FormEvent) => {
       e.preventDefault();
@@ -1878,7 +1991,7 @@ export default function App() {
       
       setComments(prev => ({
         ...prev,
-        [contentId]: [comment, ...(prev[contentId] || [])]
+        [commentKey]: [comment, ...(prev[commentKey] || [])]
       }));
       setNewComment('');
     };
@@ -2454,7 +2567,7 @@ export default function App() {
                     </span>
                     <span className="flex items-center gap-1.5">
                       <MessageSquare className="h-3.5 w-3.5" />
-                      {(comments[selectedComic?.id] || []).length}
+                      {(selectedComic ? comments[String(selectedComic.id)] : [])?.length || 0}
                     </span>
                   </div>
                 </header>
@@ -2676,7 +2789,7 @@ export default function App() {
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
             <Badge>{selectedComic?.genre}</Badge>
-            {selectedComic?.isOriginal && <Badge variant="secondary" className="bg-primary/20 text-primary">Original</Badge>}
+            {selectedComic && isComicStory(selectedComic) && selectedComic.isOriginal && <Badge variant="secondary" className="bg-primary/20 text-primary">Original</Badge>}
             <Badge variant="outline" className="uppercase text-[10px] font-bold">{selectedComic?.type || 'webtoon'}</Badge>
           </div>
           <h1 className="text-4xl font-black tracking-tighter mb-2">{selectedComic?.title}</h1>
@@ -2871,9 +2984,85 @@ export default function App() {
         <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 md:px-6 lg:px-10">
           {/* Mobile Header Structure (Matching Screenshot) */}
           <div className="flex md:hidden items-center justify-between w-full">
-            <Button variant="ghost" size="icon" className="text-white hover:bg-white/10" onClick={() => setIsReaderMenuOpen(!isReaderMenuOpen)}>
-              <Menu className="w-6 h-6" />
-            </Button>
+            <Sheet open={isMobileNavOpen} onOpenChange={setIsMobileNavOpen}>
+              <SheetTrigger className="rounded-full">
+                <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
+                  <Menu className="w-6 h-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[280px] border-white/10 bg-zinc-950 p-0 text-white">
+                <div className="border-b border-white/10 px-6 py-5">
+                  <div className="flex items-center gap-2">
+                    <div className="rounded-full bg-primary/15 p-2">
+                      <Menu className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-zinc-500">Navigation</p>
+                      <p className="text-lg font-black tracking-tight">Lemonade</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-2 p-4">
+                  <button
+                    type="button"
+                    onClick={() => handleMobileNavSelect('home')}
+                    className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left font-bold transition-colors ${currentView === 'home' ? 'bg-primary text-primary-foreground' : 'text-zinc-300 hover:bg-white/5 hover:text-white'}`}
+                  >
+                    <Home className="h-4 w-4" />
+                    Home
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleMobileNavSelect('manga')}
+                    className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left font-bold transition-colors ${currentView === 'manga' ? 'bg-primary text-primary-foreground' : 'text-zinc-300 hover:bg-white/5 hover:text-white'}`}
+                  >
+                    <Compass className="h-4 w-4" />
+                    Originals
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleMobileNavSelect('Novel')}
+                    className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left font-bold transition-colors ${currentView === 'Novel' ? 'bg-primary text-primary-foreground' : 'text-zinc-300 hover:bg-white/5 hover:text-white'}`}
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    Novels
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMobileNavOpen(false);
+                      handleMyClick();
+                    }}
+                    className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left font-bold transition-colors ${currentView === 'my' ? 'bg-primary text-primary-foreground' : 'text-zinc-300 hover:bg-white/5 hover:text-white'}`}
+                  >
+                    <Heart className="h-4 w-4" />
+                    Library
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMobileNavOpen(false);
+                      handlePublishClick();
+                    }}
+                    className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left font-bold text-zinc-300 transition-colors hover:bg-white/5 hover:text-white"
+                  >
+                    <PenTool className="h-4 w-4" />
+                    Publish
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMobileNavOpen(false);
+                      handleProfileClick();
+                    }}
+                    className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left font-bold text-zinc-300 transition-colors hover:bg-white/5 hover:text-white"
+                  >
+                    <User className="h-4 w-4" />
+                    {isLoggedIn ? 'Profile' : 'Sign Up / Log In'}
+                  </button>
+                </div>
+              </SheetContent>
+            </Sheet>
             
             <div className="relative group cursor-pointer" onClick={() => setCurrentView('home')}>
               <div className="absolute inset-0 bg-primary -skew-x-[15deg] transform -translate-y-0.5" />
