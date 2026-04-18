@@ -4,7 +4,7 @@ import { collection, query, where, limit, onSnapshot, orderBy } from 'firebase/f
 import { db, handleFirestoreError } from '../lib/firebase';
 import { SeriesCard } from '../components/SeriesCard';
 import { motion } from 'framer-motion';
-import { TrendingUp, Sparkles, Clock, ChevronRight, Smartphone } from 'lucide-react';
+import { Clock, ChevronRight, Smartphone } from 'lucide-react';
 
 const MOCK_SERIES = [
   {
@@ -129,7 +129,6 @@ export function Home() {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-black tracking-tight flex items-center gap-2">
               Trending Now
-              <TrendingUp size={18} className="text-brand-yellow" />
             </h2>
             <Link to="/rankings" className="text-[10px] font-black text-brand-yellow uppercase tracking-widest">View All</Link>
           </div>
@@ -154,7 +153,6 @@ export function Home() {
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-lg font-black tracking-tight flex items-center gap-2">
               New Releases
-              <Sparkles size={18} className="text-brand-yellow" />
             </h2>
             <Link to="/new-releases" className="text-[10px] font-black text-brand-yellow uppercase tracking-widest">View All</Link>
           </div>
