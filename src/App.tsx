@@ -360,6 +360,22 @@ export default function App() {
 
   const displayComics = React.useMemo(() => allStories.filter(isComicStory), [allStories]);
   const displayNovels = React.useMemo(() => allStories.filter(isNovelStory), [allStories]);
+  const publicBirthdayLabel = React.useMemo(() => {
+    if (!profileBirthday) return '';
+
+    const [year, month, day] = profileBirthday.split('-');
+    if (!month || !day) return '';
+
+    const parsedDate = new Date(`${year || '2000'}-${month}-${day}T00:00:00`);
+    if (Number.isNaN(parsedDate.getTime())) {
+      return `${month}/${day}`;
+    }
+
+    return parsedDate.toLocaleDateString(undefined, {
+      month: 'long',
+      day: 'numeric',
+    });
+  }, [profileBirthday]);
 
   useEffect(() => {
     const routeState = getRouteState(location.pathname, allStories);
@@ -1483,11 +1499,6 @@ export default function App() {
           ) : (
             <User className="w-12 h-12 text-muted-foreground" />
           )}
-          {isPremium && (
-            <div className="absolute bottom-0 right-0 bg-background rounded-full p-0.5">
-              <BadgeCheck className="w-6 h-6 text-primary fill-primary/20" />
-            </div>
-          )}
         </div>
         <div className="flex-1">
           <h1 className="text-2xl sm:text-3xl font-black tracking-tighter flex items-center gap-2">
@@ -1515,10 +1526,10 @@ export default function App() {
         </div>
       )}
 
-      {(profilePronouns || profileBirthday || selectedGenres.length > 0) && (
+      {(profilePronouns || publicBirthdayLabel || selectedGenres.length > 0) && (
         <div className="mb-8 flex flex-wrap gap-2">
           {profilePronouns && <Badge variant="secondary">{profilePronouns}</Badge>}
-          {profileBirthday && <Badge variant="secondary">{profileBirthday}</Badge>}
+          {publicBirthdayLabel && <Badge variant="secondary">{publicBirthdayLabel}</Badge>}
           {selectedGenres.map((genre) => (
             <Badge key={genre} variant="outline">{genre}</Badge>
           ))}
@@ -1532,7 +1543,7 @@ export default function App() {
 
       {dropSomethingLink && (
         <div className="mb-8">
-          <a href={dropSomethingLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline bg-primary/10 px-4 py-2 rounded-full">
+          <a href={dropSomethingLink} className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline bg-primary/10 px-4 py-2 rounded-full">
             <Heart className="w-4 h-4 fill-primary" /> Support me on DropSomething
           </a>
         </div>
