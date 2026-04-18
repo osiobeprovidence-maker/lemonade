@@ -279,6 +279,7 @@ export default function App() {
   const [profileBirthday, setProfileBirthday] = useState('');
   const [marketingEmailsEnabled, setMarketingEmailsEnabled] = useState(false);
   const [likedComics, setLikedComics] = useState<Set<StoryId>>(new Set());
+  const [likedEpisodes, setLikedEpisodes] = useState<Set<string>>(new Set());
   const [isReaderMenuOpen, setIsReaderMenuOpen] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
@@ -438,6 +439,20 @@ export default function App() {
         newSet.add(comicId);
       }
       return newSet;
+    });
+  };
+
+  const toggleEpisodeLike = (storyId: StoryId, episodeNumber: number) => {
+    const episodeKey = `${String(storyId)}-${episodeNumber}`;
+
+    setLikedEpisodes((prev) => {
+      const next = new Set(prev);
+      if (next.has(episodeKey)) {
+        next.delete(episodeKey);
+      } else {
+        next.add(episodeKey);
+      }
+      return next;
     });
   };
 
@@ -2939,7 +2954,26 @@ export default function App() {
                   <h4 className="font-bold text-lg">Episode {ep}</h4>
                   <p className="text-sm text-muted-foreground">Oct {ep}, 2023</p>
                 </div>
-                <Button variant="ghost" size="icon"><Heart className="w-5 h-5 text-muted-foreground" /></Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={`Like Episode ${ep}`}
+                  className="shrink-0"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    if (selectedComic) {
+                      toggleEpisodeLike(selectedComic.id, ep);
+                    }
+                  }}
+                >
+                  <Heart
+                    className={`w-5 h-5 transition-colors ${
+                      selectedComic && likedEpisodes.has(`${String(selectedComic.id)}-${ep}`)
+                        ? 'fill-primary text-primary'
+                        : 'text-muted-foreground'
+                    }`}
+                  />
+                </Button>
               </div>
             ))}
           </div>
