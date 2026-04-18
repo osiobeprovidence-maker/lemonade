@@ -79,10 +79,10 @@ const VIEW_PATHS: Record<string, string> = {
 
 const VIEW_ALL_SECTIONS = ['trending', 'popular', 'daily', 'originals', 'novels', 'new-releases'] as const;
 
-function findStoryById(storyId?: string | null) {
+function findStoryById(storyId?: string | null, stories: any[] = []) {
   if (!storyId) return null;
 
-  return ALL_STORIES.find((story) => String(story.id) === storyId) || null;
+  return stories.find((story) => String(story.id) === storyId) || null;
 }
 
 function getRouteState(pathname: string) {
@@ -97,7 +97,7 @@ function getRouteState(pathname: string) {
 
   const readerMatch = pathname.match(/^\/reader\/([^/]+)\/?$/);
   if (readerMatch) {
-    const story = findStoryById(readerMatch[1]);
+    const story = findStoryById(readerMatch[1], stories);
     return story ? { view: story.type === 'novel' ? 'novel-reader' : 'reader', story } : null;
   }
 
@@ -191,8 +191,28 @@ export default function App() {
   const editableStoryStyle = useQuery(api.series.getStoryStyleByKey, editableStoryKey ? { storyKey: editableStoryKey } : "skip");
   const upsertStoryStyle = useMutation(api.series.upsertStoryStyle);
 
+  // Convex Data Queries
+  const backendSeries = useQuery(api.series.getAllSeries, { limit: 100 });
+  
+  // Dynamic Content Derivation
+  const allStories = React.useMemo(() => {
+    if (!backendSeries || backendSeries.length === 0) return ALL_STORIES;
+    return backendSeries.map(s => ({
+      ...s,
+      id: s._id,
+      creator: s.creatorName,
+      cover: s.coverImageUrl || s.coverImage || "https://picsum.photos/seed/default/400/533",
+      type: s.type === 'novel' ? 'novel' : 'series',
+      day: s.releaseDay || 'Sun',
+      rankChange: Math.floor(Math.random() * 40), // Placeholder for dynamic ranking
+    }));
+  }, [backendSeries]);
+
+  const displayComics = React.useMemo(() => allStories.filter(s => s.type === 'series'), [allStories]);
+  const displayNovels = React.useMemo(() => allStories.filter(s => s.type === 'novel'), [allStories]);
+
   useEffect(() => {
-    const routeState = getRouteState(location.pathname);
+    const routeState = getRouteState(location.pathname, allStories);
 
     if (!routeState) {
       if (location.pathname !== '/') {
@@ -211,7 +231,7 @@ export default function App() {
     }
 
     setCurrentView((prev) => (prev === routeState.view ? prev : routeState.view));
-  }, [location.pathname, navigate]);
+  }, [location.pathname, navigate, allStories]);
 
   useEffect(() => {
     const nextPath = getPathForView(currentView, selectedComic, viewAllSection);
@@ -277,13 +297,13 @@ export default function App() {
     setCurrentView(selectedComic?.type === 'novel' ? 'novel-reader' : 'reader');
   };
 
-  const filteredComics = COMICS.filter(comic => 
+  const filteredComics = displayComics.filter(comic => 
     comic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     comic.genre.toLowerCase().includes(searchQuery.toLowerCase())
   );
-  const editableStories = ALL_STORIES;
-  const editableStory = editableStories.find((story) => String(story.id) === editableStoryKey) || NOVELS[0];
-  const filteredNovels = NOVELS.filter((novel) => novel.genre === activeLemonCategory || activeLemonCategory === 'Drama');
+  const editableStories = allStories;
+  const editableStory = editableStories.find((story) => String(story.id) === editableStoryKey) || (displayNovels[0] || NOVELS[0]);
+  const filteredNovels = displayNovels.filter((novel) => novel.genre === activeLemonCategory || activeLemonCategory === 'Drama');
   const filteredAdminUsers = (convexAdminUsers || []).filter((adminUser) => {
     const query = adminUserSearch.trim().toLowerCase();
     if (!query) return true;
@@ -315,25 +335,25 @@ export default function App() {
       title: 'Trending & popular series',
       eyebrow: 'Reader momentum',
       description: 'The stories readers are opening first right now, ranked by current attention.',
-      items: COMICS.slice(0, 12),
+      items: displayComics.slice(0, 12),
     },
     popular: {
       title: `${activeCategory} stories`,
       eyebrow: 'Popular on Lemonade',
       description: `Everything readers are opening in ${activeCategory.toLowerCase()} right now.`,
-      items: COMICS.filter((comic) => comic.genre === activeCategory || activeCategory === 'Drama'),
+      items: displayComics.filter((comic) => comic.genre === activeCategory || activeCategory === 'Drama'),
     },
     daily: {
       title: `${activeDay} drops`,
       eyebrow: 'Weekly release board',
       description: `Every title dropping on ${activeDay}.`,
-      items: COMICS.filter((comic) => comic.day === activeDay || activeDay === 'Sun'),
+      items: displayComics.filter((comic) => comic.day === activeDay || activeDay === 'Sun'),
     },
     originals: {
       title: 'Lemonade Originals',
       eyebrow: 'Exclusive lineup',
       description: 'The complete originals shelf, from breakout action to weekend drama.',
-      items: COMICS.filter((comic) => comic.isOriginal),
+      items: displayComics.filter((comic) => comic.isOriginal),
     },
     novels: {
       title: `${activeLemonCategory} novels`,
@@ -345,7 +365,7 @@ export default function App() {
       title: 'Newly released originals',
       eyebrow: 'Fresh this week',
       description: 'Recent launches and newly updated originals worth jumping into first.',
-      items: COMICS.filter((comic) => comic.isNew),
+      items: displayComics.filter((comic) => comic.isNew),
     },
   } as const;
 
@@ -559,7 +579,7 @@ export default function App() {
               <button className="text-xs font-black text-zinc-400 hover:text-primary transition-colors flex items-center gap-1 uppercase tracking-widest" onClick={() => openViewAll('trending')}>View All <ChevronRight className="w-4 h-4" /></button>
             </div>
             <div className="flex gap-6 overflow-x-auto pb-8 pt-4 no-scrollbar snap-x relative mask-image-fade-right">
-              {COMICS.slice(0, 10).map((comic, i) => (
+              {displayComics.slice(0, 10).map((comic, i) => (
                 <div key={comic.id} className="min-w-[280px] w-[280px] snap-start relative group cursor-pointer" onClick={() => openSeriesDetails(comic)}>
                   <div 
                     className="absolute -left-3 top-6 z-20 text-[100px] font-black leading-none drop-shadow-2xl transition-transform duration-300 group-hover:scale-110 group-hover:text-primary"
@@ -590,7 +610,7 @@ export default function App() {
               <button className="text-xs font-black text-zinc-400 hover:text-primary transition-colors flex items-center gap-1 uppercase tracking-widest" onClick={() => openViewAll('new-releases')}>View All <ChevronRight className="w-4 h-4" /></button>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-              {COMICS.filter(c => c.isNew).slice(0, 6).map(comic => (
+              {displayComics.filter(c => c.isNew).slice(0, 6).map(comic => (
                 <div key={comic.id} className="flex flex-col group cursor-pointer" onClick={() => openSeriesDetails(comic)}>
                   <div className="relative aspect-[3/4] rounded-[14px] overflow-hidden mb-3 bg-zinc-900 border border-white/5 transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-[0_12px_30px_rgba(30,215,96,0.15)] group-hover:border-primary/30">
                     <img src={comic.cover} alt={comic.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90 group-hover:opacity-100" />
@@ -614,7 +634,7 @@ export default function App() {
               <h2 className="text-3xl font-black tracking-tighter text-white">Recommended For You</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {COMICS.slice(1, 3).map(comic => (
+              {displayComics.slice(1, 4).map(comic => (
                 <div key={comic.id} className="flex h-[220px] bg-zinc-900/50 border border-white/5 rounded-[20px] overflow-hidden group cursor-pointer hover:bg-zinc-900 hover:border-primary/20 transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)]" onClick={() => openSeriesDetails(comic)}>
                   <div className="w-2/5 h-full relative overflow-hidden">
                     <img src={comic.cover} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90 group-hover:opacity-100" />
@@ -703,7 +723,7 @@ export default function App() {
           </div>
 
           <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-2 gap-y-8">
-            {COMICS.filter(c => c.isOriginal && (c.day === activeDay || activeDay === 'Sun')).map((comic) => (
+            {displayComics.filter(c => c.isOriginal && (c.day === activeDay || activeDay === 'Sun')).map((comic) => (
               <div key={comic.id} className="flex flex-col cursor-pointer group" onClick={() => openSeriesDetails(comic)}>
                 <div className="relative aspect-[3/4] rounded-md mb-2 overflow-hidden">
                   <img src={comic.cover} alt={comic.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" referrerPolicy="no-referrer" />
@@ -734,7 +754,7 @@ export default function App() {
             </button>
           </div>
           <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-2 gap-y-8">
-            {COMICS.filter(c => c.isOriginal).map((comic) => (
+            {displayComics.filter(c => c.isOriginal).map((comic) => (
               <div key={comic.id} className="flex flex-col cursor-pointer group" onClick={() => openSeriesDetails(comic)}>
                 <div className="relative aspect-[3/4] rounded-md mb-2 overflow-hidden">
                   <img src={comic.cover} alt={comic.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" referrerPolicy="no-referrer" />
@@ -761,7 +781,7 @@ export default function App() {
       </div>
       
       <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-2 gap-y-8">
-        {COMICS.slice(0, 3).map((comic) => (
+        {displayComics.slice(0, 3).map((comic) => (
           <div key={comic.id} className="flex flex-col cursor-pointer group" onClick={() => openSeriesDetails(comic)}>
             <div className="relative aspect-[3/4] rounded-md mb-2 overflow-hidden">
               <img src={comic.cover} alt={comic.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
@@ -2445,7 +2465,7 @@ export default function App() {
                 <div className={`rounded-2xl p-5 ${readerCardClasses}`}>
                   <p className={`text-xs font-semibold uppercase tracking-[0.25em] ${readerMutedTextClasses}`}>More Like This</p>
                   <div className="mt-4 space-y-4">
-                    {NOVELS.filter((novel) => novel.id !== selectedComic?.id).slice(0, 3).map((novel) => (
+                    {displayNovels.filter((novel) => novel.id !== selectedComic?.id).slice(0, 3).map((novel) => (
                       <button
                         key={novel.id}
                         type="button"
