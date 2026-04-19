@@ -3673,6 +3673,7 @@ export default function App() {
         open={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         onSuccess={() => setCurrentView('my')}
+        defaultView={authMode === 'signup' ? 'create-account' : 'login'}
       />
 
       {showAd && renderAdOverlay()}

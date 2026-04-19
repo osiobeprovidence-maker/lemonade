@@ -7,6 +7,7 @@ import {
   User,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
   signInWithPopup,
   GoogleAuthProvider,
   OAuthProvider,
@@ -52,6 +53,7 @@ interface AuthContextType {
   signUpWithEmail: (email: string, password: string) => Promise<AuthActionResult>;
   signInWithGoogle: () => Promise<AuthActionResult>;
   signInWithApple: () => Promise<AuthActionResult>;
+  sendPasswordReset: (email: string) => Promise<void>;
   logout: () => Promise<void>;
   updateUserProfile: (data: Partial<ConvexUserProfile>) => Promise<void>;
 }
@@ -132,6 +134,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   };
 
+  const sendPasswordReset = async (email: string) => {
+    await sendPasswordResetEmail(auth, email);
+  };
+
   const logout = async () => {
     setUserProfile(null);
     await signOut(auth);
@@ -190,6 +196,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signUpWithEmail,
       signInWithGoogle,
       signInWithApple,
+      sendPasswordReset,
       logout,
       updateUserProfile
     }}>
