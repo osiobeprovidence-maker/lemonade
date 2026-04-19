@@ -1,6 +1,6 @@
 export type AuthMethod = 'email' | 'google' | 'apple';
 
-interface LastLoginMethodHintProps {
+interface LastSignInMethodHintProps {
   method: AuthMethod | null;
 }
 
@@ -10,7 +10,7 @@ const METHOD_LABEL: Record<AuthMethod, string> = {
   apple: 'Apple',
 };
 
-export function LastLoginMethodHint({ method }: LastLoginMethodHintProps) {
+export function LastSignInMethodHint({ method }: LastSignInMethodHintProps) {
   if (!method) return null;
 
   return (

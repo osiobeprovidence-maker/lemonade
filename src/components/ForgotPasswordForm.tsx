@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail } from 'lucide-react';
+import { ArrowLeft, Mail } from 'lucide-react';
 
 interface ForgotPasswordFormProps {
   email: string;
@@ -7,6 +7,7 @@ interface ForgotPasswordFormProps {
   error: string;
   onEmailChange: (value: string) => void;
   onSubmit: (event: React.FormEvent) => void;
+  onBack: () => void;
 }
 
 export function ForgotPasswordForm({
@@ -15,6 +16,7 @@ export function ForgotPasswordForm({
   error,
   onEmailChange,
   onSubmit,
+  onBack,
 }: ForgotPasswordFormProps) {
   return (
     <form onSubmit={onSubmit} className="space-y-5 text-white">
@@ -43,6 +45,15 @@ export function ForgotPasswordForm({
         className="w-full rounded-2xl bg-white px-4 py-3.5 text-sm font-semibold text-zinc-950 shadow-[0_18px_45px_rgba(0,0,0,0.22)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/92 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? 'Sending link...' : 'Send reset link'}
+      </button>
+
+      <button
+        type="button"
+        onClick={onBack}
+        className="inline-flex items-center gap-2 text-sm font-medium text-white/62 transition hover:text-white"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to sign in
       </button>
     </form>
   );

@@ -1,20 +1,23 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { CheckCircle2, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { auth } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
-import { AuthToggle } from './AuthToggle';
-import { CreateAccountForm } from './CreateAccountForm';
+import { AuthMethodList } from './AuthMethodList';
+import { AuthModeToggle } from './AuthModeToggle';
+import { EmailLoginForm } from './EmailLoginForm';
+import { EmailSignupForm } from './EmailSignupForm';
 import { ForgotPasswordForm } from './ForgotPasswordForm';
-import { LastLoginMethodHint, type AuthMethod } from './LastLoginMethodHint';
-import { LoginForm } from './LoginForm';
+import { LastSignInMethodHint, type AuthMethod } from './LastSignInMethodHint';
+import { ResetSentState } from './ResetSentState';
 
-type AuthView = 'create-account' | 'login' | 'forgot-password' | 'reset-sent';
+type AuthMode = 'create' | 'login';
+type AuthSubstep = 'methods' | 'email-form' | 'forgot-password' | 'reset-sent';
 
-const AUTH_VIEW_STORAGE_KEY = 'lemonade:last-auth-view';
-const LOGIN_METHOD_STORAGE_KEY = 'lemonade:last-login-method';
+const AUTH_MODE_STORAGE_KEY = 'lemonade:last-auth-mode';
+const SIGN_IN_METHOD_STORAGE_KEY = 'lemonade:last-sign-in-method';
 
 interface AuthModalProps {
   open: boolean;
@@ -34,21 +37,23 @@ function readStorageValue<T>(key: string, fallback: T): T {
   }
 }
 
-function inferInitialView(defaultView?: 'create-account' | 'login', hasLastLoginMethod?: boolean) {
-  if (defaultView) return defaultView;
+function inferInitialMode(defaultView?: 'create-account' | 'login', hasLastSignInMethod?: boolean): AuthMode {
+  if (defaultView === 'create-account') return 'create';
+  if (defaultView === 'login') return 'login';
 
-  const storedView = readStorageValue<AuthView | null>(AUTH_VIEW_STORAGE_KEY, null);
-  if (storedView === 'create-account' || storedView === 'login') return storedView;
+  const storedMode = readStorageValue<AuthMode | null>(AUTH_MODE_STORAGE_KEY, null);
+  if (storedMode === 'create' || storedMode === 'login') return storedMode;
 
-  return hasLastLoginMethod ? 'login' : 'create-account';
+  return hasLastSignInMethod ? 'login' : 'create';
 }
 
 export function AuthModal({ open, onClose, onSuccess, defaultView }: AuthModalProps) {
   const { signInWithEmail, signUpWithEmail, signInWithGoogle, signInWithApple, sendPasswordReset, user, userProfile } = useAuth();
   const createUser = useMutation(api.users.createUser);
   const updateUserProfileMutation = useMutation(api.users.updateUserProfile);
-  const [currentView, setCurrentView] = useState<AuthView>('create-account');
-  const [lastLoginMethod, setLastLoginMethod] = useState<AuthMethod | null>(() => readStorageValue<AuthMethod | null>(LOGIN_METHOD_STORAGE_KEY, null));
+  const [mode, setMode] = useState<AuthMode>('create');
+  const [substep, setSubstep] = useState<AuthSubstep>('methods');
+  const [lastSignInMethod, setLastSignInMethod] = useState<AuthMethod | null>(() => readStorageValue<AuthMethod | null>(SIGN_IN_METHOD_STORAGE_KEY, null));
   const [createAccountName, setCreateAccountName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -57,23 +62,22 @@ export function AuthModal({ open, onClose, onSuccess, defaultView }: AuthModalPr
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [successEmail, setSuccessEmail] = useState('');
 
   useEffect(() => {
     if (!open) return;
 
-    const nextView = inferInitialView(defaultView, Boolean(lastLoginMethod));
-    setCurrentView(nextView);
-    setEmail(user?.email || '');
+    const nextMode = inferInitialMode(defaultView, Boolean(lastSignInMethod));
+    setMode(nextMode);
+    setSubstep('methods');
     setCreateAccountName(userProfile?.displayName || user?.displayName || '');
+    setEmail(user?.email || '');
     setPassword('');
     setConfirmPassword('');
     setShowPassword(false);
     setShowConfirmPassword(false);
     setLoading(false);
     setError('');
-    setSuccessEmail('');
-  }, [defaultView, lastLoginMethod, open, user?.displayName, user?.email, userProfile?.displayName]);
+  }, [defaultView, lastSignInMethod, open, user?.displayName, user?.email, userProfile?.displayName]);
 
   useEffect(() => {
     if (!open) return;
@@ -87,18 +91,25 @@ export function AuthModal({ open, onClose, onSuccess, defaultView }: AuthModalPr
   }, [onClose, open]);
 
   useEffect(() => {
-    if (!open || (currentView !== 'create-account' && currentView !== 'login')) return;
-    if (typeof window === 'undefined') return;
+    if (!open || typeof window === 'undefined') return;
+    window.localStorage.setItem(AUTH_MODE_STORAGE_KEY, JSON.stringify(mode));
+  }, [mode, open]);
 
-    window.localStorage.setItem(AUTH_VIEW_STORAGE_KEY, JSON.stringify(currentView));
-  }, [currentView, open]);
-
-  const persistLastLoginMethod = (method: AuthMethod) => {
-    setLastLoginMethod(method);
-
+  const persistLastSignInMethod = (method: AuthMethod) => {
+    setLastSignInMethod(method);
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem(LOGIN_METHOD_STORAGE_KEY, JSON.stringify(method));
+      window.localStorage.setItem(SIGN_IN_METHOD_STORAGE_KEY, JSON.stringify(method));
     }
+  };
+
+  const switchMode = (nextMode: AuthMode) => {
+    setError('');
+    setMode(nextMode);
+    setSubstep('methods');
+    setPassword('');
+    setConfirmPassword('');
+    setShowPassword(false);
+    setShowConfirmPassword(false);
   };
 
   const finalizeAccount = async (method: AuthMethod, preferredName?: string) => {
@@ -122,22 +133,22 @@ export function AuthModal({ open, onClose, onSuccess, defaultView }: AuthModalPr
       onboardingCompleted: true,
     });
 
-    persistLastLoginMethod(method);
+    persistLastSignInMethod(method);
     onSuccess();
     onClose();
   };
 
-  const handleProviderAccess = async (method: 'google' | 'apple', mode: 'create-account' | 'login') => {
+  const handleProviderAccess = async (method: 'google' | 'apple', activeMode: AuthMode) => {
     setError('');
 
     try {
       setLoading(true);
       const result = method === 'google' ? await signInWithGoogle() : await signInWithApple();
 
-      if (mode === 'create-account' || result.requiresProfileCompletion) {
+      if (activeMode === 'create' || result.requiresProfileCompletion) {
         await finalizeAccount(method);
       } else {
-        persistLastLoginMethod(method);
+        persistLastSignInMethod(method);
         onSuccess();
         onClose();
       }
@@ -200,11 +211,11 @@ export function AuthModal({ open, onClose, onSuccess, defaultView }: AuthModalPr
     try {
       setLoading(true);
       await signInWithEmail(email.trim(), password);
-      persistLastLoginMethod('email');
+      persistLastSignInMethod('email');
       onSuccess();
       onClose();
     } catch (loginError: any) {
-      setError(loginError?.message || 'Could not log you in.');
+      setError(loginError?.message || 'Could not sign you in.');
     } finally {
       setLoading(false);
     }
@@ -222,8 +233,7 @@ export function AuthModal({ open, onClose, onSuccess, defaultView }: AuthModalPr
     try {
       setLoading(true);
       await sendPasswordReset(email.trim());
-      setSuccessEmail(email.trim());
-      setCurrentView('reset-sent');
+      setSubstep('reset-sent');
     } catch (resetError: any) {
       setError(resetError?.message || 'Could not send a reset link right now.');
     } finally {
@@ -232,32 +242,48 @@ export function AuthModal({ open, onClose, onSuccess, defaultView }: AuthModalPr
   };
 
   const panelCopy = useMemo(() => {
-    if (currentView === 'create-account') {
+    if (mode === 'create' && substep === 'methods') {
       return {
         heading: 'Create account',
         subtext: 'Start reading on Lemonade with one calm, fast account flow.',
       };
     }
 
-    if (currentView === 'login') {
+    if (mode === 'login' && substep === 'methods') {
       return {
         heading: 'Welcome back',
-        subtext: 'Pick up your reading list and continue where you left off.',
+        subtext: 'Sign in and continue where you left off.',
       };
     }
 
-    if (currentView === 'forgot-password') {
+    if (mode === 'create' && substep === 'email-form') {
+      return {
+        heading: 'Create account with email',
+        subtext: 'Set up your account in a few quick steps.',
+      };
+    }
+
+    if (mode === 'login' && substep === 'email-form') {
+      return {
+        heading: 'Sign in with email',
+        subtext: 'Enter your details to continue reading.',
+      };
+    }
+
+    if (substep === 'forgot-password') {
       return {
         heading: 'Reset password',
-        subtext: 'Enter your account email and we will send a reset link right away.',
+        subtext: 'Enter your email and we’ll send a reset link.',
       };
     }
 
     return {
       heading: 'Check your inbox',
-      subtext: `If ${successEmail} is registered, a reset link is on the way.`,
+      subtext: 'If that email is connected to an account, we’ve sent reset instructions.',
     };
-  }, [currentView, successEmail]);
+  }, [mode, substep]);
+
+  const viewKey = `${mode}-${substep}`;
 
   return (
     <AnimatePresence>
@@ -301,31 +327,38 @@ export function AuthModal({ open, onClose, onSuccess, defaultView }: AuthModalPr
                   <p className="max-w-md text-sm leading-6 text-white/68 sm:text-[0.95rem]">{panelCopy.subtext}</p>
                 </div>
 
-                {(currentView === 'create-account' || currentView === 'login') && (
+                {(substep === 'methods' || substep === 'email-form') && (
                   <div className="flex flex-col items-start gap-3">
-                    <AuthToggle
-                      value={currentView}
-                      onChange={(value) => {
-                        setError('');
-                        setCurrentView(value);
-                      }}
-                    />
-                    <LastLoginMethodHint method={lastLoginMethod} />
+                    <AuthModeToggle value={mode} onChange={switchMode} />
+                    {mode === 'login' && substep === 'methods' && <LastSignInMethodHint method={lastSignInMethod} />}
                   </div>
                 )}
               </div>
 
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={currentView}
+                  key={viewKey}
                   initial={{ opacity: 0, x: 14 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -12 }}
                   transition={{ duration: 0.22 }}
                   className="mt-6"
                 >
-                  {currentView === 'create-account' && (
-                    <CreateAccountForm
+                  {substep === 'methods' && (
+                    <AuthMethodList
+                      mode={mode}
+                      loading={loading}
+                      lastSignInMethod={lastSignInMethod}
+                      onEmailSelect={() => {
+                        setError('');
+                        setSubstep('email-form');
+                      }}
+                      onProviderSelect={(method) => handleProviderAccess(method, mode)}
+                    />
+                  )}
+
+                  {mode === 'create' && substep === 'email-form' && (
+                    <EmailSignupForm
                       name={createAccountName}
                       email={email}
                       password={password}
@@ -334,7 +367,6 @@ export function AuthModal({ open, onClose, onSuccess, defaultView }: AuthModalPr
                       error={error}
                       showPassword={showPassword}
                       showConfirmPassword={showConfirmPassword}
-                      lastLoginMethod={lastLoginMethod}
                       onNameChange={setCreateAccountName}
                       onEmailChange={setEmail}
                       onPasswordChange={setPassword}
@@ -342,80 +374,66 @@ export function AuthModal({ open, onClose, onSuccess, defaultView }: AuthModalPr
                       onTogglePassword={() => setShowPassword((current) => !current)}
                       onToggleConfirmPassword={() => setShowConfirmPassword((current) => !current)}
                       onSubmit={handleCreateAccount}
-                      onProviderSelect={(method) => handleProviderAccess(method, 'create-account')}
+                      onBack={() => {
+                        setError('');
+                        setSubstep('methods');
+                      }}
                     />
                   )}
 
-                  {currentView === 'login' && (
-                    <LoginForm
+                  {mode === 'login' && substep === 'email-form' && (
+                    <EmailLoginForm
                       email={email}
                       password={password}
                       loading={loading}
                       error={error}
                       showPassword={showPassword}
-                      lastLoginMethod={lastLoginMethod}
                       onEmailChange={setEmail}
                       onPasswordChange={setPassword}
                       onTogglePassword={() => setShowPassword((current) => !current)}
                       onSubmit={handleLogin}
                       onForgotPassword={() => {
                         setError('');
-                        setCurrentView('forgot-password');
+                        setSubstep('forgot-password');
                       }}
-                      onProviderSelect={(method) => handleProviderAccess(method, 'login')}
+                      onBack={() => {
+                        setError('');
+                        setSubstep('methods');
+                      }}
                     />
                   )}
 
-                  {currentView === 'forgot-password' && (
+                  {mode === 'login' && substep === 'forgot-password' && (
                     <ForgotPasswordForm
                       email={email}
                       loading={loading}
                       error={error}
                       onEmailChange={setEmail}
                       onSubmit={handlePasswordReset}
+                      onBack={() => {
+                        setError('');
+                        setSubstep('email-form');
+                      }}
                     />
                   )}
 
-                  {currentView === 'reset-sent' && (
-                    <div className="space-y-5 text-white">
-                      <div className="rounded-[28px] border border-white/10 bg-white/6 p-5">
-                        <div className="flex items-start gap-4">
-                          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/16 text-primary">
-                            <CheckCircle2 className="h-5 w-5" />
-                          </div>
-                          <div>
-                            <p className="text-base font-semibold text-white">Reset link sent</p>
-                            <p className="mt-2 text-sm leading-6 text-white/68">
-                              Use the link in your inbox to choose a new password. You can return and log in once it is done.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setError('');
-                          setCurrentView('login');
-                        }}
-                        className="w-full rounded-2xl bg-white px-4 py-3.5 text-sm font-semibold text-zinc-950 shadow-[0_18px_45px_rgba(0,0,0,0.22)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/92"
-                      >
-                        Return to log in
-                      </button>
-                    </div>
+                  {mode === 'login' && substep === 'reset-sent' && (
+                    <ResetSentState
+                      onBackToLogin={() => {
+                        setError('');
+                        setSubstep('methods');
+                      }}
+                    />
                   )}
                 </motion.div>
               </AnimatePresence>
 
-              {currentView === 'create-account' && (
+              {mode === 'create' && (
                 <p className="mt-5 text-center text-sm text-white/62">
                   Already have an account?{' '}
                   <button
                     type="button"
-                    onClick={() => {
-                      setError('');
-                      setCurrentView('login');
-                    }}
+                    onClick={() => switchMode('login')}
                     className="font-semibold text-white transition hover:text-emerald-200"
                   >
                     Log in
@@ -423,34 +441,15 @@ export function AuthModal({ open, onClose, onSuccess, defaultView }: AuthModalPr
                 </p>
               )}
 
-              {currentView === 'login' && (
+              {mode === 'login' && substep !== 'forgot-password' && substep !== 'reset-sent' && (
                 <p className="mt-5 text-center text-sm text-white/62">
                   Need an account?{' '}
                   <button
                     type="button"
-                    onClick={() => {
-                      setError('');
-                      setCurrentView('create-account');
-                    }}
+                    onClick={() => switchMode('create')}
                     className="font-semibold text-white transition hover:text-emerald-200"
                   >
                     Create one
-                  </button>
-                </p>
-              )}
-
-              {currentView === 'forgot-password' && (
-                <p className="mt-5 text-center text-sm text-white/62">
-                  Remembered it?{' '}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setError('');
-                      setCurrentView('login');
-                    }}
-                    className="font-semibold text-white transition hover:text-emerald-200"
-                  >
-                    Back to log in
                   </button>
                 </p>
               )}

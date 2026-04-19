@@ -1,9 +1,9 @@
-interface AuthToggleProps {
-  value: 'create-account' | 'login';
-  onChange: (value: 'create-account' | 'login') => void;
+interface AuthModeToggleProps {
+  value: 'create' | 'login';
+  onChange: (value: 'create' | 'login') => void;
 }
 
-export function AuthToggle({ value, onChange }: AuthToggleProps) {
+export function AuthModeToggle({ value, onChange }: AuthModeToggleProps) {
   return (
     <div className="relative inline-grid grid-cols-2 rounded-full border border-white/12 bg-white/6 p-1">
       <div
@@ -13,9 +13,9 @@ export function AuthToggle({ value, onChange }: AuthToggleProps) {
       />
       <button
         type="button"
-        onClick={() => onChange('create-account')}
+        onClick={() => onChange('create')}
         className={`relative z-10 rounded-full px-4 py-2.5 text-sm font-semibold transition ${
-          value === 'create-account' ? 'text-zinc-950' : 'text-white/72 hover:text-white'
+          value === 'create' ? 'text-zinc-950' : 'text-white/72 hover:text-white'
         }`}
       >
         Create Account
