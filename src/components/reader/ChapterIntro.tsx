@@ -41,17 +41,17 @@ export function ChapterIntro({ story, chapter, theme, hasResumePoint, onResume }
         <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl">{story.title}</h2>
         <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
           <span className={theme === 'night' ? 'text-white/62' : 'text-zinc-600'}>by {story.author}</span>
-          <span className={theme === 'night' ? 'text-white/25' : 'text-zinc-300'}>•</span>
+          <span className={theme === 'night' ? 'text-white/25' : 'text-zinc-300'}>&middot;</span>
           <span className={theme === 'night' ? 'text-white/62' : 'text-zinc-600'}>{chapter.estimatedReadTime}</span>
           {publishedLabel && (
             <>
-              <span className={theme === 'night' ? 'text-white/25' : 'text-zinc-300'}>•</span>
+              <span className={theme === 'night' ? 'text-white/25' : 'text-zinc-300'}>&middot;</span>
               <span className={theme === 'night' ? 'text-white/62' : 'text-zinc-600'}>Published {publishedLabel}</span>
             </>
           )}
           {updatedLabel && updatedLabel !== publishedLabel && (
             <>
-              <span className={theme === 'night' ? 'text-white/25' : 'text-zinc-300'}>•</span>
+              <span className={theme === 'night' ? 'text-white/25' : 'text-zinc-300'}>&middot;</span>
               <span className={theme === 'night' ? 'text-white/62' : 'text-zinc-600'}>Updated {updatedLabel}</span>
             </>
           )}

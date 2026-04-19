@@ -2908,6 +2908,7 @@ export default function App() {
           cover: selectedComic.cover,
           summary: selectedComic.summary,
           genre: selectedComic.genre,
+          chapters: selectedComic.type === 'novel' ? selectedComic.chapters : undefined,
         })}
         isFavorite={likedComics.has(selectedComic.id)}
         onBack={() => setCurrentView('series-details')}
