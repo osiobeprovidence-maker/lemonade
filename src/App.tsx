@@ -15,6 +15,8 @@ import { Search, Heart, ChevronRight, Menu, Bell, User, Star, Clock, Home, Compa
 import { Skeleton } from '@/components/ui/skeleton';
 import { Logo } from './components/Logo';
 import { AuthModal } from './components/AuthModal';
+import { NovelReaderPage } from './components/reader/NovelReaderPage';
+import { buildSampleNovelReaderData } from './components/reader/novel-reader-data';
 import { auth } from './lib/firebase';
 import { updateProfile as updateFirebaseProfile } from 'firebase/auth';
 import { uploadProfilePhoto } from './lib/profilePhoto';
@@ -2882,197 +2884,23 @@ export default function App() {
   };
 
   const renderNovelReader = () => {
-    const isLiked = selectedComic ? likedComics.has(selectedComic.id) : false;
-    const authorInitial = selectedComic?.creator?.charAt(0)?.toUpperCase() || 'L';
-    const readerCoverImage = readerStoryStyle.coverImage || selectedComic?.cover;
-    const overlayAlpha = Math.max(0, Math.min(100, readerStoryStyle.backgroundOverlayOpacity ?? 40)) / 100;
-    const chapterParagraphs = [
-      `${selectedComic?.summary || 'This story begins with a quiet unease, the kind that settles into a room before anyone says a word.'} The city outside was still awake, but inside, everything felt suspended between confession and consequence.`,
-      `I used to think stories announced themselves with thunder. Turns out they arrive softer than that, in the scrape of a chair, in a glance held one second too long, in the feeling that something familiar has shifted half an inch out of place.`,
-      `${selectedComic?.creator || 'The narrator'} writes with the patience of someone circling the truth. Each sentence drifts forward, calm on the surface, carrying the weight of choices nobody wants to name out loud.`,
-      `By midnight, the air had gone thin and metallic. The kind of night that makes old promises sound dangerous. I looked at the message again, then at the door, and knew that if I opened it, nothing in my life would fit back together the same way.`,
-      `So I stayed still for one last borrowed moment, letting the silence lengthen. Outside, the world kept moving. Inside, the story finally began.`
-    ];
+    if (!selectedComic) return null;
 
     return (
-      <div className={`relative min-h-screen ${readerStoryStyle.layoutStyle === 'immersive' && readerStoryStyle.backgroundImage ? 'overflow-hidden' : ''} ${readerStoryStyle.layoutStyle === 'classic' ? 'bg-gray-50' : 'bg-zinc-950'}`}>
-        {readerStoryStyle.layoutStyle === 'immersive' && readerStoryStyle.backgroundImage && (
-          <>
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${readerStoryStyle.backgroundImage})` }}
-            />
-            <div
-              className="absolute inset-0"
-              style={{ backgroundColor: readerStoryStyle.backgroundOverlayColor || '#000000', opacity: overlayAlpha }}
-            />
-          </>
-        )}
-
-        <div className={`sticky top-0 z-50 border-b ${readerStoryStyle.layoutStyle === 'immersive' ? 'border-white/10 bg-black/30 text-white backdrop-blur-md' : 'border-zinc-200 bg-white/85 backdrop-blur-md'}`}>
-          <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-6 sm:px-8 lg:px-10">
-            <Button variant="ghost" size="icon" onClick={() => setCurrentView('series-details')} className="rounded-full">
-              <ChevronRight className="w-6 h-6 rotate-180" />
-            </Button>
-            <div className="text-center">
-              <h2 className={`line-clamp-1 text-sm font-semibold ${readerStoryStyle.layoutStyle === 'immersive' ? 'text-white' : 'text-zinc-700'}`}>{selectedComic?.title}</h2>
-              <p className={`text-[10px] font-semibold uppercase tracking-[0.3em] ${readerStoryStyle.layoutStyle === 'immersive' ? 'text-white/65' : 'text-zinc-400'}`}>Chapter One</p>
-            </div>
-            <Button variant="ghost" size="icon" className={`rounded-full ${readerStoryStyle.layoutStyle === 'immersive' ? 'text-white/75' : 'text-zinc-500'}`}>
-              <Settings2 className="w-5 h-5" />
-            </Button>
-          </div>
-        </div>
-
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-10 sm:px-8 lg:px-10 lg:py-12">
-          <div className="grid grid-cols-1 gap-10 lg:grid-cols-[180px_minmax(0,680px)_220px] lg:items-start lg:justify-center">
-            <aside className="hidden lg:block">
-              <div className="sticky top-24 space-y-6">
-                <div className={`rounded-2xl p-5 ${readerCardClasses}`}>
-                  <div className="flex items-center gap-3">
-                    <div className={`flex h-12 w-12 items-center justify-center rounded-full text-sm font-bold ${readerStoryStyle.layoutStyle === 'immersive' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-700'}`}>
-                      {authorInitial}
-                    </div>
-                    <div>
-                      <p className={`text-xs font-semibold uppercase tracking-[0.25em] ${readerMutedTextClasses}`}>Author</p>
-                      <p className={`text-sm font-semibold ${readerTextClasses}`}>{selectedComic?.creator}</p>
-                    </div>
-                  </div>
-                  <Button variant="outline" className="mt-4 w-full rounded-full font-semibold">
-                    Follow
-                  </Button>
-                </div>
-
-                <div className={`rounded-2xl p-4 ${readerCardClasses}`}>
-                  <p className={`mb-3 text-xs font-semibold uppercase tracking-[0.25em] ${readerMutedTextClasses}`}>Share</p>
-                  <div className="flex flex-col gap-2">
-                    <Button variant="ghost" size="icon" className={`justify-start rounded-xl ${readerStoryStyle.layoutStyle === 'immersive' ? 'text-white/75 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'}`}>
-                      <Share2 className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className={`justify-start rounded-xl ${readerStoryStyle.layoutStyle === 'immersive' ? 'text-white/75 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'}`}>
-                      <Heart className={`h-4 w-4 ${isLiked ? 'fill-primary text-primary' : ''}`} />
-                    </Button>
-                    <Button variant="ghost" size="icon" className={`justify-start rounded-xl ${readerStoryStyle.layoutStyle === 'immersive' ? 'text-white/75 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'}`}>
-                      <MessageSquare className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </aside>
-
-            <article className="max-w-3xl mx-auto w-full">
-              <div className={`rounded-[28px] px-6 py-8 sm:px-8 md:px-10 md:py-10 ${readerCardClasses}`}>
-                {readerCoverImage && (
-                  <div className="mb-8">
-                    <img src={readerCoverImage} alt={selectedComic?.title} className="max-h-64 w-full rounded-lg object-cover" referrerPolicy="no-referrer" />
-                  </div>
-                )}
-                <header className={`border-b pb-8 text-center ${readerStoryStyle.layoutStyle === 'immersive' ? 'border-white/10' : 'border-zinc-100'}`}>
-                  <p className={`text-sm ${readerMutedTextClasses}`}>{selectedComic?.title}</p>
-                  <h1 className={`mt-3 text-3xl font-semibold ${readerTextClasses}`}>Chapter One</h1>
-                  <div className={`mt-4 flex items-center justify-center gap-5 text-xs ${readerMutedTextClasses}`}>
-                    <span className="flex items-center gap-1.5">
-                      <Eye className="h-3.5 w-3.5" />
-                      {selectedComic?.views || '0'}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <Heart className="h-3.5 w-3.5" />
-                      {selectedComic?.likes || '0'}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <MessageSquare className="h-3.5 w-3.5" />
-                      {(selectedComic ? comments[String(selectedComic.id)] : [])?.length || 0}
-                    </span>
-                  </div>
-                </header>
-
-                <div className="py-8">
-                  <div className="mb-8 flex items-center justify-center">
-                    <div className={`h-px w-full ${readerStoryStyle.layoutStyle === 'immersive' ? 'bg-white/10' : 'bg-zinc-100'}`} />
-                    <span className={`px-5 text-sm font-medium uppercase tracking-[0.35em] ${readerMutedTextClasses}`}>Harper</span>
-                    <div className={`h-px w-full ${readerStoryStyle.layoutStyle === 'immersive' ? 'bg-white/10' : 'bg-zinc-100'}`} />
-                  </div>
-
-                  <div className={`max-w-3xl mx-auto px-6 py-10 rounded-2xl ${readerStoryStyle.layoutStyle === 'immersive' ? 'backdrop-blur-sm' : ''} text-left text-base leading-relaxed md:text-lg md:leading-[1.85] ${readerTextClasses} ${readerFontClass}`}>
-                    {chapterParagraphs.map((paragraph, index) => (
-                      <p key={index} className="mb-5">
-                        {paragraph}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-
-                <div className={`border-t pt-8 ${readerStoryStyle.layoutStyle === 'immersive' ? 'border-white/10' : 'border-zinc-100'}`}>
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-3">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="rounded-full"
-                        onClick={() => selectedComic && toggleLike(selectedComic.id)}
-                      >
-                        <Heart className={`h-4 w-4 ${isLiked ? 'fill-primary text-primary' : ''}`} />
-                      </Button>
-                      <Button variant="outline" size="icon" className="rounded-full">
-                        <MessageSquare className="h-4 w-4" />
-                      </Button>
-                    </div>
-
-                    <div className="flex flex-col gap-3 sm:flex-row">
-                      <Button variant="outline" className="rounded-full px-6 font-semibold">
-                        Previous Chapter
-                      </Button>
-                      <Button className="rounded-full px-6 font-semibold">
-                        Next Chapter
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-10">{selectedComic && renderCommentSection(selectedComic.id)}</div>
-            </article>
-
-            <aside className="hidden lg:block">
-              <div className="sticky top-24 space-y-5">
-                <div className={`rounded-2xl p-5 ${readerCardClasses}`}>
-                  <p className={`text-xs font-semibold uppercase tracking-[0.25em] ${readerMutedTextClasses}`}>Lemonade Premium</p>
-                  <h3 className={`mt-3 text-lg font-semibold ${readerTextClasses}`}>Read without interruptions</h3>
-                  <p className={`mt-2 text-sm leading-6 ${readerMutedTextClasses}`}>
-                    Unlock premium chapters, save your place everywhere, and get early access to featured novels.
-                  </p>
-                  <Button className="mt-4 w-full rounded-full font-semibold">Try Premium</Button>
-                </div>
-
-                <div className={`rounded-2xl p-5 ${readerCardClasses}`}>
-                  <p className={`text-xs font-semibold uppercase tracking-[0.25em] ${readerMutedTextClasses}`}>More Like This</p>
-                  <div className="mt-4 space-y-4">
-                    {displayNovels.filter((novel) => novel.id !== selectedComic?.id).slice(0, 3).map((novel) => (
-                      <button
-                        key={novel.id}
-                        type="button"
-                        onClick={() => openSeriesDetails(novel)}
-                        className="flex w-full items-start gap-3 text-left transition hover:opacity-80"
-                      >
-                        <img
-                          src={novel.cover}
-                          alt={novel.title}
-                          className="h-16 w-12 rounded-lg object-cover"
-                          referrerPolicy="no-referrer"
-                        />
-                        <div className="min-w-0">
-                          <p className={`line-clamp-2 text-sm font-semibold ${readerTextClasses}`}>{novel.title}</p>
-                          <p className={`mt-1 text-xs ${readerMutedTextClasses}`}>{novel.creator}</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </aside>
-          </div>
-        </div>
-      </div>
+      <NovelReaderPage
+        key={String(selectedComic.id)}
+        data={buildSampleNovelReaderData({
+          id: selectedComic.id,
+          title: selectedComic.title,
+          creator: selectedComic.creator,
+          cover: selectedComic.cover,
+          summary: selectedComic.summary,
+          genre: selectedComic.genre,
+        })}
+        isFavorite={likedComics.has(selectedComic.id)}
+        onBack={() => setCurrentView('series-details')}
+        onToggleFavorite={() => toggleLike(selectedComic.id)}
+      />
     );
   };
 
