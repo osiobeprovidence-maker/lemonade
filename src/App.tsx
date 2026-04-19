@@ -320,9 +320,6 @@ export default function App() {
   const [marketingEmailsEnabled, setMarketingEmailsEnabled] = useState(false);
   const [likedComics, setLikedComics] = useState<Set<StoryId>>(new Set());
   const [likedEpisodes, setLikedEpisodes] = useState<Set<string>>(new Set());
-  const [followedCreators, setFollowedCreators] = useState<Set<string>>(new Set());
-  const [likedCreators, setLikedCreators] = useState<Set<string>>(new Set());
-  const [likedCreatorDrops, setLikedCreatorDrops] = useState<Set<string>>(new Set());
   const [isReaderMenuOpen, setIsReaderMenuOpen] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
@@ -462,6 +459,10 @@ export default function App() {
     setUserBio(userProfile?.bio || '');
     setUserProfilePic(userProfile?.photoURL || user?.photoURL || null);
     setDropSomethingLink(userProfile?.dropSomethingLink || '');
+    setCreatorSupportHeadline(userProfile?.creatorSupportHeadline || DEFAULT_CREATOR_SUPPORT_HEADLINE);
+    setCreatorDropTitle(userProfile?.creatorDropTitle || DEFAULT_CREATOR_DROP_TITLE);
+    setCreatorDropDescription(userProfile?.creatorDropDescription || DEFAULT_CREATOR_DROP_DESCRIPTION);
+    setCreatorDropVisibility(userProfile?.creatorDropVisibility === 'premium' ? 'premium' : 'public');
     setSelectedGenres(userProfile?.genres || []);
     setProfilePronouns(userProfile?.pronouns || '');
     setMarketingEmailsEnabled(Boolean(userProfile?.marketingEmails));
@@ -479,37 +480,17 @@ export default function App() {
     const scope = user?.uid || 'guest';
 
     try {
-      const creatorStudioRaw = window.localStorage.getItem(`lemonade:creator-studio:${scope}`);
-      if (creatorStudioRaw) {
-        const creatorStudio = JSON.parse(creatorStudioRaw);
-        setCreatorSupportHeadline(creatorStudio.creatorSupportHeadline || DEFAULT_CREATOR_SUPPORT_HEADLINE);
-        setCreatorDropTitle(creatorStudio.creatorDropTitle || DEFAULT_CREATOR_DROP_TITLE);
-        setCreatorDropDescription(creatorStudio.creatorDropDescription || DEFAULT_CREATOR_DROP_DESCRIPTION);
-        setCreatorDropVisibility(creatorStudio.creatorDropVisibility === 'premium' ? 'premium' : 'public');
-      } else {
-        setCreatorSupportHeadline(DEFAULT_CREATOR_SUPPORT_HEADLINE);
-        setCreatorDropTitle(DEFAULT_CREATOR_DROP_TITLE);
-        setCreatorDropDescription(DEFAULT_CREATOR_DROP_DESCRIPTION);
-        setCreatorDropVisibility('public');
-      }
-
       const fanSocialRaw = window.localStorage.getItem(`lemonade:fan-social:${scope}`);
       if (fanSocialRaw) {
         const fanSocial = JSON.parse(fanSocialRaw);
         setLikedComics(new Set(fanSocial.likedComics || []));
         setLikedEpisodes(new Set(fanSocial.likedEpisodes || []));
-        setFollowedCreators(new Set(fanSocial.followedCreators || []));
-        setLikedCreators(new Set(fanSocial.likedCreators || []));
-        setLikedCreatorDrops(new Set(fanSocial.likedCreatorDrops || []));
       } else {
         setLikedComics(new Set());
         setLikedEpisodes(new Set());
-        setFollowedCreators(new Set());
-        setLikedCreators(new Set());
-        setLikedCreatorDrops(new Set());
       }
     } catch (error) {
-      console.error('Could not load local creator data:', error);
+      console.error('Could not load fan activity:', error);
     }
   }, [user?.uid]);
 
@@ -524,15 +505,12 @@ export default function App() {
         JSON.stringify({
           likedComics: Array.from(likedComics),
           likedEpisodes: Array.from(likedEpisodes),
-          followedCreators: Array.from(followedCreators),
-          likedCreators: Array.from(likedCreators),
-          likedCreatorDrops: Array.from(likedCreatorDrops),
         })
       );
     } catch (error) {
       console.error('Could not save fan activity:', error);
     }
-  }, [user?.uid, likedComics, likedEpisodes, followedCreators, likedCreators, likedCreatorDrops]);
+  }, [user?.uid, likedComics, likedEpisodes]);
 
   const toggleLike = (comicId: StoryId) => {
     setLikedComics(prev => {
@@ -555,42 +533,6 @@ export default function App() {
         next.delete(episodeKey);
       } else {
         next.add(episodeKey);
-      }
-      return next;
-    });
-  };
-
-  const toggleCreatorFollow = (creatorName: string) => {
-    setFollowedCreators((prev) => {
-      const next = new Set(prev);
-      if (next.has(creatorName)) {
-        next.delete(creatorName);
-      } else {
-        next.add(creatorName);
-      }
-      return next;
-    });
-  };
-
-  const toggleCreatorLike = (creatorName: string) => {
-    setLikedCreators((prev) => {
-      const next = new Set(prev);
-      if (next.has(creatorName)) {
-        next.delete(creatorName);
-      } else {
-        next.add(creatorName);
-      }
-      return next;
-    });
-  };
-
-  const toggleCreatorDropLike = (dropId: string) => {
-    setLikedCreatorDrops((prev) => {
-      const next = new Set(prev);
-      if (next.has(dropId)) {
-        next.delete(dropId);
-      } else {
-        next.add(dropId);
       }
       return next;
     });
@@ -633,6 +575,37 @@ export default function App() {
     }
   };
 
+  const ensureSignedInForEngagement = () => {
+    if (user) return true;
+    openSignupModal();
+    return false;
+  };
+
+  const toggleCreatorFollow = async (creatorName: string) => {
+    if (!ensureSignedInForEngagement()) return;
+    await toggleCreatorFollowMutation({
+      creatorDisplayName: creatorName,
+      viewerFirebaseUid: user!.uid,
+    });
+  };
+
+  const toggleCreatorLike = async (creatorName: string) => {
+    if (!ensureSignedInForEngagement()) return;
+    await toggleCreatorLikeMutation({
+      creatorDisplayName: creatorName,
+      viewerFirebaseUid: user!.uid,
+    });
+  };
+
+  const toggleCreatorDropLike = async (creatorName: string, dropId: string) => {
+    if (!ensureSignedInForEngagement()) return;
+    await toggleCreatorDropLikeMutation({
+      creatorDisplayName: creatorName,
+      viewerFirebaseUid: user!.uid,
+      dropId,
+    });
+  };
+
   const skipAd = () => {
     setShowAd(false);
     setCurrentView(selectedComic?.type === 'novel' ? 'novel-reader' : 'reader');
@@ -645,6 +618,33 @@ export default function App() {
   const editableStories = allStories;
   const editableStory = editableStories.find((story) => String(story.id) === editableStoryKey) || (displayNovels[0] || NOVELS[0]);
   const filteredNovels = displayNovels.filter((novel) => novel.genre === activeLemonCategory || activeLemonCategory === 'Drama');
+  const selectedCreatorName = selectedComic?.creator || '';
+  const selectedCreatorMomentIds = selectedCreatorName
+    ? [
+        `${selectedCreatorName}-featured-drop`,
+        ...allStories
+          .filter((story) => story.creator === selectedCreatorName)
+          .slice(0, 3)
+          .map((story, index) => `${selectedCreatorName}-${String(story.id)}-${index}`),
+      ]
+    : [];
+  const creatorPublicProfile = useQuery(
+    api.users.getPublicCreatorProfileByDisplayName,
+    selectedCreatorName ? { displayName: selectedCreatorName } : "skip"
+  );
+  const creatorEngagement = useQuery(
+    (api as any).fanEngagement.getCreatorEngagement,
+    selectedCreatorName
+      ? {
+          creatorDisplayName: selectedCreatorName,
+          viewerFirebaseUid: user?.uid || undefined,
+          dropIds: selectedCreatorMomentIds,
+        }
+      : "skip"
+  );
+  const toggleCreatorFollowMutation = useMutation((api as any).fanEngagement.toggleCreatorFollow);
+  const toggleCreatorLikeMutation = useMutation((api as any).fanEngagement.toggleCreatorLike);
+  const toggleCreatorDropLikeMutation = useMutation((api as any).fanEngagement.toggleCreatorDropLike);
   const filteredAdminUsers = (convexAdminUsers || []).filter((adminUser) => {
     const query = adminUserSearch.trim().toLowerCase();
     if (!query) return true;
@@ -873,6 +873,10 @@ export default function App() {
         photoURL: userProfilePic || undefined,
         genres: selectedGenres,
         dropSomethingLink: cleanDropSomethingLink || undefined,
+        creatorSupportHeadline: creatorSupportHeadline.trim() || undefined,
+        creatorDropTitle: creatorDropTitle.trim() || undefined,
+        creatorDropDescription: creatorDropDescription.trim() || undefined,
+        creatorDropVisibility,
         birthYear,
         birthMonth,
         birthDay,
@@ -880,19 +884,6 @@ export default function App() {
         marketingEmails: marketingEmailsEnabled,
         onboardingCompleted: true,
       });
-
-      if (typeof window !== 'undefined') {
-        const scope = user?.uid || 'guest';
-        window.localStorage.setItem(
-          `lemonade:creator-studio:${scope}`,
-          JSON.stringify({
-            creatorSupportHeadline: creatorSupportHeadline.trim() || DEFAULT_CREATOR_SUPPORT_HEADLINE,
-            creatorDropTitle: creatorDropTitle.trim() || DEFAULT_CREATOR_DROP_TITLE,
-            creatorDropDescription: creatorDropDescription.trim() || DEFAULT_CREATOR_DROP_DESCRIPTION,
-            creatorDropVisibility,
-          })
-        );
-      }
 
       setProfileSaveMessage('Profile updated successfully.');
       setCurrentView('profile');
@@ -3290,27 +3281,46 @@ export default function App() {
       publicMoments: [] as CreatorMoment[],
     };
     const isOwnCreatorProfile = Boolean(creatorName) && [userName, userProfile?.displayName, user?.displayName].filter(Boolean).includes(creatorName);
-    const supportUrl = isOwnCreatorProfile ? normalizeExternalUrl(dropSomethingLink) : normalizeExternalUrl(fallbackProfile.supportUrl);
+    const publicCreatorProfile = !isOwnCreatorProfile ? creatorPublicProfile : null;
+    const creatorBio = isOwnCreatorProfile
+      ? userBio || fallbackProfile.intro
+      : publicCreatorProfile?.bio || fallbackProfile.intro;
+    const creatorAvatar = isOwnCreatorProfile
+      ? (userProfilePic || publicCreatorProfile?.photoURL)
+      : publicCreatorProfile?.photoURL;
+    const supportUrl = isOwnCreatorProfile
+      ? normalizeExternalUrl(dropSomethingLink)
+      : normalizeExternalUrl(publicCreatorProfile?.dropSomethingLink || fallbackProfile.supportUrl);
+    const publicSupportHeadline = isOwnCreatorProfile
+      ? creatorSupportHeadline.trim() || fallbackProfile.supportLabel
+      : publicCreatorProfile?.creatorSupportHeadline || fallbackProfile.supportLabel;
     const featuredDrop: CreatorMoment = {
       id: `${creatorName}-featured-drop`,
-      title: isOwnCreatorProfile ? creatorDropTitle.trim() || DEFAULT_CREATOR_DROP_TITLE : `${creatorName}'s supporter drop`,
+      title: isOwnCreatorProfile
+        ? creatorDropTitle.trim() || DEFAULT_CREATOR_DROP_TITLE
+        : publicCreatorProfile?.creatorDropTitle || `${creatorName}'s supporter drop`,
       description: isOwnCreatorProfile
         ? creatorDropDescription.trim() || DEFAULT_CREATOR_DROP_DESCRIPTION
-        : `${fallbackProfile.intro} Fans can follow, like, and support the next release directly from this page.`,
+        : publicCreatorProfile?.creatorDropDescription || `${fallbackProfile.intro} Fans can follow, like, and support the next release directly from this page.`,
       label: 'Featured drop',
-      visibility: isOwnCreatorProfile ? creatorDropVisibility : (supportUrl ? 'premium' : 'public'),
+      visibility: isOwnCreatorProfile
+        ? creatorDropVisibility
+        : publicCreatorProfile?.creatorDropVisibility === 'premium'
+          ? 'premium'
+          : 'public',
       accent: 'from-primary/35 via-emerald-400/10 to-transparent',
     };
     const creatorMoments = [
       ...(featuredDrop.visibility === 'public' ? [featuredDrop] : []),
       ...fallbackProfile.publicMoments.filter((moment) => moment.id !== featuredDrop.id),
     ].slice(0, 4);
-    const isFollowingCreator = followedCreators.has(creatorName);
-    const isCreatorLiked = likedCreators.has(creatorName);
+    const isFollowingCreator = Boolean(creatorEngagement?.isFollowing);
+    const isCreatorLiked = Boolean(creatorEngagement?.hasLikedCreator);
     const visibleFeaturedDrop = featuredDrop.visibility === 'public' || isPremium;
-    const followerCount = formatCompactMetric((fallbackProfile.totalViews / 180) + (isFollowingCreator ? 1 : 0));
-    const creatorLikeCount = formatCompactMetric((fallbackProfile.totalLikes / 220) + (isCreatorLiked ? 1 : 0));
+    const followerCount = formatCompactMetric(creatorEngagement?.followerCount ?? Math.round(fallbackProfile.totalViews / 180));
+    const creatorLikeCount = formatCompactMetric(creatorEngagement?.creatorLikeCount ?? Math.round(fallbackProfile.totalLikes / 220));
     const supporterCount = formatCompactMetric((fallbackProfile.totalLikes / 950) + (supportUrl ? 14 : 6));
+    const likedDropIds = new Set(creatorEngagement?.likedDropIds ?? []);
 
     return (
       <div className="px-4 py-8 md:py-12 max-w-6xl mx-auto w-full min-h-[60vh]">
@@ -3334,7 +3344,7 @@ export default function App() {
               </div>
               <div className="mb-6 flex items-center gap-4">
                 <div className="h-24 w-24 overflow-hidden rounded-full border-4 border-primary/25 bg-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
-                  <img src={`https://picsum.photos/seed/${creatorName}/200/200`} alt={creatorName} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
+                  <img src={creatorAvatar || `https://picsum.photos/seed/${creatorName}/200/200`} alt={creatorName} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
                 </div>
                 <div>
                   <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary/80">{fallbackProfile.tagline}</p>
@@ -3346,7 +3356,7 @@ export default function App() {
               </div>
 
               <p className="max-w-2xl text-base leading-7 text-white/72 md:text-lg">
-                {isOwnCreatorProfile ? userBio || fallbackProfile.intro : fallbackProfile.intro}
+                {creatorBio}
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">
@@ -3392,7 +3402,7 @@ export default function App() {
             <div className="rounded-[30px] border border-white/10 bg-black/30 p-6 backdrop-blur-xl">
               <div className="mb-5 flex items-center justify-between">
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.32em] text-primary/75">{creatorSupportHeadline.trim() || fallbackProfile.supportLabel}</p>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.32em] text-primary/75">{publicSupportHeadline}</p>
                   <h3 className="mt-2 text-2xl font-black">{featuredDrop.title}</h3>
                 </div>
                 <div className="rounded-full border border-white/10 bg-white/5 p-2">
@@ -3450,7 +3460,8 @@ export default function App() {
 
             <div className="grid gap-4 md:grid-cols-2">
               {creatorMoments.map((moment) => {
-                const isDropLiked = likedCreatorDrops.has(moment.id);
+                const isDropLiked = likedDropIds.has(moment.id);
+                const momentLikeCount = creatorEngagement?.dropLikeCounts?.[moment.id] ?? 0;
 
                 return (
                   <article key={moment.id} className="group relative overflow-hidden rounded-[28px] border border-white/10 bg-zinc-950 text-white shadow-[0_16px_60px_rgba(0,0,0,0.18)]">
@@ -3468,12 +3479,14 @@ export default function App() {
                         <Button
                           variant="outline"
                           className={`rounded-full border-white/15 bg-transparent px-4 font-bold text-white hover:bg-white/10 hover:text-white ${isDropLiked ? 'bg-white/12' : ''}`}
-                          onClick={() => toggleCreatorDropLike(moment.id)}
+                          onClick={() => toggleCreatorDropLike(creatorName, moment.id)}
                         >
                           <Heart className={`mr-2 h-4 w-4 ${isDropLiked ? 'fill-current' : ''}`} />
                           {isDropLiked ? 'Liked' : 'Like'}
                         </Button>
-                        <span className="text-xs font-medium uppercase tracking-[0.24em] text-white/45">Fan signal</span>
+                        <span className="text-xs font-medium uppercase tracking-[0.24em] text-white/45">
+                          {momentLikeCount > 0 ? `${formatCompactMetric(momentLikeCount)} likes` : 'Fan signal'}
+                        </span>
                       </div>
                     </div>
                   </article>

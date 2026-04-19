@@ -15,6 +15,10 @@ export default defineSchema({
     genres: v.optional(v.array(v.string())),
     profilePic: v.optional(v.id("_storage")),
     dropSomethingLink: v.optional(v.string()),
+    creatorSupportHeadline: v.optional(v.string()),
+    creatorDropTitle: v.optional(v.string()),
+    creatorDropDescription: v.optional(v.string()),
+    creatorDropVisibility: v.optional(v.union(v.literal("public"), v.literal("premium"))),
     birthMonth: v.optional(v.string()),
     birthDay: v.optional(v.number()),
     birthYear: v.optional(v.number()),
@@ -95,6 +99,28 @@ export default defineSchema({
   }).index("by_user", ["userId"])
     .index("by_series", ["seriesId"])
     .index("by_user_and_series", ["userId", "seriesId"]),
+
+  creatorFollows: defineTable({
+    creatorUserId: v.id("users"),
+    fanUserId: v.id("users"),
+    createdAt: v.number(),
+  }).index("by_creator", ["creatorUserId"])
+    .index("by_fan_and_creator", ["fanUserId", "creatorUserId"]),
+
+  creatorLikes: defineTable({
+    creatorUserId: v.id("users"),
+    fanUserId: v.id("users"),
+    createdAt: v.number(),
+  }).index("by_creator", ["creatorUserId"])
+    .index("by_fan_and_creator", ["fanUserId", "creatorUserId"]),
+
+  creatorDropLikes: defineTable({
+    creatorUserId: v.id("users"),
+    fanUserId: v.id("users"),
+    dropId: v.string(),
+    createdAt: v.number(),
+  }).index("by_creator_and_drop", ["creatorUserId", "dropId"])
+    .index("by_fan_creator_drop", ["fanUserId", "creatorUserId", "dropId"]),
 
   wallet: defineTable({
     userId: v.id("users"),

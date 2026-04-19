@@ -27,6 +27,10 @@ interface ConvexUserProfile {
   bio?: string;
   genres?: string[];
   dropSomethingLink?: string;
+  creatorSupportHeadline?: string;
+  creatorDropTitle?: string;
+  creatorDropDescription?: string;
+  creatorDropVisibility?: 'public' | 'premium';
   birthMonth?: string;
   birthDay?: number;
   birthYear?: number;
@@ -57,6 +61,10 @@ const CLEARABLE_PROFILE_FIELDS = [
   'bio',
   'photoURL',
   'dropSomethingLink',
+  'creatorSupportHeadline',
+  'creatorDropTitle',
+  'creatorDropDescription',
+  'creatorDropVisibility',
   'birthMonth',
   'birthDay',
   'birthYear',
@@ -148,6 +156,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       photoURL: data.photoURL,
       genres: data.genres,
       dropSomethingLink: data.dropSomethingLink,
+      creatorSupportHeadline: data.creatorSupportHeadline,
+      creatorDropTitle: data.creatorDropTitle,
+      creatorDropDescription: data.creatorDropDescription,
+      creatorDropVisibility: data.creatorDropVisibility,
       birthMonth: data.birthMonth,
       birthDay: data.birthDay,
       birthYear: data.birthYear,

@@ -19,6 +19,30 @@ export const getUser = query({
   },
 });
 
+export const getPublicCreatorProfileByDisplayName = query({
+  args: { displayName: v.string() },
+  handler: async (ctx, args) => {
+    const creator = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("displayName"), args.displayName))
+      .first();
+
+    if (!creator) return null;
+
+    return {
+      displayName: creator.displayName,
+      photoURL: creator.photoURL,
+      bio: creator.bio,
+      isPremium: creator.isPremium,
+      dropSomethingLink: creator.dropSomethingLink,
+      creatorSupportHeadline: creator.creatorSupportHeadline,
+      creatorDropTitle: creator.creatorDropTitle,
+      creatorDropDescription: creator.creatorDropDescription,
+      creatorDropVisibility: creator.creatorDropVisibility,
+    };
+  },
+});
+
 export const createUser = mutation({
   args: {
     firebaseUid: v.string(),
@@ -66,6 +90,10 @@ export const updateUserProfile = mutation({
     photoURL: v.optional(v.string()),
     genres: v.optional(v.array(v.string())),
     dropSomethingLink: v.optional(v.string()),
+    creatorSupportHeadline: v.optional(v.string()),
+    creatorDropTitle: v.optional(v.string()),
+    creatorDropDescription: v.optional(v.string()),
+    creatorDropVisibility: v.optional(v.union(v.literal("public"), v.literal("premium"))),
     birthMonth: v.optional(v.string()),
     birthDay: v.optional(v.number()),
     birthYear: v.optional(v.number()),
@@ -90,6 +118,10 @@ export const updateUserProfile = mutation({
       photoURL: updates.photoURL,
       genres: updates.genres,
       dropSomethingLink: updates.dropSomethingLink,
+      creatorSupportHeadline: updates.creatorSupportHeadline,
+      creatorDropTitle: updates.creatorDropTitle,
+      creatorDropDescription: updates.creatorDropDescription,
+      creatorDropVisibility: updates.creatorDropVisibility,
       birthMonth: updates.birthMonth,
       birthDay: updates.birthDay,
       birthYear: updates.birthYear,
