@@ -355,9 +355,9 @@ export function Login() {
                   </motion.button>
 
                   <p className="mt-8 text-center text-sm text-zinc-500">
-                    I already have an account{' '}
+                    Already have account?{' '}
                     <button type="button" onClick={switchToLogin} className="font-semibold text-zinc-950 underline-offset-4 hover:underline">
-                      Log in
+                      Sign in
                     </button>
                   </p>
                 </>
