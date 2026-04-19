@@ -617,9 +617,14 @@ export default function App() {
     comic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     comic.genre.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  const filteredStories = allStories.filter((story) =>
+    story.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    story.genre.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    story.creator.toLowerCase().includes(searchQuery.toLowerCase())
+  );
   const editableStories = allStories;
   const editableStory = editableStories.find((story) => String(story.id) === editableStoryKey) || (displayNovels[0] || NOVELS[0]);
-  const filteredNovels = displayNovels.filter((novel) => novel.genre === activeLemonCategory || activeLemonCategory === 'Drama');
+  const filteredNovels = displayNovels.filter((novel) => novel.genre === activeLemonCategory);
   const selectedCreatorName = selectedComic?.creator || '';
   const selectedCreatorMomentIds = selectedCreatorName
     ? [
@@ -1234,15 +1239,22 @@ export default function App() {
       {searchQuery ? (
         <div>
           <h2 className="text-xl font-bold mb-6">Results for "{searchQuery}"</h2>
-          {filteredComics.length > 0 ? (
+          {filteredStories.length > 0 ? (
             <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-2 gap-y-8">
-              {filteredComics.map((comic) => (
-                <div key={comic.id} className="flex flex-col cursor-pointer group" onClick={() => openSeriesDetails(comic)}>
+              {filteredStories.map((story) => (
+                <div key={story.id} className="flex flex-col cursor-pointer group" onClick={() => openSeriesDetails(story)}>
                   <div className="relative aspect-[3/4] rounded-md mb-2 overflow-hidden">
-                    <img src={comic.cover} alt={comic.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    <img src={story.cover} alt={story.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    {story.type === 'novel' && (
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent p-3">
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/75">
+                          {story.readingMood}
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  <h3 className="font-bold text-sm leading-tight line-clamp-2 group-hover:text-primary transition-colors">{comic.title}</h3>
-                  <p className="text-[11px] text-muted-foreground mt-1">{comic.genre}</p>
+                  <h3 className="font-bold text-sm leading-tight line-clamp-2 group-hover:text-primary transition-colors">{story.title}</h3>
+                  <p className="text-[11px] text-muted-foreground mt-1">{story.genre}</p>
                 </div>
               ))}
             </div>

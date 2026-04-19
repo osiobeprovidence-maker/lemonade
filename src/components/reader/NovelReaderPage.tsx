@@ -92,6 +92,7 @@ export function NovelReaderPage({ data, isFavorite, onBack, onToggleFavorite }: 
   const hideTimerRef = useRef<number | null>(null);
   const lastScrollYRef = useRef(0);
   const skipFirstChapterEffectRef = useRef(true);
+  const progressPersistenceReadyRef = useRef(false);
   const restoredFromSavedProgressRef = useRef(false);
   const savedProgressRef = useRef<SavedProgress | null>(getInitialSavedProgress(data.story.id));
   const currentChapter = data.chapters[chapterIndex] || data.chapters[0];
@@ -247,6 +248,7 @@ export function NovelReaderPage({ data, isFavorite, onBack, onToggleFavorite }: 
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (!progressPersistenceReadyRef.current) return;
 
     const payload: SavedProgress = {
       chapterId: currentChapter.id,
@@ -263,7 +265,10 @@ export function NovelReaderPage({ data, isFavorite, onBack, onToggleFavorite }: 
       skipFirstChapterEffectRef.current = false;
 
       const savedProgress = savedProgressRef.current;
-      if (!savedProgress || savedProgress.chapterId !== currentChapter.id || savedProgress.progress <= 0.02) return;
+      if (!savedProgress || savedProgress.chapterId !== currentChapter.id || savedProgress.progress <= 0.02) {
+        progressPersistenceReadyRef.current = true;
+        return;
+      }
 
       restoredFromSavedProgressRef.current = true;
       window.requestAnimationFrame(() => {
@@ -272,6 +277,7 @@ export function NovelReaderPage({ data, isFavorite, onBack, onToggleFavorite }: 
           const maxScrollDistance = Math.max(contentRef.current.offsetHeight - window.innerHeight * 0.55, 0);
           const scrollTarget = contentRef.current.offsetTop + maxScrollDistance * savedProgress.progress;
           window.scrollTo({ top: scrollTarget, behavior: 'auto' });
+          progressPersistenceReadyRef.current = true;
         });
       });
       return;
@@ -282,6 +288,7 @@ export function NovelReaderPage({ data, isFavorite, onBack, onToggleFavorite }: 
     }
 
     restoredFromSavedProgressRef.current = false;
+    progressPersistenceReadyRef.current = true;
   }, [currentChapter.id]);
 
   useEffect(() => {
