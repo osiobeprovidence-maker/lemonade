@@ -126,11 +126,10 @@ export function buildSampleNovelReaderData(story: {
   cover: string;
   summary?: string;
   genre: string;
-  chapters?: number;
 }): NovelReaderData {
   const storyId = String(story.id);
   const baseSummary = story.summary || `${story.title} is a premium Lemonade fiction serial about people who keep choosing the dangerous truth over the easy version of their lives.`;
-  const chapterCount = Math.max(4, story.chapters ?? 4);
+  const chapterCount = 4;
 
   const chapters: ReaderChapter[] = Array.from({ length: chapterCount }, (_, index) => {
     const chapterNumber = index + 1;
