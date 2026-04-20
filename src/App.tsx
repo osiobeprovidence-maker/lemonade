@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Heart, ChevronRight, Menu, Bell, User, Home, Compass, PenTool, Facebook, Twitter, Instagram, Youtube, Plus, X, Play, SkipForward, DollarSign, Coins, BarChart3, Settings, BadgeCheck, Share2, Check, Upload, BookOpen, ShieldCheck, Users, MessageSquare, Flag, Eye, EyeOff, ExternalLink, Lock, Sparkles } from 'lucide-react';
+import { Search, Heart, ChevronRight, Menu, Bell, User, Home, Compass, PenTool, Facebook, Twitter, Instagram, Youtube, Plus, X, Play, SkipForward, DollarSign, Coins, BarChart3, Settings, BadgeCheck, Share2, Check, Upload, BookOpen, ShieldCheck, Users, MessageSquare, Flag, Eye, EyeOff, ExternalLink, Lock, Sparkles, Star, Clock, Megaphone } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Logo } from './components/Logo';
 import { AuthModal } from './components/AuthModal';
@@ -302,7 +302,7 @@ export default function App() {
   const location = useLocation();
   const initialRouteState = React.useMemo(() => getRouteState(location.pathname, ALL_STORIES), [location.pathname]);
   const locationSyncRef = React.useRef(false);
-  const [currentView, setCurrentView] = useState<View>(() => initialRouteState?.view ?? 'home');
+  const [currentView, setCurrentView] = useState<View>(() => (initialRouteState?.view as View) ?? 'home');
   const [activeCategory, setActiveCategory] = useState('Drama');
   const [activeDay, setActiveDay] = useState('Sun');
   const [searchQuery, setSearchQuery] = useState('');
@@ -371,6 +371,9 @@ export default function App() {
   const [storyFontStyle, setStoryFontStyle] = useState<'serif' | 'sans'>('serif');
   const [isSavingStoryStyle, setIsSavingStoryStyle] = useState(false);
   const [storyStyleMessage, setStoryStyleMessage] = useState('');
+  const [sessionCreatorFollows, setSessionCreatorFollows] = useState<Record<string, boolean>>({});
+  const [sessionCreatorLikes, setSessionCreatorLikes] = useState<Record<string, boolean>>({});
+  const [sessionCreatorDropLikes, setSessionCreatorDropLikes] = useState<Record<string, Set<string>>>({});
   const convexAdminUsers = useQuery(api.users.getAllUsers, { limit: 100 });
   const adminDashboardStats = useQuery((api as any).series.getAdminDashboardStats, {});
   const adminCampaigns = useQuery(api.campaigns.getAllCampaigns, {});
@@ -465,7 +468,7 @@ export default function App() {
       setViewAllSection((prev) => (prev === routeState.section ? prev : (routeState.section as (typeof VIEW_ALL_SECTIONS)[number])));
     }
 
-    setCurrentView((prev) => (prev === routeState.view ? prev : routeState.view));
+    setCurrentView((prev) => (prev === routeState.view ? prev : (routeState.view as View)));
   }, [location.pathname, navigate, allStories, backendSeries]);
 
   useEffect(() => {
@@ -612,26 +615,34 @@ export default function App() {
 
   const toggleCreatorFollow = async (creatorName: string) => {
     if (!ensureSignedInForEngagement()) return;
-    await toggleCreatorFollowMutation({
-      creatorDisplayName: creatorName,
-      viewerFirebaseUid: user!.uid,
-    });
+    setSessionCreatorFollows((current) => ({
+      ...current,
+      [creatorName]: !current[creatorName],
+    }));
   };
 
   const toggleCreatorLike = async (creatorName: string) => {
     if (!ensureSignedInForEngagement()) return;
-    await toggleCreatorLikeMutation({
-      creatorDisplayName: creatorName,
-      viewerFirebaseUid: user!.uid,
-    });
+    setSessionCreatorLikes((current) => ({
+      ...current,
+      [creatorName]: !current[creatorName],
+    }));
   };
 
   const toggleCreatorDropLike = async (creatorName: string, dropId: string) => {
     if (!ensureSignedInForEngagement()) return;
-    await toggleCreatorDropLikeMutation({
-      creatorDisplayName: creatorName,
-      viewerFirebaseUid: user!.uid,
-      dropId,
+    setSessionCreatorDropLikes((current) => {
+      const next = new Set(current[creatorName] ?? []);
+      if (next.has(dropId)) {
+        next.delete(dropId);
+      } else {
+        next.add(dropId);
+      }
+
+      return {
+        ...current,
+        [creatorName]: next,
+      };
     });
   };
 
@@ -661,23 +672,7 @@ export default function App() {
           .map((story, index) => `${selectedCreatorName}-${String(story.id)}-${index}`),
       ]
     : [];
-  const creatorPublicProfile = useQuery(
-    api.users.getPublicCreatorProfileByDisplayName,
-    selectedCreatorName ? { displayName: selectedCreatorName } : "skip"
-  );
-  const creatorEngagement = useQuery(
-    (api as any).fanEngagement.getCreatorEngagement,
-    selectedCreatorName
-      ? {
-          creatorDisplayName: selectedCreatorName,
-          viewerFirebaseUid: user?.uid || undefined,
-          dropIds: selectedCreatorMomentIds,
-        }
-      : "skip"
-  );
-  const toggleCreatorFollowMutation = useMutation((api as any).fanEngagement.toggleCreatorFollow);
-  const toggleCreatorLikeMutation = useMutation((api as any).fanEngagement.toggleCreatorLike);
-  const toggleCreatorDropLikeMutation = useMutation((api as any).fanEngagement.toggleCreatorDropLike);
+  const creatorPublicProfile = null;
   const filteredAdminUsers = (convexAdminUsers || []).filter((adminUser) => {
     const query = adminUserSearch.trim().toLowerCase();
     if (!query) return true;
@@ -839,7 +834,7 @@ export default function App() {
     }
   };
 
-  const handleMobileNavSelect = (view: string) => {
+  const handleMobileNavSelect = (view: View) => {
     setIsMobileNavOpen(false);
     setCurrentView(view);
   };
@@ -3022,13 +3017,13 @@ export default function App() {
       ...(featuredDrop.visibility === 'public' ? [featuredDrop] : []),
       ...fallbackProfile.publicMoments.filter((moment) => moment.id !== featuredDrop.id),
     ].slice(0, 4);
-    const isFollowingCreator = Boolean(creatorEngagement?.isFollowing);
-    const isCreatorLiked = Boolean(creatorEngagement?.hasLikedCreator);
+    const isFollowingCreator = Boolean(sessionCreatorFollows[creatorName]);
+    const isCreatorLiked = Boolean(sessionCreatorLikes[creatorName]);
     const visibleFeaturedDrop = featuredDrop.visibility === 'public' || isPremium;
-    const followerCount = formatCompactMetric(creatorEngagement?.followerCount ?? Math.round(fallbackProfile.totalViews / 180));
-    const creatorLikeCount = formatCompactMetric(creatorEngagement?.creatorLikeCount ?? Math.round(fallbackProfile.totalLikes / 220));
+    const followerCount = formatCompactMetric(Math.round(fallbackProfile.totalViews / 180) + (isFollowingCreator ? 1 : 0));
+    const creatorLikeCount = formatCompactMetric(Math.round(fallbackProfile.totalLikes / 220) + (isCreatorLiked ? 1 : 0));
     const supporterCount = formatCompactMetric((fallbackProfile.totalLikes / 950) + (supportUrl ? 14 : 6));
-    const likedDropIds = new Set(creatorEngagement?.likedDropIds ?? []);
+    const likedDropIds = sessionCreatorDropLikes[creatorName] ?? new Set<string>();
 
     return (
       <div className="px-4 py-8 md:py-12 max-w-6xl mx-auto w-full min-h-[60vh]">
@@ -3169,7 +3164,7 @@ export default function App() {
             <div className="grid gap-4 md:grid-cols-2">
               {creatorMoments.map((moment) => {
                 const isDropLiked = likedDropIds.has(moment.id);
-                const momentLikeCount = creatorEngagement?.dropLikeCounts?.[moment.id] ?? 0;
+                const momentLikeCount = likedDropIds.has(moment.id) ? 1 : 0;
 
                 return (
                   <article key={moment.id} className="group relative overflow-hidden rounded-[28px] border border-white/10 bg-zinc-950 text-white shadow-[0_16px_60px_rgba(0,0,0,0.18)]">
