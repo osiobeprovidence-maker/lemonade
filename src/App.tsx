@@ -274,17 +274,29 @@ export default function App() {
   const { user, logout, userProfile, updateUserProfile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [currentView, setCurrentView] = useState('home');
+  const initialRouteState = React.useMemo(() => getRouteState(location.pathname, ALL_STORIES), [location.pathname]);
+  const locationSyncRef = React.useRef(false);
+  const [currentView, setCurrentView] = useState(() => initialRouteState?.view ?? 'home');
   const [activeCategory, setActiveCategory] = useState('Drama');
   const [activeDay, setActiveDay] = useState('Sun');
   const [searchQuery, setSearchQuery] = useState('');
   const isLoggedIn = !!user;
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>(() =>
+    initialRouteState && 'authMode' in initialRouteState && initialRouteState.authMode
+      ? initialRouteState.authMode
+      : 'login'
+  );
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [creatorType, setCreatorType] = useState<'original' | 'self' | null>(null);
   const [dashboardTab, setDashboardTab] = useState<'series' | 'monetization' | 'stats'>('series');
-  const [selectedComic, setSelectedComic] = useState<Story | null>(null);
-  const [viewAllSection, setViewAllSection] = useState<(typeof VIEW_ALL_SECTIONS)[number]>('popular');
+  const [selectedComic, setSelectedComic] = useState<Story | null>(() =>
+    initialRouteState && 'story' in initialRouteState ? initialRouteState.story : null
+  );
+  const [viewAllSection, setViewAllSection] = useState<(typeof VIEW_ALL_SECTIONS)[number]>(() =>
+    initialRouteState && 'section' in initialRouteState && initialRouteState.section
+      ? (initialRouteState.section as (typeof VIEW_ALL_SECTIONS)[number])
+      : 'popular'
+  );
   const [showAd, setShowAd] = useState(false);
   const [adTimeLeft, setAdTimeLeft] = useState(5);
 
@@ -399,14 +411,23 @@ export default function App() {
 
   useEffect(() => {
     const routeState = getRouteState(location.pathname, allStories);
+    const isPendingDynamicSeriesRoute =
+      /^\/(series|creator|reader)\/[^/]+\/?$/.test(location.pathname) && backendSeries === undefined;
 
     if (!routeState) {
+      if (isPendingDynamicSeriesRoute) {
+        return;
+      }
+
       if (location.pathname !== '/') {
         navigate('/', { replace: true });
       }
+      locationSyncRef.current = true;
       setCurrentView('home');
       return;
     }
+
+    locationSyncRef.current = true;
 
     if ('story' in routeState && routeState.story) {
       setSelectedComic((prev) => (prev?.id === routeState.story.id ? prev : routeState.story));
@@ -421,9 +442,14 @@ export default function App() {
     }
 
     setCurrentView((prev) => (prev === routeState.view ? prev : routeState.view));
-  }, [location.pathname, navigate, allStories]);
+  }, [location.pathname, navigate, allStories, backendSeries]);
 
   useEffect(() => {
+    if (locationSyncRef.current) {
+      locationSyncRef.current = false;
+      return;
+    }
+
     const nextPath = getPathForView(currentView, selectedComic, viewAllSection, authMode);
 
     if (!nextPath || nextPath === location.pathname) return;
@@ -517,7 +543,8 @@ export default function App() {
     });
   };
 
-  const startReading = (comic: Story) => {
+  const startReading = (comic: Story | null) => {
+    if (!comic) return;
     setSelectedComic(comic);
     setPreviousView(currentView);
     setCurrentView('reader');
@@ -537,7 +564,8 @@ export default function App() {
     }
   };
 
-  const openSeriesDetails = (comic: Story) => {
+  const openSeriesDetails = (comic: Story | null) => {
+    if (!comic) return;
     setSelectedComic(comic);
     setPreviousView(currentView);
     setCurrentView('series-details');
@@ -2845,7 +2873,24 @@ export default function App() {
     return <NovelReaderPage story={readerStory} onBack={() => setCurrentView(backView || 'novels')} />;
   };
 
-  const renderSeriesDetails = () => (
+  const renderSeriesDetails = () => {
+    if (!selectedComic) {
+      return (
+        <div className="px-4 py-12 max-w-4xl mx-auto w-full min-h-[60vh]">
+          <Button variant="ghost" onClick={() => setCurrentView(previousView || 'home')} className="mb-6 -ml-4 gap-2">
+            <ChevronRight className="w-4 h-4 rotate-180" /> Back
+          </Button>
+          <div className="rounded-3xl border border-border bg-card p-8 text-center">
+            <h1 className="text-2xl font-black tracking-tight">Series unavailable</h1>
+            <p className="mt-3 text-muted-foreground">
+              We couldn&apos;t resolve this series from the current route. Try returning to the catalog and opening it again.
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
     <div className="px-4 py-8 max-w-4xl mx-auto w-full min-h-[60vh]">
       <Button variant="ghost" onClick={() => setCurrentView(previousView || 'home')} className="mb-6 -ml-4 gap-2">
         <ChevronRight className="w-4 h-4 rotate-180" /> Back
@@ -2917,7 +2962,8 @@ export default function App() {
 
       {selectedComic && renderCommentSection(selectedComic.id)}
     </div>
-  );
+    );
+  };
 
   const renderCreatorProfile = () => {
     const creatorName = selectedComic?.creator || '';
