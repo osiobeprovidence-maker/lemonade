@@ -152,11 +152,6 @@
     border: 1px solid rgba(252, 165, 165, 0.28);
 }
 
-.novel-reader-selection::selection {
-    background: rgba(29, 185, 84, 0.35);
-    color: inherit;
-}
-
 @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
     .glass-modal {
         background: linear-gradient(180deg, rgba(24, 24, 27, 0.96), rgba(39, 39, 42, 0.92));

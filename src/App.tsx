@@ -15,8 +15,6 @@ import { Search, Heart, ChevronRight, Menu, Bell, User, Star, Clock, Home, Compa
 import { Skeleton } from '@/components/ui/skeleton';
 import { Logo } from './components/Logo';
 import { AuthModal } from './components/AuthModal';
-import { NovelReaderPage } from './components/reader/NovelReaderPage';
-import { buildSampleNovelReaderData } from './components/reader/novel-reader-data';
 import { auth } from './lib/firebase';
 import { updateProfile as updateFirebaseProfile } from 'firebase/auth';
 import { uploadProfilePhoto } from './lib/profilePhoto';
@@ -43,15 +41,7 @@ interface ComicStory extends StoryBase {
   isOriginal: boolean;
 }
 
-interface NovelStory extends StoryBase {
-  type: 'novel';
-  chapters: number;
-  readingMood: string;
-  summary: string;
-  excerpt: string;
-}
-
-type Story = ComicStory | NovelStory;
+type Story = ComicStory;
 type StoryComment = {
   id: number;
   user: string;
@@ -72,7 +62,6 @@ type CreatorMoment = {
 };
 
 const isComicStory = (story: Story): story is ComicStory => story.type === 'series';
-const isNovelStory = (story: Story): story is NovelStory => story.type === 'novel';
 
 const parseCompactMetric = (value?: string | number) => {
   if (typeof value === 'number') return value;
@@ -111,14 +100,6 @@ const COMICS: ComicStory[] = [
   { id: 12, title: "Behind Her Highness's Smile", creator: "Lemonade", emotion: "Drama", genre: "Drama", cover: "https://picsum.photos/seed/smile/400/533", rankChange: 12, views: "28M", likes: "1.3M", day: "Sun", isNew: false, isOriginal: true, type: 'series' },
 ];
 
-const NOVELS: NovelStory[] = [
-  { id: 101, title: "The Alchemist of Lemonade", creator: "Novel Master", genre: "Fantasy", cover: "https://picsum.photos/seed/novel-1/400/533", views: "1.2M", likes: "45K", type: 'novel', chapters: 38, readingMood: "Arcane slow burn", summary: "A young alchemist discovers the secret to the ultimate lemonade, which grants magical powers.", excerpt: "At dawn the syrup looked like glass, and everyone in the workshop pretended not to notice it humming." },
-  { id: 102, title: "Shadow of the Citrus", creator: "Sour King", genre: "Action", cover: "https://picsum.photos/seed/novel-2/400/533", views: "800K", likes: "32K", type: 'novel', chapters: 26, readingMood: "High-stakes action", summary: "In a world where fruit is power, one warrior fights to protect the last citrus tree.", excerpt: "Every rooftop in the district carried the smell of smoke and orange peel after the raid." },
-  { id: 103, title: "Sweet Revenge", creator: "Sugar Queen", genre: "Drama", cover: "https://picsum.photos/seed/novel-3/400/533", views: "2.5M", likes: "120K", type: 'novel', chapters: 44, readingMood: "Society drama", summary: "A high society drama about betrayal and the sweetest comeback ever told.", excerpt: "By the time the champagne reached her table, the rumor had already become a verdict." },
-  { id: 104, title: "Lemonade Stand Hero", creator: "Zest", genre: "Comedy", cover: "https://picsum.photos/seed/novel-4/400/533", views: "1.5M", likes: "88K", type: 'novel', chapters: 19, readingMood: "Bright comedy", summary: "A hilarious journey of a boy trying to build a lemonade empire in his backyard.", excerpt: "The first investor arrived on a bicycle and demanded equity before taking a sip." },
-  { id: 105, title: "The Last Zest", creator: "Pulp", genre: "Sci-fi", cover: "https://picsum.photos/seed/novel-5/400/533", views: "600K", likes: "15K", type: 'novel', chapters: 31, readingMood: "Quiet apocalypse", summary: "In a post-apocalyptic future, the last remaining citrus seed may decide whether humanity survives.", excerpt: "The archive lights flickered awake only when Mara whispered the code her mother died keeping." },
-];
-
 const ADMIN_ADS = [
   { id: 1, title: "Summer Sale", status: "Active", views: "1.2M", clicks: "45K", image: "https://picsum.photos/seed/ad1/800/400" },
   { id: 2, title: "New Series Launch", status: "Scheduled", views: "0", clicks: "0", image: "https://picsum.photos/seed/ad2/800/400" },
@@ -140,7 +121,7 @@ const DEFAULT_CREATOR_SUPPORT_HEADLINE = 'Support my next drop';
 const DEFAULT_CREATOR_DROP_TITLE = 'Behind the scenes drop';
 const DEFAULT_CREATOR_DROP_DESCRIPTION = 'Share previews, bonus pages, sketches, or a premium note for your biggest fans.';
 
-const ALL_STORIES: Story[] = [...COMICS, ...NOVELS];
+const ALL_STORIES: Story[] = [...COMICS];
 const PILL_BUTTON_BASE = "rounded-full px-4 py-1.5 text-xs font-bold whitespace-nowrap transition-all md:px-6 md:py-2 md:text-sm";
 const HOME_SECTION_HEADING_CLASS = "text-[1.25rem] font-bold leading-tight sm:text-[1.5rem]";
 const HOME_VIEW_ALL_CLASS = "flex items-center gap-1 text-[0.82rem] font-medium text-muted-foreground transition-colors hover:text-foreground sm:text-sm";
@@ -148,7 +129,6 @@ const HOME_VIEW_ALL_CLASS = "flex items-center gap-1 text-[0.82rem] font-medium 
 const VIEW_PATHS: Record<string, string> = {
   home: '/',
   manga: '/manga',
-  Novel: '/novels',
   my: '/my',
   search: '/search',
   profile: '/profile',
@@ -167,7 +147,7 @@ const VIEW_PATHS: Record<string, string> = {
   'edit-series': '/publish/edit-series',
 };
 
-const VIEW_ALL_SECTIONS = ['trending', 'popular', 'daily', 'originals', 'novels', 'new-releases'] as const;
+const VIEW_ALL_SECTIONS = ['trending', 'popular', 'daily', 'originals', 'new-releases'] as const;
 
 function findStoryById(storyId?: string | null, stories: Story[] = ALL_STORIES) {
   if (!storyId) return null;
@@ -202,7 +182,7 @@ function getRouteState(pathname: string, stories: Story[] = ALL_STORIES) {
   const readerMatch = pathname.match(/^\/reader\/([^/]+)\/?$/);
   if (readerMatch) {
     const story = findStoryById(readerMatch[1], stories);
-    return story ? { view: story.type === 'novel' ? 'novel-reader' : 'reader', story } : null;
+    return story ? { view: 'reader', story } : null;
   }
 
   const viewAllMatch = pathname.match(/^\/view-all\/([^/]+)\/?$/);
@@ -235,7 +215,7 @@ function getPathForView(
     return `/creator/${selectedComic.id}`;
   }
 
-  if ((view === 'reader' || view === 'novel-reader') && selectedComic) {
+  if (view === 'reader' && selectedComic) {
     return `/reader/${selectedComic.id}`;
   }
 
@@ -330,7 +310,7 @@ export default function App() {
   const [isUploadingProfilePic, setIsUploadingProfilePic] = useState(false);
   const profileImageInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Admin & Novel States
+  // Admin States
   const [adminTab, setAdminTab] = useState<'dashboard' | 'users' | 'moderation' | 'ads'>('dashboard');
   const [activeLemonCategory, setActiveLemonCategory] = useState('Drama');
   const [previousView, setPreviousView] = useState('home');
@@ -341,9 +321,8 @@ export default function App() {
     ]
   });
   const [newComment, setNewComment] = useState('');
-  const [publishType, setPublishType] = useState<'webtoon' | 'novel'>('webtoon');
   const [adminUserSearch, setAdminUserSearch] = useState('');
-  const [editableStoryKey, setEditableStoryKey] = useState(String(NOVELS[0].id));
+  const [editableStoryKey, setEditableStoryKey] = useState(String(COMICS[0].id));
   const [storyCoverImage, setStoryCoverImage] = useState('');
   const [storyBackgroundImage, setStoryBackgroundImage] = useState('');
   const [storyOverlayColor, setStoryOverlayColor] = useState('#000000');
@@ -366,7 +345,9 @@ export default function App() {
   // Dynamic Content Derivation
   const allStories = React.useMemo<Story[]>(() => {
     if (!backendSeries || backendSeries.length === 0) return ALL_STORIES;
-    return backendSeries.map((s) => {
+    return backendSeries.flatMap((s) => {
+      if (s.type !== 'webtoon') return [];
+
       const baseStory = {
         id: s._id,
         title: s.title,
@@ -378,18 +359,7 @@ export default function App() {
         summary: s.summary || undefined,
       };
 
-      if (s.type === 'novel') {
-        return {
-          ...baseStory,
-          type: 'novel' as const,
-          chapters: 0,
-          readingMood: s.emotion || 'Long-form fiction',
-          summary: s.summary || 'No summary available yet.',
-          excerpt: s.summary || 'Start reading this new Lemonade novel.',
-        };
-      }
-
-      return {
+      return [{
         ...baseStory,
         type: 'series' as const,
         emotion: s.emotion || undefined,
@@ -397,12 +367,11 @@ export default function App() {
         day: s.releaseDay || 'Sun',
         isNew: Boolean(s.isNew),
         isOriginal: Boolean(s.isOriginal),
-      };
+      }];
     });
   }, [backendSeries]);
 
   const displayComics = React.useMemo(() => allStories.filter(isComicStory), [allStories]);
-  const displayNovels = React.useMemo(() => allStories.filter(isNovelStory), [allStories]);
   const publicBirthdayLabel = React.useMemo(() => {
     if (!profileBirthday) return '';
 
@@ -542,11 +511,7 @@ export default function App() {
 
   const startReading = (comic: Story) => {
     setSelectedComic(comic);
-    if (comic.type === 'novel') {
-      setCurrentView('novel-reader');
-    } else {
-      setCurrentView('reader');
-    }
+    setCurrentView('reader');
     
     if (!isPremium) {
       setShowAd(true);
@@ -610,7 +575,7 @@ export default function App() {
 
   const skipAd = () => {
     setShowAd(false);
-    setCurrentView(selectedComic?.type === 'novel' ? 'novel-reader' : 'reader');
+    setCurrentView('reader');
   };
 
   const filteredComics = displayComics.filter(comic => 
@@ -623,8 +588,7 @@ export default function App() {
     story.creator.toLowerCase().includes(searchQuery.toLowerCase())
   );
   const editableStories = allStories;
-  const editableStory = editableStories.find((story) => String(story.id) === editableStoryKey) || (displayNovels[0] || NOVELS[0]);
-  const filteredNovels = displayNovels.filter((novel) => novel.genre === activeLemonCategory);
+  const editableStory = editableStories.find((story) => String(story.id) === editableStoryKey) || (displayComics[0] || COMICS[0]);
   const selectedCreatorName = selectedComic?.creator || '';
   const selectedCreatorMomentIds = selectedCreatorName
     ? [
@@ -677,10 +641,8 @@ export default function App() {
           title: story.title,
           description:
             story.summary ||
-            (story.type === 'novel'
-              ? `A premium preview from ${story.creator} with a stronger emotional hook for loyal readers.`
-              : `New panels, creator notes, and a clean public drop from ${story.creator}.`),
-          label: story.type === 'novel' ? 'Public preview' : 'Public update',
+            `New panels, creator notes, and a clean public drop from ${story.creator}.`,
+          label: 'Public update',
           visibility: 'public',
           accent: index % 2 === 0 ? 'from-primary/30 via-primary/10 to-transparent' : 'from-amber-500/30 via-amber-400/10 to-transparent',
         }));
@@ -688,7 +650,7 @@ export default function App() {
         return [
           creator,
           {
-            tagline: `Premium ${stories[0]?.type === 'novel' ? 'storyteller' : 'creator'} on Lemonade`,
+            tagline: 'Premium creator on Lemonade',
             intro:
               stories[0]?.summary ||
               `${creator} shares polished updates, early looks, and public moments for fans who want to stay close to the work.`,
@@ -742,12 +704,6 @@ export default function App() {
       eyebrow: 'Exclusive lineup',
       description: 'The complete originals shelf, from breakout action to weekend drama.',
       items: displayComics.filter((comic) => comic.isOriginal),
-    },
-    novels: {
-      title: `${activeLemonCategory} novels`,
-      eyebrow: 'Reading room',
-      description: `Long-form fiction, curated for ${activeLemonCategory.toLowerCase()} readers.`,
-      items: filteredNovels,
     },
     'new-releases': {
       title: 'Newly released originals',
@@ -1245,13 +1201,6 @@ export default function App() {
                 <div key={story.id} className="flex flex-col cursor-pointer group" onClick={() => openSeriesDetails(story)}>
                   <div className="relative aspect-[3/4] rounded-md mb-2 overflow-hidden">
                     <img src={story.cover} alt={story.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                    {story.type === 'novel' && (
-                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent p-3">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/75">
-                          {story.readingMood}
-                        </p>
-                      </div>
-                    )}
                   </div>
                   <h3 className="font-bold text-sm leading-tight line-clamp-2 group-hover:text-primary transition-colors">{story.title}</h3>
                   <p className="text-[11px] text-muted-foreground mt-1">{story.genre}</p>
@@ -1290,21 +1239,17 @@ export default function App() {
             <h1 className="mt-3 max-w-[12ch] text-[clamp(2rem,7vw,4rem)] font-black leading-[0.92] tracking-[-0.06em] text-white sm:max-w-none">{config.title}</h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-400 md:text-base">{config.description}</p>
           </div>
-          <Button variant="outline" className="w-fit rounded-full" onClick={() => setCurrentView(viewAllSection === 'novels' ? 'Novel' : viewAllSection === 'originals' ? 'manga' : 'home')}>
+          <Button variant="outline" className="w-fit rounded-full" onClick={() => setCurrentView(viewAllSection === 'originals' ? 'manga' : 'home')}>
             Back
           </Button>
         </div>
 
-        <div className={`grid gap-6 ${viewAllSection === 'novels' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5'}`}>
+        <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5">
           {config.items.map((item: any) => (
             <div key={item.id} className="group cursor-pointer" onClick={() => openSeriesDetails(item)}>
               <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-border bg-muted">
                 <img src={item.cover} alt={item.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" referrerPolicy="no-referrer" />
-                {item.type === 'novel' ? (
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent p-4">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/70">{item.readingMood}</p>
-                  </div>
-                ) : item.isNew ? (
+                {item.isNew ? (
                   <div className="absolute left-3 top-3 rounded-full bg-primary px-2 py-1 text-[10px] font-bold uppercase text-white">
                     New
                   </div>
@@ -1314,7 +1259,7 @@ export default function App() {
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-400">{item.genre}</p>
                 <h3 className="mt-1 text-base font-bold text-white transition-colors group-hover:text-primary">{item.title}</h3>
                 <p className="mt-1 text-sm text-zinc-500">{item.creator}</p>
-                <p className="mt-2 text-sm leading-6 text-zinc-600 line-clamp-2">{item.excerpt || item.summary}</p>
+                <p className="mt-2 text-sm leading-6 text-zinc-600 line-clamp-2">{item.summary}</p>
               </div>
             </div>
           ))}
@@ -1510,8 +1455,8 @@ export default function App() {
                   size="sm"
                   className="rounded-full"
                   onClick={() => {
-                    setSelectedComic(NOVELS[0]);
-                    setEditableStoryKey(String(NOVELS[0].id));
+                    setSelectedComic(COMICS[0]);
+                    setEditableStoryKey(String(COMICS[0].id));
                     setCurrentView('edit-series');
                   }}
                 >
@@ -1633,30 +1578,8 @@ export default function App() {
       <form className="space-y-8" onSubmit={(e) => { e.preventDefault(); setCurrentView('publish-dashboard'); }}>
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-bold">Content Type</label>
-            <div className="flex gap-4">
-              <Button 
-                type="button" 
-                variant={publishType === 'webtoon' ? 'default' : 'outline'} 
-                className="flex-1 rounded-full font-bold"
-                onClick={() => setPublishType('webtoon')}
-              >
-                Webtoon
-              </Button>
-              <Button 
-                type="button" 
-                variant={publishType === 'novel' ? 'default' : 'outline'} 
-                className="flex-1 rounded-full font-bold"
-                onClick={() => setPublishType('novel')}
-              >
-                Novel
-              </Button>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-bold">{publishType === 'webtoon' ? 'Series' : 'Novel'} Title</label>
-            <input type="text" placeholder={`Enter ${publishType} title`} className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none" required />
+            <label className="text-sm font-bold">Series Title</label>
+            <input type="text" placeholder="Enter series title" className="w-full bg-background border-2 border-border rounded-md p-3 focus:border-primary outline-none" required />
           </div>
           
           <div className="space-y-3">
@@ -2478,100 +2401,6 @@ export default function App() {
     );
   };
 
-  const renderLemon = () => (
-    <div className="pb-20">
-      <section className="relative mb-12 min-h-[calc(100svh-5rem)] w-full overflow-hidden">
-        <img 
-          src="https://picsum.photos/seed/lemonade-novels/1920/1080" 
-          alt="Novel Banner" 
-          className="absolute inset-0 h-full w-full object-cover saturate-[0.9]"
-          referrerPolicy="no-referrer"
-        />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,10,16,0.82)_0%,rgba(7,10,16,0.54)_36%,rgba(7,10,16,0.18)_68%,rgba(7,10,16,0.08)_100%)] md:bg-[linear-gradient(90deg,rgba(7,10,16,0.78)_0%,rgba(7,10,16,0.44)_42%,rgba(7,10,16,0.12)_72%,rgba(7,10,16,0.04)_100%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(185,221,255,0.2),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.12),transparent_30%)]" />
-        <div className="relative flex min-h-[calc(100svh-5rem)] items-end py-6 sm:py-8 md:items-center md:py-10">
-          <div className={`${pageContainerClass} w-full`}>
-            <div className="glass-surface max-w-[min(100%,44rem)] rounded-[28px] p-5 text-white sm:p-6 md:p-8 lg:p-10">
-              <div className="mb-5 flex flex-wrap items-center gap-3">
-                <span className="inline-flex items-center rounded-full border border-white/18 bg-white/10 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-white/84 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]">
-                  Lemonade Novels
-                </span>
-              </div>
-              <h1 className="max-w-[11ch] text-[clamp(2.4rem,6.8vw,5.6rem)] font-black uppercase tracking-[-0.06em] leading-[0.92] text-white text-balance">
-                Stories you can sink into.
-              </h1>
-              <p className="mt-4 max-w-[34rem] text-[clamp(0.98rem,2vw,1.18rem)] font-medium leading-[1.6] tracking-[-0.01em] text-white/82 sm:mt-5">
-                Discover long-form fiction with sharper twists, richer character arcs, and chapter drops built to keep readers coming back every night.
-              </p>
-              <div className="mt-7 flex flex-col items-start gap-3 sm:mt-8 sm:flex-row sm:items-center">
-                <Button
-                  size="lg"
-                  className="group h-auto min-h-12 rounded-full border border-white/10 bg-white px-6 py-3 text-sm font-semibold text-zinc-950 shadow-[0_18px_45px_rgba(0,0,0,0.22)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/92 hover:shadow-[0_24px_60px_rgba(0,0,0,0.28)]"
-                  onClick={() => openSeriesDetails(NOVELS[0])}
-                >
-                  <BookOpen className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
-                  Start Reading
-                </Button>
-                <p className="text-sm font-medium tracking-[-0.01em] text-white/62">
-                  Fresh romance, thrillers, and slow-burn drama in one reading lane.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div className={pageContainerClass}>
-        {/* Novel Categories */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-6 no-scrollbar mb-8 border-b border-border">
-          {CATEGORIES.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setActiveLemonCategory(cat)}
-              className={`${PILL_BUTTON_BASE} ${activeLemonCategory === cat ? 'bg-primary-dark text-primary-foreground' : 'bg-muted hover:bg-muted/80 text-muted-foreground'}`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
-            {activeLemonCategory.toUpperCase()} NOVELS
-          </h2>
-          <button type="button" onClick={() => openViewAll('novels')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-            View all <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-          {filteredNovels.map((novel) => (
-            <div key={novel.id} className="group cursor-pointer" onClick={() => openSeriesDetails(novel)}>
-              <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-3 border border-border group-hover:border-primary transition-colors">
-                <img 
-                  src={novel.cover} 
-                  alt={novel.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/75">{novel.readingMood}</p>
-                </div>
-              </div>
-              <h3 className="font-bold text-sm line-clamp-1 group-hover:text-primary transition-colors">{novel.title}</h3>
-              <p className="text-xs text-muted-foreground font-medium">{novel.creator}</p>
-              <p className="mt-2 text-xs leading-5 text-zinc-400 line-clamp-2">{novel.excerpt}</p>
-              <div className="mt-3 flex items-center gap-3 text-[11px] font-semibold text-zinc-400">
-                <span>{novel.chapters} chapters</span>
-                <span>{novel.likes} likes</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
   const renderAdmin = () => {
     const renderAdminDashboard = () => (
       <div className="space-y-8">
@@ -2895,27 +2724,6 @@ export default function App() {
     );
   };
 
-  const renderNovelReader = () => {
-    if (!selectedComic) return null;
-
-    return (
-      <NovelReaderPage
-        key={String(selectedComic.id)}
-        data={buildSampleNovelReaderData({
-          id: selectedComic.id,
-          title: selectedComic.title,
-          creator: selectedComic.creator,
-          cover: selectedComic.cover,
-          summary: selectedComic.summary,
-          genre: selectedComic.genre,
-        })}
-        isFavorite={likedComics.has(selectedComic.id)}
-        onBack={() => setCurrentView('series-details')}
-        onToggleFavorite={() => toggleLike(selectedComic.id)}
-      />
-    );
-  };
-
   const renderReader = () => {
     const isLiked = selectedComic ? likedComics.has(selectedComic.id) : false;
     const readerCoverImage = readerStoryStyle.coverImage || selectedComic?.cover;
@@ -3033,7 +2841,7 @@ export default function App() {
 
   const renderSeriesDetails = () => (
     <div className="px-4 py-8 max-w-4xl mx-auto w-full min-h-[60vh]">
-      <Button variant="ghost" onClick={() => setCurrentView(selectedComic?.type === 'novel' ? 'Novel' : 'home')} className="mb-6 -ml-4 gap-2">
+      <Button variant="ghost" onClick={() => setCurrentView('home')} className="mb-6 -ml-4 gap-2">
         <ChevronRight className="w-4 h-4 rotate-180" /> Back
       </Button>
       <div className="flex flex-col md:flex-row gap-8 mb-12">
@@ -3056,52 +2864,50 @@ export default function App() {
             {selectedComic?.summary || `Follow the epic journey in ${selectedComic?.title}. This is a placeholder summary for the series. It's full of action, drama, and incredible art.`}
           </p>
           <Button className="rounded-full px-8 py-6 font-bold text-lg w-full md:w-auto" onClick={() => startReading(selectedComic)}>
-            {selectedComic?.type === 'novel' ? 'Start Reading' : 'Read First Episode'}
+            Read First Episode
           </Button>
         </div>
       </div>
 
-      {selectedComic?.type !== 'novel' && (
-        <>
-          <h3 className="text-2xl font-bold mb-6">Episodes</h3>
-          <div className="space-y-4">
-            {[5, 4, 3, 2, 1].map(ep => (
-              <div key={ep} className="flex items-center gap-4 p-4 border border-border rounded-xl hover:border-primary transition-colors cursor-pointer group" onClick={() => startReading(selectedComic)}>
-                <div className="w-24 aspect-video bg-muted rounded-md overflow-hidden shrink-0 relative">
-                  <img src={`https://picsum.photos/seed/ep${selectedComic?.id}-${ep}/320/180`} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Play className="w-6 h-6 text-white" />
-                  </div>
+      <>
+        <h3 className="text-2xl font-bold mb-6">Episodes</h3>
+        <div className="space-y-4">
+          {[5, 4, 3, 2, 1].map(ep => (
+            <div key={ep} className="flex items-center gap-4 p-4 border border-border rounded-xl hover:border-primary transition-colors cursor-pointer group" onClick={() => startReading(selectedComic)}>
+              <div className="w-24 aspect-video bg-muted rounded-md overflow-hidden shrink-0 relative">
+                <img src={`https://picsum.photos/seed/ep${selectedComic?.id}-${ep}/320/180`} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Play className="w-6 h-6 text-white" />
                 </div>
-                <div className="flex-1">
-                  <h4 className="font-bold text-lg">Episode {ep}</h4>
-                  <p className="text-sm text-muted-foreground">Oct {ep}, 2023</p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={`Like Episode ${ep}`}
-                  className="shrink-0"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    if (selectedComic) {
-                      toggleEpisodeLike(selectedComic.id, ep);
-                    }
-                  }}
-                >
-                  <Heart
-                    className={`w-5 h-5 transition-colors ${
-                      selectedComic && likedEpisodes.has(`${String(selectedComic.id)}-${ep}`)
-                        ? 'fill-primary text-primary'
-                        : 'text-muted-foreground'
-                    }`}
-                  />
-                </Button>
               </div>
-            ))}
-          </div>
-        </>
-      )}
+              <div className="flex-1">
+                <h4 className="font-bold text-lg">Episode {ep}</h4>
+                <p className="text-sm text-muted-foreground">Oct {ep}, 2023</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={`Like Episode ${ep}`}
+                className="shrink-0"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  if (selectedComic) {
+                    toggleEpisodeLike(selectedComic.id, ep);
+                  }
+                }}
+              >
+                <Heart
+                  className={`w-5 h-5 transition-colors ${
+                    selectedComic && likedEpisodes.has(`${String(selectedComic.id)}-${ep}`)
+                      ? 'fill-primary text-primary'
+                      : 'text-muted-foreground'
+                  }`}
+                />
+              </Button>
+            </div>
+          ))}
+        </div>
+      </>
 
       {selectedComic && renderCommentSection(selectedComic.id)}
     </div>
@@ -3521,14 +3327,6 @@ export default function App() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleMobileNavSelect('Novel')}
-                    className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left font-bold transition-colors ${currentView === 'Novel' ? 'bg-primary text-primary-foreground' : 'text-zinc-300 hover:bg-white/5 hover:text-white'}`}
-                  >
-                    <BookOpen className="h-4 w-4" />
-                    Novels
-                  </button>
-                  <button
-                    type="button"
                     onClick={() => {
                       setIsMobileNavOpen(false);
                       handleMyClick();
@@ -3601,13 +3399,6 @@ export default function App() {
                 {currentView === 'manga' && <motion.div layoutId="nav-pill" className="absolute bottom-0 left-0 right-0 h-[3px] bg-primary rounded-t-full" />}
               </div>
               <div 
-                onClick={() => setCurrentView('Novel')}
-                className={`relative h-full flex items-center cursor-pointer transition-colors pt-0.5 ${currentView === 'Novel' ? 'text-primary' : 'text-zinc-400 hover:text-white'}`}
-              >
-                Novels
-                {currentView === 'Novel' && <motion.div layoutId="nav-pill" className="absolute bottom-0 left-0 right-0 h-[3px] bg-primary rounded-t-full" />}
-              </div>
-              <div 
                 onClick={handleMyClick}
                 className={`relative h-full flex items-center cursor-pointer transition-colors pt-0.5 ${currentView === 'my' ? 'text-primary' : 'text-zinc-400 hover:text-white'}`}
               >
@@ -3656,7 +3447,6 @@ export default function App() {
       <main>
         {currentView === 'home' && renderHome()}
         {currentView === 'manga' && renderOriginals()}
-        {currentView === 'Novel' && renderLemon()}
         {currentView === 'admin' && renderAdmin()}
         {currentView === 'my' && renderMy()}
         {currentView === 'search' && renderSearch()}
@@ -3678,7 +3468,6 @@ export default function App() {
         {currentView === 'ads-manager' && renderAdsManager()}
         {currentView === 'create-campaign' && renderCreateCampaign()}
         {currentView === 'reader' && renderReader()}
-        {currentView === 'novel-reader' && renderNovelReader()}
       </main>
 
       <AuthModal
