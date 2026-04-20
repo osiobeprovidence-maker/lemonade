@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 
-// Use environment variables from Vercel, fallback to local config for development
+// Use Vite environment variables from the hosting platform, with local fallbacks for development.
 const firebaseConfig = {
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'gen-lang-client-0261238438',
   appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:523804729634:web:f8e6ef8052b095c9fb457b',

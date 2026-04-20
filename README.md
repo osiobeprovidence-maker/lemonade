@@ -21,6 +21,25 @@ The frontend runs on `http://localhost:3000`.
 - `npm run convex:deploy` deploys Convex functions.
 - `npm run convex:dashboard` opens the Convex dashboard.
 
+## Netlify
+
+This project is ready to host on Netlify.
+
+- Build command: `npm run build`
+- Publish directory: `dist`
+- SPA routing is handled in [netlify.toml](/C:/Users/USER/OneDrive/Desktop/lemonade/netlify.toml)
+
+Set these environment variables in Netlify before deploying:
+
+- `VITE_CONVEX_URL`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_APP_ID`
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_STORAGE_BUCKET`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_MEASUREMENT_ID` if used
+
 ## Environment
 
 The app expects a mix of Vite, Firebase, and Convex environment variables. Start from [.env.example](./.env.example) and add any project-specific values used by your Firebase and Convex setup.
