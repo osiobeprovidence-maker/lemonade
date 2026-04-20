@@ -130,6 +130,7 @@ const HOME_VIEW_ALL_CLASS = "flex items-center gap-1 text-[0.82rem] font-medium 
 const VIEW_PATHS: Record<string, string> = {
   home: '/',
   manga: '/manga',
+  novels: '/novels',
   my: '/my',
   search: '/search',
   profile: '/profile',
@@ -3217,6 +3218,14 @@ export default function App() {
                   </button>
                   <button
                     type="button"
+                    onClick={() => handleMobileNavSelect('novels')}
+                    className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left font-bold transition-colors ${currentView === 'novels' ? 'bg-primary text-primary-foreground' : 'text-zinc-300 hover:bg-white/5 hover:text-white'}`}
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    Novels
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => {
                       setIsMobileNavOpen(false);
                       handleMyClick();
@@ -3289,6 +3298,13 @@ export default function App() {
                 {currentView === 'manga' && <motion.div layoutId="nav-pill" className="absolute bottom-0 left-0 right-0 h-[3px] bg-primary rounded-t-full" />}
               </div>
               <div 
+                onClick={() => setCurrentView('novels')}
+                className={`relative h-full flex items-center cursor-pointer transition-colors pt-0.5 ${currentView === 'novels' ? 'text-primary' : 'text-zinc-400 hover:text-white'}`}
+              >
+                Novels
+                {currentView === 'novels' && <motion.div layoutId="nav-pill" className="absolute bottom-0 left-0 right-0 h-[3px] bg-primary rounded-t-full" />}
+              </div>
+              <div 
                 onClick={handleMyClick}
                 className={`relative h-full flex items-center cursor-pointer transition-colors pt-0.5 ${currentView === 'my' ? 'text-primary' : 'text-zinc-400 hover:text-white'}`}
               >
@@ -3337,6 +3353,7 @@ export default function App() {
       <main>
         {currentView === 'home' && renderHome()}
         {currentView === 'manga' && renderOriginals()}
+        {currentView === 'novels' && renderReader()}
         {currentView === 'admin' && renderAdmin()}
         {currentView === 'my' && renderMy()}
         {currentView === 'search' && renderSearch()}
