@@ -1825,12 +1825,12 @@ export default function App() {
               <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.35em] text-primary/80">Creator support</p>
               <h3 className="text-2xl font-black tracking-tight">{creatorDropTitle.trim() || 'Your next public drop'}</h3>
               <p className="mt-2 max-w-xl text-sm text-white/65">
-                {creatorDropDescription.trim() || 'Set up a public or premium drop so fans can follow your work and support your next release.'}
+                {creatorDropDescription.trim() || 'Set up a public or behind the scenes drop so fans can follow your work and support your next release.'}
               </p>
             </div>
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold uppercase tracking-[0.25em] text-white/70">
-              {creatorDropVisibility === 'premium' ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-              {creatorDropVisibility === 'premium' ? 'Premium drop' : 'Public drop'}
+              {creatorDropVisibility === 'premium' ? <Lock className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+              {creatorDropVisibility === 'premium' ? 'Behind the scenes drop' : 'Public drop'}
             </div>
           </div>
 
@@ -1857,18 +1857,7 @@ export default function App() {
       )}
 
       <div className="grid gap-4 mb-12">
-        <Card className="p-4 flex items-center justify-between hover:border-primary transition-colors cursor-pointer" onClick={() => setCurrentView('publish-dashboard')}>
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-              <PenTool className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <p className="font-bold">Creator Tools</p>
-              <p className="text-xs text-muted-foreground">Manage your series and earnings</p>
-            </div>
-          </div>
-          <ChevronRight className="w-5 h-5 text-muted-foreground" />
-        </Card>
+
         <Card className="p-4 flex items-center justify-between hover:border-primary transition-colors cursor-pointer" onClick={() => setCurrentView('ads-manager')}>
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
@@ -2086,7 +2075,7 @@ export default function App() {
                 className={`rounded-2xl border p-4 text-left transition-all ${creatorDropVisibility === 'premium' ? 'border-primary bg-primary/5' : 'border-border bg-background hover:border-primary/40'}`}
               >
                 <div className="mb-2 flex items-center gap-2 text-sm font-bold">
-                  <Lock className="h-4 w-4 text-primary" /> Premium
+                  <Lock className="h-4 w-4 text-primary" /> Behind the scenes drop
                 </div>
                 <p className="text-xs text-muted-foreground">Fans see the preview and need Premium to unlock the full drop.</p>
               </button>
@@ -3111,7 +3100,7 @@ export default function App() {
 
               <div className="mt-6 rounded-[24px] border border-white/10 bg-white/5 p-4">
                 <div className="mb-3 flex items-center justify-between text-xs font-bold uppercase tracking-[0.26em] text-white/45">
-                  <span>{featuredDrop.visibility === 'premium' ? 'Premium drop' : 'Public drop'}</span>
+                  <span>{featuredDrop.visibility === 'premium' ? 'Behind the scenes drop' : 'Public drop'}</span>
                   <span>{featuredDrop.label}</span>
                 </div>
                 {visibleFeaturedDrop ? (
@@ -3120,7 +3109,7 @@ export default function App() {
                   </p>
                 ) : (
                   <p className="text-sm text-white/65">
-                    This drop is premium-only. Fans can preview it here, then upgrade to Premium to unlock the full release.
+                    This drop is a behind the scenes release. Fans can preview it here, then upgrade to Premium to unlock the full content.
                   </p>
                 )}
               </div>
@@ -3168,7 +3157,7 @@ export default function App() {
                       <div className="mb-4 flex items-center justify-between">
                         <span className="rounded-full border border-white/10 bg-white/8 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.28em] text-white/60">{moment.label}</span>
                         <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.26em] text-white/55">
-                          {moment.visibility === 'premium' ? 'Premium' : 'Public'}
+                          {moment.visibility === 'premium' ? 'Behind the scenes drop' : 'Public drop'}
                         </span>
                       </div>
                       <h4 className="text-2xl font-black tracking-tight">{moment.title}</h4>
