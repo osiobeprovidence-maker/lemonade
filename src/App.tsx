@@ -19,6 +19,7 @@ import { auth } from './lib/firebase';
 import { updateProfile as updateFirebaseProfile } from 'firebase/auth';
 import { uploadProfilePhoto } from './lib/profilePhoto';
 import { NovelReaderPage } from './components/reader/NovelReaderPage';
+import { DUMMY_STORY } from './components/reader/novel-reader-data';
 
 type StoryId = number | string;
 
@@ -374,6 +375,11 @@ export default function App() {
   }, [backendSeries]);
 
   const displayComics = React.useMemo(() => allStories.filter(isComicStory), [allStories]);
+  const novelStories = React.useMemo(() => {
+    const nonOriginals = displayComics.filter((comic) => !comic.isOriginal);
+    return nonOriginals.length > 0 ? nonOriginals : displayComics;
+  }, [displayComics]);
+  const featuredNovel = novelStories[0] || displayComics[0] || COMICS[0];
   const publicBirthdayLabel = React.useMemo(() => {
     if (!profileBirthday) return '';
 
@@ -513,6 +519,7 @@ export default function App() {
 
   const startReading = (comic: Story) => {
     setSelectedComic(comic);
+    setPreviousView(currentView);
     setCurrentView('reader');
     
     if (!isPremium) {
@@ -532,6 +539,7 @@ export default function App() {
 
   const openSeriesDetails = (comic: Story) => {
     setSelectedComic(comic);
+    setPreviousView(currentView);
     setCurrentView('series-details');
   };
 
@@ -1147,6 +1155,100 @@ export default function App() {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderNovels = () => (
+    <div className="pb-20">
+      <section className="relative mb-12 min-h-[calc(100svh-5rem)] w-full overflow-hidden">
+        <img
+          src={featuredNovel?.cover || DUMMY_STORY.cover}
+          alt={featuredNovel?.title || DUMMY_STORY.title}
+          className="absolute inset-0 h-full w-full object-cover saturate-[0.85]"
+          referrerPolicy="no-referrer"
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(9,11,18,0.92)_0%,rgba(9,11,18,0.72)_34%,rgba(9,11,18,0.28)_68%,rgba(9,11,18,0.16)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,214,102,0.24),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.12),transparent_30%)]" />
+        <div className="relative flex min-h-[calc(100svh-5rem)] items-end py-6 sm:py-8 md:items-center md:py-10">
+          <div className={`${pageContainerClass} w-full`}>
+            <div className="glass-surface max-w-[min(100%,44rem)] rounded-[28px] p-5 text-white sm:p-6 md:p-8 lg:p-10">
+              <div className="mb-5 flex flex-wrap items-center gap-3">
+                <span className="inline-flex items-center rounded-full border border-white/18 bg-white/10 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-white/84 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]">
+                  Lemonade Novels
+                </span>
+                <span className="inline-flex items-center rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-white/70">
+                  Structured like Originals
+                </span>
+              </div>
+              <h1 className="max-w-[12ch] text-[clamp(2.4rem,6.8vw,5.4rem)] font-black uppercase tracking-[-0.06em] leading-[0.92] text-white text-balance">
+                Browse the novel shelf before you read.
+              </h1>
+              <p className="mt-4 max-w-[34rem] text-[clamp(0.98rem,2vw,1.18rem)] font-medium leading-[1.6] tracking-[-0.01em] text-white/82 sm:mt-5">
+                Pick a title, open its details page, then jump into the chapter reader. That keeps novels following the same product flow as Originals instead of dropping straight into content.
+              </p>
+              <div className="mt-7 flex flex-col items-start gap-3 sm:mt-8 sm:flex-row sm:items-center">
+                <Button
+                  size="lg"
+                  className="group h-auto min-h-12 rounded-full border border-white/10 bg-white px-6 py-3 text-sm font-semibold text-zinc-950 shadow-[0_18px_45px_rgba(0,0,0,0.22)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/92 hover:shadow-[0_24px_60px_rgba(0,0,0,0.28)]"
+                  onClick={() => featuredNovel && openSeriesDetails(featuredNovel)}
+                >
+                  <Play className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+                  Open Featured Novel
+                </Button>
+                <p className="text-sm font-medium tracking-[-0.01em] text-white/62">
+                  Tap a novel card to open details, then start reading from there.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className={pageContainerClass}>
+        <div className="mb-10 flex items-end justify-between gap-4 border-b border-border pb-6">
+          <div>
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-zinc-500">Novel Catalog</p>
+            <h2 className="mt-2 text-2xl font-black tracking-tight text-white sm:text-3xl">Featured Novels</h2>
+          </div>
+          <p className="max-w-md text-sm leading-6 text-zinc-400">
+            Each novel now opens with the same browse to details to reader progression used elsewhere in Lemonade.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5">
+          {novelStories.map((novel) => (
+            <button
+              key={novel.id}
+              type="button"
+              className="group text-left"
+              onClick={() => openSeriesDetails(novel)}
+            >
+              <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-white/8 bg-zinc-900 shadow-[0_20px_50px_rgba(0,0,0,0.28)] transition-all duration-300 group-hover:-translate-y-1.5 group-hover:border-primary/40 group-hover:shadow-[0_28px_64px_rgba(0,0,0,0.38)]">
+                <img
+                  src={novel.cover}
+                  alt={novel.title}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+                <div className="absolute left-3 top-3 rounded-full border border-white/10 bg-black/30 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-white/80 backdrop-blur-md">
+                  Novel
+                </div>
+                <div className="absolute inset-x-0 bottom-0 p-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/60">{novel.genre}</p>
+                  <h3 className="mt-2 text-base font-black leading-tight text-white transition-colors group-hover:text-primary">
+                    {novel.title}
+                  </h3>
+                </div>
+              </div>
+              <div className="mt-3">
+                <p className="text-sm font-semibold text-zinc-200">{novel.creator}</p>
+                <p className="mt-1 text-xs uppercase tracking-[0.18em] text-zinc-500">{novel.views} reads</p>
+              </div>
+            </button>
+          ))}
         </div>
       </div>
     </div>
@@ -2727,12 +2829,25 @@ export default function App() {
   };
 
   const renderReader = () => {
-    return <NovelReaderPage onBack={() => setCurrentView('home')} />;
+    const readerStory = selectedComic
+      ? {
+          ...DUMMY_STORY,
+          id: selectedComic.id,
+          title: selectedComic.title,
+          author: selectedComic.creator,
+          cover: selectedComic.cover,
+          description: selectedComic.summary || DUMMY_STORY.description,
+        }
+      : DUMMY_STORY;
+
+    const backView = previousView === 'reader' ? 'novels' : previousView;
+
+    return <NovelReaderPage story={readerStory} onBack={() => setCurrentView(backView || 'novels')} />;
   };
 
   const renderSeriesDetails = () => (
     <div className="px-4 py-8 max-w-4xl mx-auto w-full min-h-[60vh]">
-      <Button variant="ghost" onClick={() => setCurrentView('home')} className="mb-6 -ml-4 gap-2">
+      <Button variant="ghost" onClick={() => setCurrentView(previousView || 'home')} className="mb-6 -ml-4 gap-2">
         <ChevronRight className="w-4 h-4 rotate-180" /> Back
       </Button>
       <div className="flex flex-col md:flex-row gap-8 mb-12">
@@ -3353,7 +3468,7 @@ export default function App() {
       <main>
         {currentView === 'home' && renderHome()}
         {currentView === 'manga' && renderOriginals()}
-        {currentView === 'novels' && renderReader()}
+        {currentView === 'novels' && renderNovels()}
         {currentView === 'admin' && renderAdmin()}
         {currentView === 'my' && renderMy()}
         {currentView === 'search' && renderSearch()}

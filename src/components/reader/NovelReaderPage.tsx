@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { NovelReaderPageProps } from './types'; // Oh wait, I don't have types.ts. I'll just put props inline.
-import { DUMMY_STORY } from './novel-reader-data';
+import { DUMMY_STORY, Story } from './novel-reader-data';
 import { ReaderTopBar } from './ReaderTopBar';
 import { TableOfContentsSidebar } from './TableOfContentsSidebar';
 import { ChapterIntro } from './ChapterIntro';
@@ -13,7 +12,7 @@ import { RecommendationsSidebar } from './RecommendationsSidebar';
 
 interface NovelReaderPageProps {
   onBack: () => void;
-  // Can pass story as prop if needed, for now use dummy
+  story?: Story;
 }
 
 const DEFAULT_SETTINGS: ReaderSettings = {
@@ -24,8 +23,8 @@ const DEFAULT_SETTINGS: ReaderSettings = {
   contentWidth: 'medium'
 };
 
-export function NovelReaderPage({ onBack }: NovelReaderPageProps) {
-  const [currentChapterId, setCurrentChapterId] = useState(DUMMY_STORY.chapters[0].id);
+export function NovelReaderPage({ onBack, story = DUMMY_STORY }: NovelReaderPageProps) {
+  const [currentChapterId, setCurrentChapterId] = useState(story.chapters[0].id);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
@@ -44,7 +43,6 @@ export function NovelReaderPage({ onBack }: NovelReaderPageProps) {
     return DEFAULT_SETTINGS;
   });
 
-  const story = DUMMY_STORY;
   const currentChapterIndex = story.chapters.findIndex(c => c.id === currentChapterId);
   const currentChapter = story.chapters[currentChapterIndex];
   
@@ -90,6 +88,11 @@ export function NovelReaderPage({ onBack }: NovelReaderPageProps) {
     window.scrollTo({ top: 0, behavior: 'instant' });
     setShowTopBar(true);
   }, [currentChapterId]);
+
+  useEffect(() => {
+    setCurrentChapterId(story.chapters[0].id);
+    setShowTopBar(true);
+  }, [story]);
 
   if (!currentChapter) return null;
 
