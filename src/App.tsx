@@ -18,6 +18,7 @@ import { AuthModal } from './components/AuthModal';
 import { auth } from './lib/firebase';
 import { updateProfile as updateFirebaseProfile } from 'firebase/auth';
 import { uploadProfilePhoto } from './lib/profilePhoto';
+import { NovelReaderPage } from './components/reader/NovelReaderPage';
 
 type StoryId = number | string;
 
@@ -2725,118 +2726,7 @@ export default function App() {
   };
 
   const renderReader = () => {
-    const isLiked = selectedComic ? likedComics.has(selectedComic.id) : false;
-    const readerCoverImage = readerStoryStyle.coverImage || selectedComic?.cover;
-    const overlayAlpha = Math.max(0, Math.min(100, readerStoryStyle.backgroundOverlayOpacity ?? 40)) / 100;
-
-    return (
-      <div className={`relative min-h-screen ${readerStoryStyle.layoutStyle === 'immersive' && readerStoryStyle.backgroundImage ? 'overflow-hidden' : ''} ${readerStoryStyle.layoutStyle === 'immersive' ? 'bg-black' : 'bg-zinc-950'} text-white`}>
-        {readerStoryStyle.layoutStyle === 'immersive' && readerStoryStyle.backgroundImage && (
-          <>
-            <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${readerStoryStyle.backgroundImage})` }} />
-            <div className="absolute inset-0" style={{ backgroundColor: readerStoryStyle.backgroundOverlayColor || '#000000', opacity: overlayAlpha }} />
-          </>
-        )}
-        <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-md px-4 h-14 flex items-center justify-between border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => setCurrentView('home')} className="text-white hover:bg-white/10">
-              <ChevronRight className="w-6 h-6 rotate-180" />
-            </Button>
-            <div>
-              <h2 className="font-bold text-sm line-clamp-1">{selectedComic?.title}</h2>
-              <p className="text-[10px] text-white/60">Episode 1</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className={`hover:bg-white/10 ${isLiked ? 'text-primary' : 'text-white'}`}
-              onClick={() => selectedComic && toggleLike(selectedComic.id)}
-            >
-              <Heart className={`w-5 h-5 ${isLiked ? 'fill-primary' : ''}`} />
-            </Button>
-            
-            <Sheet open={isReaderMenuOpen} onOpenChange={setIsReaderMenuOpen}>
-              <SheetTrigger className="text-white hover:bg-white/10 flex items-center justify-center w-10 h-10 rounded-full transition-colors cursor-pointer">
-                <MoreVertical className="w-5 h-5" />
-              </SheetTrigger>
-              <SheetContent className="bg-zinc-950 text-white border-zinc-800">
-                <SheetHeader>
-                  <SheetTitle className="text-white text-left">{selectedComic?.title}</SheetTitle>
-                </SheetHeader>
-                <div className="mt-6 space-y-4">
-                  <div 
-                    className="flex items-center gap-4 p-3 hover:bg-white/5 rounded-lg cursor-pointer"
-                    onClick={() => {
-                      setIsReaderMenuOpen(false);
-                      setCurrentView('series-details');
-                    }}
-                  >
-                    <List className="w-5 h-5 text-zinc-400" />
-                    <div>
-                      <p className="font-bold">Episode List</p>
-                      <p className="text-xs text-zinc-500">View all episodes</p>
-                    </div>
-                  </div>
-                  <div 
-                    className="flex items-center gap-4 p-3 hover:bg-white/5 rounded-lg cursor-pointer"
-                    onClick={() => {
-                      setIsReaderMenuOpen(false);
-                      setCurrentView('creator-profile');
-                    }}
-                  >
-                    <User className="w-5 h-5 text-zinc-400" />
-                    <div>
-                      <p className="font-bold">About Creator</p>
-                      <p className="text-xs text-zinc-500">{selectedComic?.creator}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4 p-3 hover:bg-white/5 rounded-lg cursor-pointer">
-                    <Share2 className="w-5 h-5 text-zinc-400" />
-                    <div>
-                      <p className="font-bold">Share Series</p>
-                      <p className="text-xs text-zinc-500">Spread the word</p>
-                    </div>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
-
-        <div className="relative z-10 max-w-2xl mx-auto py-4 space-y-0">
-          {readerCoverImage && (
-            <div className="px-4 pb-4">
-              <img src={readerCoverImage} alt={selectedComic?.title} className="max-h-64 w-full rounded-lg object-cover" referrerPolicy="no-referrer" />
-            </div>
-          )}
-          {[1, 2, 3, 4, 5].map(i => (
-            <img 
-              key={i} 
-              src={`https://picsum.photos/seed/comic-page-${selectedComic?.id}-${i}/800/1200`} 
-              alt={`Page ${i}`} 
-              className="w-full h-auto"
-              referrerPolicy="no-referrer"
-            />
-          ))}
-        </div>
-
-        <div className="p-8 text-center border-t border-white/10">
-          <h3 className="font-bold mb-4">You've reached the end of this episode!</h3>
-          <Button 
-            className="rounded-full px-8 bg-primary text-primary-foreground font-bold"
-            onClick={() => startReading(selectedComic)}
-          >
-            Next Episode
-          </Button>
-
-          <div className="max-w-2xl mx-auto text-left mt-12">
-            {selectedComic && renderCommentSection(selectedComic.id)}
-          </div>
-        </div>
-      </div>
-    );
+    return <NovelReaderPage onBack={() => setCurrentView('home')} />;
   };
 
   const renderSeriesDetails = () => (
