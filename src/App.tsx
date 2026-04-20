@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Heart, ChevronRight, Menu, Bell, User, Star, Clock, Home, Compass, PenTool, Facebook, Twitter, Instagram, Youtube, Plus, X, Play, SkipForward, DollarSign, Coins, BarChart3, Settings, BadgeCheck, Share2, MoreVertical, List, Check, Upload, BookOpen, ShieldCheck, Users, MessageSquare, Flag, Megaphone, Trash2, Eye, EyeOff, Settings2, ExternalLink, Lock, Sparkles } from 'lucide-react';
+import { Search, Heart, ChevronRight, Menu, Bell, User, Home, Compass, PenTool, Facebook, Twitter, Instagram, Youtube, Plus, X, Play, SkipForward, DollarSign, Coins, BarChart3, Settings, BadgeCheck, Share2, Check, Upload, BookOpen, ShieldCheck, Users, MessageSquare, Flag, Eye, EyeOff, ExternalLink, Lock, Sparkles } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Logo } from './components/Logo';
 import { AuthModal } from './components/AuthModal';
@@ -22,6 +22,32 @@ import { NovelReaderPage } from './components/reader/NovelReaderPage';
 import { DUMMY_STORY } from './components/reader/novel-reader-data';
 
 type StoryId = number | string;
+
+type View = 
+  | 'home' 
+  | 'manga' 
+  | 'novels' 
+  | 'admin' 
+  | 'my' 
+  | 'search' 
+  | 'view-all' 
+  | 'publish' 
+  | 'publish-dashboard' 
+  | 'publish-new' 
+  | 'publish-episode' 
+  | 'edit-series' 
+  | 'profile' 
+  | 'edit-profile' 
+  | 'wallet' 
+  | 'email-preferences' 
+  | 'privacy-settings' 
+  | 'premium' 
+  | 'series-details' 
+  | 'creator-profile' 
+  | 'auth' 
+  | 'ads-manager' 
+  | 'create-campaign' 
+  | 'reader';
 
 interface StoryBase {
   id: StoryId;
@@ -276,7 +302,7 @@ export default function App() {
   const location = useLocation();
   const initialRouteState = React.useMemo(() => getRouteState(location.pathname, ALL_STORIES), [location.pathname]);
   const locationSyncRef = React.useRef(false);
-  const [currentView, setCurrentView] = useState(() => initialRouteState?.view ?? 'home');
+  const [currentView, setCurrentView] = useState<View>(() => initialRouteState?.view ?? 'home');
   const [activeCategory, setActiveCategory] = useState('Drama');
   const [activeDay, setActiveDay] = useState('Sun');
   const [searchQuery, setSearchQuery] = useState('');
@@ -317,7 +343,6 @@ export default function App() {
   const [marketingEmailsEnabled, setMarketingEmailsEnabled] = useState(false);
   const [likedComics, setLikedComics] = useState<Set<StoryId>>(new Set());
   const [likedEpisodes, setLikedEpisodes] = useState<Set<string>>(new Set());
-  const [isReaderMenuOpen, setIsReaderMenuOpen] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [profileSaveError, setProfileSaveError] = useState('');
@@ -327,8 +352,7 @@ export default function App() {
 
   // Admin States
   const [adminTab, setAdminTab] = useState<'dashboard' | 'users' | 'moderation' | 'ads'>('dashboard');
-  const [activeLemonCategory, setActiveLemonCategory] = useState('Drama');
-  const [previousView, setPreviousView] = useState('home');
+  const [previousView, setPreviousView] = useState<View>('home');
   const [comments, setComments] = useState<Record<string, StoryComment[]>>({
     1: [
       { id: 1, user: "LemonLover", text: "This is amazing!", likes: 12, date: "2h ago" },
@@ -1857,7 +1881,6 @@ export default function App() {
       )}
 
       <div className="grid gap-4 mb-12">
-
         <Card className="p-4 flex items-center justify-between hover:border-primary transition-colors cursor-pointer" onClick={() => setCurrentView('ads-manager')}>
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
@@ -1874,7 +1897,7 @@ export default function App() {
 
       <div className="space-y-6">
         <div className="border-b border-border pb-4">
-          <h3 className="font-bold text-lg mb-4 uppercase tracking-widest text-muted-foreground text-xs">Account Settings</h3>
+          <h3 className="font-bold mb-4 uppercase tracking-widest text-muted-foreground text-xs">Account Settings</h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between cursor-pointer hover:text-primary group" onClick={() => setCurrentView('email-preferences')}>
               <div className="flex items-center gap-3">
@@ -2909,7 +2932,6 @@ export default function App() {
         </div>
       </div>
 
-      <>
         <h3 className="text-2xl font-bold mb-6">Episodes</h3>
         <div className="space-y-4">
           {[5, 4, 3, 2, 1].map(ep => (
@@ -2947,7 +2969,6 @@ export default function App() {
             </div>
           ))}
         </div>
-      </>
 
       {selectedComic && renderCommentSection(selectedComic.id)}
     </div>
@@ -3411,12 +3432,17 @@ export default function App() {
               </SheetContent>
             </Sheet>
             
-            <div className="relative group cursor-pointer" onClick={() => setCurrentView('home')}>
+            <button 
+              type="button"
+              className="relative group cursor-pointer border-none p-0 bg-transparent" 
+              onClick={() => setCurrentView('home')}
+              aria-label="Home"
+            >
               <div className="absolute inset-0 bg-primary -skew-x-[15deg] transform -translate-y-0.5" />
               <div className="relative px-6 py-1 flex items-center justify-center">
                 <span className="text-white font-black italic tracking-tighter text-xl">LEMONADE</span>
               </div>
-            </div>
+            </button>
 
             <div className="flex items-center gap-1">
               <Button variant="ghost" size="icon" className="text-white" onClick={() => setCurrentView('search')}>
@@ -3433,34 +3459,38 @@ export default function App() {
             <Logo onClick={() => setCurrentView('home')} className="hover:opacity-80 transition-opacity" />
             
             <div className="flex items-center gap-8 font-black text-[13px] uppercase tracking-widest h-full">
-              <div 
+              <button 
+                type="button"
                 onClick={() => setCurrentView('home')}
-                className={`relative h-full flex items-center cursor-pointer transition-colors pt-0.5 ${currentView === 'home' ? 'text-primary' : 'text-zinc-400 hover:text-white'}`}
+                className={`relative h-full flex items-center cursor-pointer transition-colors pt-0.5 bg-transparent border-none p-0 ${currentView === 'home' ? 'text-primary' : 'text-zinc-400 hover:text-white'}`}
               >
                 Home
                 {currentView === 'home' && <motion.div layoutId="nav-pill" className="absolute bottom-0 left-0 right-0 h-[3px] bg-primary rounded-t-full" />}
-              </div>
-              <div 
+              </button>
+              <button 
+                type="button"
                 onClick={() => setCurrentView('manga')}
-                className={`relative h-full flex items-center cursor-pointer transition-colors pt-0.5 ${currentView === 'manga' ? 'text-primary' : 'text-zinc-400 hover:text-white'}`}
+                className={`relative h-full flex items-center cursor-pointer transition-colors pt-0.5 bg-transparent border-none p-0 ${currentView === 'manga' ? 'text-primary' : 'text-zinc-400 hover:text-white'}`}
               >
                 Originals
                 {currentView === 'manga' && <motion.div layoutId="nav-pill" className="absolute bottom-0 left-0 right-0 h-[3px] bg-primary rounded-t-full" />}
-              </div>
-              <div 
+              </button>
+              <button 
+                type="button"
                 onClick={() => setCurrentView('novels')}
-                className={`relative h-full flex items-center cursor-pointer transition-colors pt-0.5 ${currentView === 'novels' ? 'text-primary' : 'text-zinc-400 hover:text-white'}`}
+                className={`relative h-full flex items-center cursor-pointer transition-colors pt-0.5 bg-transparent border-none p-0 ${currentView === 'novels' ? 'text-primary' : 'text-zinc-400 hover:text-white'}`}
               >
                 Novels
                 {currentView === 'novels' && <motion.div layoutId="nav-pill" className="absolute bottom-0 left-0 right-0 h-[3px] bg-primary rounded-t-full" />}
-              </div>
-              <div 
+              </button>
+              <button 
+                type="button"
                 onClick={handleMyClick}
-                className={`relative h-full flex items-center cursor-pointer transition-colors pt-0.5 ${currentView === 'my' ? 'text-primary' : 'text-zinc-400 hover:text-white'}`}
+                className={`relative h-full flex items-center cursor-pointer transition-colors pt-0.5 bg-transparent border-none p-0 ${currentView === 'my' ? 'text-primary' : 'text-zinc-400 hover:text-white'}`}
               >
                 Library
                 {currentView === 'my' && <motion.div layoutId="nav-pill" className="absolute bottom-0 left-0 right-0 h-[3px] bg-primary rounded-t-full" />}
-              </div>
+              </button>
             </div>
           </div>
 

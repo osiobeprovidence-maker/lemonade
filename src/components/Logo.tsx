@@ -12,15 +12,14 @@ export function Logo({ className = '', onClick }: LogoProps) {
   const handleClick = onClick || (() => navigate('/'));
 
   return (
-    <div
-      className={`cursor-pointer hover:opacity-90 transition-opacity inline-block ${className}`}
+    <button
+      type="button"
+      className={`cursor-pointer hover:opacity-90 transition-opacity inline-block border-none p-0 bg-transparent ${className}`}
       onClick={handleClick}
+      aria-label="Lemonade Home"
     >
       <div
-        className="px-6 py-2 transform -skew-x-12"
-        style={{
-          backgroundColor: '#4CAF50',
-        }}
+        className="px-6 py-2 transform -skew-x-12 bg-primary"
       >
         <span
           className="text-white font-black text-2xl uppercase block transform skew-x-12"
@@ -33,6 +32,6 @@ export function Logo({ className = '', onClick }: LogoProps) {
           LEMONADE
         </span>
       </div>
-    </div>
+    </button>
   );
 }
